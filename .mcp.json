@@ -7,6 +7,19 @@
     "shadcn": {
       "command": "npx",
       "args": ["shadcn@latest", "mcp"]
+    },
+    "appwrite-api": {
+      "command": "uvx",
+      "args": ["mcp-server-appwrite", "--users"],
+      "env": {
+        "APPWRITE_API_KEY": "standard_5f3175fba619a52bfebe602c1cbce611fede280a400f17de78b5ca7112467cc093c124e72c5ceda84afa42d9a3f653cf9a9d5832032470c3a9ca4b63eb5ddceece475d7a4613096283b65eef0bce6daa45a88120d4b911462000f7805503acfcc401e40deb6a0589dc5de737af8cd6f60d186e67dfd028858a64f7e15b912a61",
+        "APPWRITE_PROJECT_ID": "690e581300093ebd7b6a",
+        "APPWRITE_ENDPOINT": "https://fra.cloud.appwrite.io/v1"
+      }
+    },
+    "appwrite-docs": {
+      "command": "npx",
+      "args": ["mcp-remote", "https://mcp-for-docs.appwrite.io"]
     }
   }
 }
