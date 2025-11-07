@@ -70,14 +70,14 @@ export function FocusView({ task, onExit, onPomodoroComplete }: FocusViewProps) 
             onClick={(e) => e.stopPropagation()}
         >
           <motion.p 
-            animate={{ opacity: isIdle ? 0.5 : 1 }}
+            animate={{ opacity: isIdle ? 0 : 1 }}
             transition={{ duration: 0.5 }}
             className="text-lg text-muted-foreground mb-4">{t('focusView.focusingOn')}
           </motion.p>
           <motion.h1 
             animate={{ 
-                scale: isIdle ? 1.1 : 1,
-                y: isIdle ? -20 : 0,
+                scale: isIdle ? 1.2 : 1,
+                y: isIdle ? -60 : 0,
             }}
             transition={{ type: 'spring', stiffness: 100, damping: 20 }}
             className="text-4xl md:text-6xl font-bold mb-6">{task.title}
@@ -85,8 +85,9 @@ export function FocusView({ task, onExit, onPomodoroComplete }: FocusViewProps) 
           {task.description && (
             <motion.p 
               animate={{ 
-                scale: isIdle ? 0.9 : 1,
-                opacity: isIdle ? 0.8 : 1,
+                scale: isIdle ? 0.8 : 1,
+                y: isIdle ? -60 : 0,
+                opacity: isIdle ? 0.7 : 1,
               }}
               transition={{ type: 'spring', stiffness: 100, damping: 20 }}
               className="text-xl text-muted-foreground max-w-xl mx-auto mb-12">{task.description}
@@ -94,7 +95,7 @@ export function FocusView({ task, onExit, onPomodoroComplete }: FocusViewProps) 
           )}
           
           <motion.div
-            animate={{ opacity: isIdle ? 0.3 : 1, scale: isIdle ? 0.95 : 1 }}
+            animate={{ opacity: isIdle ? 0 : 1, scale: isIdle ? 0.7 : 1, y: isIdle ? 80 : 0 }}
             transition={{ duration: 0.5 }}
           >
             <PomodoroTimer 
