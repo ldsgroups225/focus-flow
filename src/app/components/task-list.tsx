@@ -29,6 +29,11 @@ export function TaskList({ tasks, setTasks, onEdit, onDelete, onToggle, onFocus,
   const { t } = useI18n();
 
   const handleDragStart = (e: React.DragEvent<HTMLDivElement>, task: Task) => {
+    // Only allow dragging if not clicking on an interactive element
+    if ((e.target as HTMLElement).closest('button, a, input, [role=checkbox]')) {
+        e.preventDefault();
+        return;
+    }
     setDraggedItemId(task.id);
     e.dataTransfer.effectAllowed = 'move';
     e.dataTransfer.setData('text/plain', task.id);

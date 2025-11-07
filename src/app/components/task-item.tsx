@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { ArrowDown, ArrowUp, Minus, Trash2, Edit, Crosshair, BrainCircuit, CheckCircle2, Circle, Link, Clock } from 'lucide-react';
+import { ArrowDown, ArrowUp, Minus, Trash2, Edit, Crosshair, BrainCircuit, CheckCircle2, Circle, Link, Clock, GripVertical } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Badge } from '@/components/ui/badge';
@@ -76,14 +76,10 @@ export function TaskItem({ task, isDragging, isSelected, onDragStart, onDragOver
 
   return (
     <Card 
-      draggable={!isBlocked}
-      onDragStart={isBlocked ? undefined : onDragStart}
-      onDragOver={onDragOver}
-      onDragEnd={onDragEnd}
       data-selected={isSelected}
       className={cn(
         "group transition-all duration-200 hover:shadow-lg hover:border-primary/50 data-[selected=true]:border-primary data-[selected=true]:shadow-md",
-        isBlocked ? "bg-card/50 border-dashed cursor-not-allowed" : "cursor-grab",
+        isBlocked ? "bg-card/50 border-dashed" : "",
         isDragging ? 'opacity-30 shadow-2xl scale-105' : 'opacity-100',
         task.completed ? 'bg-card/60' : 'bg-card'
       )}
@@ -97,24 +93,23 @@ export function TaskItem({ task, isDragging, isSelected, onDragStart, onDragOver
               aria-label={t(task.completed ? 'taskItem.markIncomplete' : 'taskItem.markComplete').replace('{taskTitle}', task.title)}
               disabled={isBlocked}
             />
-            <Checkbox
-              id={`select-${task.id}`}
-              checked={isSelected}
-              onCheckedChange={() => onSelect(task.id)}
-               aria-label={`Select task ${task.title}`}
-            />
         </div>
-        <div className="flex-grow space-y-3">
-          <label
-            htmlFor={`complete-${task.id}`}
+        <div 
+          className={cn("flex-grow space-y-3", isBlocked ? "cursor-not-allowed" : "cursor-pointer")}
+          onClick={(e) => {
+            // Prevent selection when clicking on links or buttons inside
+            if ((e.target as HTMLElement).closest('a, button')) return;
+            onSelect(task.id)
+          }}
+        >
+          <span
             className={cn(
               "font-medium transition-colors",
-              isBlocked ? "cursor-not-allowed" : "cursor-pointer",
               task.completed ? 'line-through text-muted-foreground' : 'text-foreground'
             )}
           >
             {task.title}
-          </label>
+          </span>
           {task.description && (
             <p className={cn("text-sm", isBlocked ? "text-muted-foreground/70" : "text-muted-foreground")}>
               {task.description}
@@ -130,7 +125,10 @@ export function TaskItem({ task, isDragging, isSelected, onDragStart, onDragOver
                 </div>
               <ul className="text-sm text-muted-foreground space-y-1.5">
                 {task.subTasks.map((sub, index) => (
-                  <li key={index} className="flex items-center gap-2 group/subtask" onClick={() => !task.completed && onSubTaskToggle(task.id, index)}>
+                  <li key={index} className="flex items-center gap-2 group/subtask" onClick={(e) => {
+                    e.stopPropagation();
+                    if (!task.completed) onSubTaskToggle(task.id, index)
+                  }}>
                      <div className={cn("flex items-center gap-2", task.completed ? "cursor-default" : "cursor-pointer")}>
                         {sub.completed ? <CheckCircle2 className="w-4 h-4 text-green-500" /> : <Circle className="w-4 h-4 group-hover/subtask:text-primary" />}
                         <span className={cn(sub.completed && "line-through")}>{sub.title}</span>
@@ -205,16 +203,28 @@ export function TaskItem({ task, isDragging, isSelected, onDragStart, onDragOver
              <Progress value={pomodoroProgress} className="h-1 mt-3" />
            )}
         </div>
-        <div className="flex flex-col sm:flex-row items-center gap-0 sm:gap-1 opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity duration-300 -mr-2 -my-2 sm:m-0">
-          <Button variant="ghost" size="icon" onClick={() => onFocus(task)} title={t('taskItem.focusMode')} disabled={isBlocked}>
-            <Crosshair className="h-4 w-4" />
-          </Button>
-          <Button variant="ghost" size="icon" onClick={() => onEdit(task)} title={t('taskItem.editTask')} disabled={isBlocked}>
-            <Edit className="h-4 w-4" />
-          </Button>
-          <Button variant="ghost" size="icon" onClick={() => onDelete(task.id)} className="text-destructive hover:text-destructive" title={t('taskItem.deleteTask')} disabled={isBlocked}>
-            <Trash2 className="h-4 w-4" />
-          </Button>
+        <div className="flex flex-col items-center">
+            <div 
+              draggable={!isBlocked}
+              onDragStart={isBlocked ? undefined : onDragStart}
+              onDragOver={onDragOver}
+              onDragEnd={onDragEnd}
+              className={cn("cursor-grab text-muted-foreground/50 transition-opacity", isBlocked ? "cursor-not-allowed" : "hover:text-muted-foreground", isDragging ? 'opacity-30' : 'opacity-100')}
+            >
+              <GripVertical className="h-5 w-5" />
+            </div>
+            <div className="flex-grow" />
+            <div className="flex flex-col sm:flex-row items-center gap-0 sm:gap-1 opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity duration-300 -mr-2 -my-2 sm:m-0">
+              <Button variant="ghost" size="icon" onClick={() => onFocus(task)} title={t('taskItem.focusMode')} disabled={isBlocked}>
+                <Crosshair className="h-4 w-4" />
+              </Button>
+              <Button variant="ghost" size="icon" onClick={() => onEdit(task)} title={t('taskItem.editTask')} disabled={isBlocked}>
+                <Edit className="h-4 w-4" />
+              </Button>
+              <Button variant="ghost" size="icon" onClick={() => onDelete(task.id)} className="text-destructive hover:text-destructive" title={t('taskItem.deleteTask')} disabled={isBlocked}>
+                <Trash2 className="h-4 w-4" />
+              </Button>
+            </div>
         </div>
       </CardContent>
     </Card>
