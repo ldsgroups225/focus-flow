@@ -14,6 +14,7 @@ export const initialTasks: Task[] = [
     timeSpent: 720,
     workspace: 'work',
     dependsOn: [],
+    completedDate: undefined,
   },
   {
     id: 'task-2',
@@ -28,6 +29,7 @@ export const initialTasks: Task[] = [
     timeSpent: 0,
     dependsOn: ['task-4'],
     workspace: 'work',
+    completedDate: undefined,
   },
   {
     id: 'task-3',
@@ -42,6 +44,7 @@ export const initialTasks: Task[] = [
     timeSpent: 5400,
     workspace: 'work',
     dependsOn: [],
+    completedDate: new Date(new Date().setDate(new Date().getDate() - 1)),
   },
   {
     id: 'task-4',
@@ -56,6 +59,7 @@ export const initialTasks: Task[] = [
     timeSpent: 1500,
     workspace: 'work',
     dependsOn: [],
+    completedDate: undefined,
   },
   {
     id: 'task-5',
@@ -70,6 +74,7 @@ export const initialTasks: Task[] = [
     timeSpent: 0,
     workspace: 'personal',
     dependsOn: [],
+    completedDate: undefined,
   },
   {
     id: 'task-6',
@@ -84,5 +89,6 @@ export const initialTasks: Task[] = [
     timeSpent: 0,
     workspace: 'personal',
     dependsOn: [],
+    completedDate: undefined,
   },
 ];

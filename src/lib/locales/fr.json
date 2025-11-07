@@ -87,5 +87,14 @@
         "personal": "Personnel",
         "work": "Travail",
         "sideProject": "Projet Annexe"
+    },
+    "aiReview": {
+        "title": "Revue IA",
+        "description": "Laissez l'IA générer un résumé de vos tâches terminées.",
+        "daily": "Quotidienne",
+        "weekly": "Hebdomadaire",
+        "generate": "Générer",
+        "generating": "Génération...",
+        "error": "Désolé, la revue n'a pas pu être générée. Veuillez réessayer."
     }
 }

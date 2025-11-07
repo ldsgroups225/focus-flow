@@ -2,12 +2,13 @@
 'use client';
 
 import { useState, useMemo, useCallback } from 'react';
-import { Plus, SlidersHorizontal, Orbit } from 'lucide-react';
+import { Plus, SlidersHorizontal, Orbit, Sparkles } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { TaskList } from './components/task-list';
 import { TaskForm } from './components/task-form';
 import { Filters } from './components/filters';
 import { FocusView } from './components/focus-view';
+import { AiReviewDialog } from './components/ai-review-dialog';
 import type { Task, Priority, Workspace } from '@/lib/types';
 import { initialTasks } from '@/lib/initial-tasks';
 import {
@@ -25,6 +26,7 @@ export default function Home() {
   const [tasks, setTasks] = useState<Task[]>(initialTasks);
   const [editingTask, setEditingTask] = useState<Task | 'new' | null>(null);
   const [focusTask, setFocusTask] = useState<Task | null>(null);
+  const [isReviewOpen, setIsReviewOpen] = useState(false);
 
   const [priorityFilter, setPriorityFilter] = useState<Priority[]>([]);
   const [tagFilter, setTagFilter] = useState<string[]>([]);
@@ -64,7 +66,7 @@ export default function Home() {
     });
   }, [tasksWithStatus, priorityFilter, tagFilter]);
 
-  const handleSaveTask = useCallback((taskToSave: Omit<Task, 'id' | 'completed' | 'completedPomodoros' | 'timeSpent'> & { id?: string }) => {
+  const handleSaveTask = useCallback((taskToSave: Omit<Task, 'id' | 'completed' | 'completedPomodoros' | 'timeSpent' | 'completedDate'> & { id?: string }) => {
     setTasks(prevTasks => {
       const allTasks = [...prevTasks];
       const dependsOn = taskToSave.dependsOn?.filter(depId => allTasks.some(t => t.id === depId)) || [];
@@ -85,6 +87,7 @@ export default function Home() {
           timeSpent: 0,
           dependsOn,
           workspace,
+          completedDate: undefined,
         };
         return [newTask, ...allTasks];
       }
@@ -95,7 +98,7 @@ export default function Home() {
   const handleToggleComplete = useCallback((taskId: string) => {
     setTasks(prevTasks =>
       prevTasks.map(task =>
-        task.id === taskId ? { ...task, completed: !task.completed } : task
+        task.id === taskId ? { ...task, completed: !task.completed, completedDate: !task.completed ? new Date() : undefined } : task
       )
     );
   }, []);
@@ -157,6 +160,12 @@ export default function Home() {
           <div className="flex items-center gap-2">
             <LanguageSwitcher />
             <ThemeToggle />
+
+            <Button variant="outline" size="icon" onClick={() => setIsReviewOpen(true)}>
+              <Sparkles className="h-4 w-4" />
+              <span className="sr-only">{t('aiReview.title')}</span>
+            </Button>
+            
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button variant="outline" size="icon" className="md:hidden">
@@ -224,6 +233,13 @@ export default function Home() {
             onPomodoroComplete={handlePomodoroComplete}
             onLogTime={handleLogTime}
           />
+        )}
+        {isReviewOpen && (
+            <AiReviewDialog 
+                isOpen={isReviewOpen}
+                onClose={() => setIsReviewOpen(false)}
+                tasks={tasks}
+            />
         )}
       </main>
     </div>

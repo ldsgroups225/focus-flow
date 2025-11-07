@@ -87,5 +87,14 @@
         "personal": "Personal",
         "work": "Work",
         "sideProject": "Side Project"
+    },
+    "aiReview": {
+        "title": "AI Review",
+        "description": "Let AI generate a summary of your completed tasks.",
+        "daily": "Daily",
+        "weekly": "Weekly",
+        "generate": "Generate",
+        "generating": "Generating...",
+        "error": "Sorry, the review could not be generated. Please try again."
     }
 }
