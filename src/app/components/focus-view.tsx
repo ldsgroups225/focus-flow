@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button';
 import type { Task } from '@/lib/types';
 import { AnimatePresence, motion } from 'framer-motion';
 import { PomodoroTimer } from './pomodoro-timer';
+import { useI18n } from './i18n-provider';
 
 type FocusViewProps = {
   task: Task;
@@ -13,6 +14,7 @@ type FocusViewProps = {
 };
 
 export function FocusView({ task, onExit, onPomodoroComplete }: FocusViewProps) {
+  const { t } = useI18n();
   return (
     <AnimatePresence>
       <motion.div
@@ -31,7 +33,7 @@ export function FocusView({ task, onExit, onPomodoroComplete }: FocusViewProps) 
             className="w-full max-w-2xl text-center flex flex-col items-center"
             onClick={(e) => e.stopPropagation()}
         >
-          <p className="text-lg text-muted-foreground mb-4">Focusing on</p>
+          <p className="text-lg text-muted-foreground mb-4">{t('focusView.focusingOn')}</p>
           <h1 className="text-4xl md:text-6xl font-bold mb-6">{task.title}</h1>
           {task.description && (
             <p className="text-xl text-muted-foreground max-w-xl mx-auto mb-12">{task.description}</p>
@@ -43,7 +45,7 @@ export function FocusView({ task, onExit, onPomodoroComplete }: FocusViewProps) 
           />
 
           <Button onClick={onExit} variant="ghost" className="mt-16 text-muted-foreground">
-            <X className="mr-2 h-4 w-4" /> End Focus Session
+            <X className="mr-2 h-4 w-4" /> {t('focusView.endSession')}
           </Button>
         </motion.div>
       </motion.div>

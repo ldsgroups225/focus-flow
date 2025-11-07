@@ -1,0 +1,78 @@
+
+{
+    "header": {
+        "title": "FocusFlow",
+        "addTask": "Add Task",
+        "filters": "Filters"
+    },
+    "filters": {
+        "byPriority": "By Priority",
+        "low": "Low",
+        "medium": "Medium",
+        "high": "High",
+        "byTag": "By Tag",
+        "selectTags": "Select tags",
+        "selected": "selected",
+        "clearFilters": "Clear filters"
+    },
+    "taskList": {
+        "allClear": "All Clear!",
+        "noTasks": "No tasks match your current filters. Or maybe you're just that good."
+    },
+    "taskItem": {
+        "priority": "Priority: {priority}",
+        "due": "Due",
+        "pomodorosCompleted": "{completed} of {total} pomodoros completed",
+        "markIncomplete": "Mark task {taskTitle} as incomplete",
+        "markComplete": "Mark task {taskTitle} as complete",
+        "focusMode": "Focus Mode",
+        "editTask": "Edit Task",
+        "deleteTask": "Delete Task"
+    },
+    "taskForm": {
+        "editTask": "Edit Task",
+        "addTask": "Add New Task",
+        "title": "Title",
+        "titlePlaceholder": "e.g., Finalize project report",
+        "description": "Description",
+        "descriptionPlaceholder": "Add more details about the task...",
+        "priority": "Priority",
+        "selectPriority": "Select priority",
+        "low": "Low",
+        "medium": "Medium",
+        "high": "High",
+        "dueDate": "Due Date",
+        "pickDate": "Pick a date",
+        "tags": "Tags",
+        "tagsPlaceholder": "e.g., marketing, design",
+        "pomodoros": "Pomodoros",
+        "cancel": "Cancel",
+        "saveTask": "Save Task",
+        "titleRequired": "Title is required",
+        "pomodorosPositive": "Must be a positive number"
+    },
+    "focusView": {
+        "focusingOn": "Focusing on",
+        "endSession": "End Focus Session"
+    },
+    "pomodoro": {
+        "focusSession": "Focus Session",
+        "takeBreak": "Take a Break",
+        "pomodorosOf": "{completed} of {total} pomodoros completed",
+        "infinite": "∞",
+        "resetTimer": "Reset Timer",
+        "pauseTimer": "Pause Timer",
+        "startTimer": "Start Timer",
+        "startBreak": "Start Break",
+        "startWork": "Start Work"
+    },
+    "theme": {
+        "toggle": "Toggle theme",
+        "light": "Light",
+        "dark": "Dark",
+        "system": "System"
+    },
+    "lang": {
+        "change": "Change language"
+    }
+}

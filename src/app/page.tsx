@@ -15,6 +15,8 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { ThemeToggle } from './components/theme-toggle';
+import { LanguageSwitcher } from './components/language-switcher';
+import { useI18n } from './components/i18n-provider';
 
 
 export default function Home() {
@@ -24,6 +26,8 @@ export default function Home() {
 
   const [priorityFilter, setPriorityFilter] = useState<Priority[]>([]);
   const [tagFilter, setTagFilter] = useState<string[]>([]);
+  
+  const { t } = useI18n();
 
   const uniqueTags = useMemo(() => {
     const allTags = tasks.flatMap(task => task.tags);
@@ -83,10 +87,11 @@ export default function Home() {
         <header className="flex items-center justify-between mb-8">
           <h1 className="text-3xl font-bold flex items-center gap-2">
             <Orbit className="w-8 h-8 text-primary" />
-            FocusFlow
+            {t('header.title')}
           </h1>
           <div className="flex items-center gap-2">
-             <ThemeToggle />
+            <LanguageSwitcher />
+            <ThemeToggle />
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button variant="outline" size="icon" className="md:hidden">
@@ -106,7 +111,7 @@ export default function Home() {
 
             <Button onClick={() => setEditingTask('new')}>
               <Plus className="mr-2 h-4 w-4" />
-              Add Task
+              {t('header.addTask')}
             </Button>
           </div>
         </header>
@@ -114,7 +119,7 @@ export default function Home() {
         <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
           <aside className="hidden md:block md:col-span-1">
              <div className="sticky top-8">
-                <h2 className="text-lg font-semibold mb-4">Filters</h2>
+                <h2 className="text-lg font-semibold mb-4">{t('header.filters')}</h2>
                 <Filters
                     priorityFilter={priorityFilter}
                     setPriorityFilter={setPriorityFilter}

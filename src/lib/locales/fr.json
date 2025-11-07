@@ -1,0 +1,78 @@
+
+{
+    "header": {
+        "title": "FocusFlow",
+        "addTask": "Ajouter une Tâche",
+        "filters": "Filtres"
+    },
+    "filters": {
+        "byPriority": "Par Priorité",
+        "low": "Basse",
+        "medium": "Moyenne",
+        "high": "Haute",
+        "byTag": "Par Étiquette",
+        "selectTags": "Sélectionner des étiquettes",
+        "selected": "sélectionné(s)",
+        "clearFilters": "Effacer les filtres"
+    },
+    "taskList": {
+        "allClear": "Tout est net !",
+        "noTasks": "Aucune tâche ne correspond à vos filtres actuels. Ou peut-être que vous êtes juste si bon."
+    },
+    "taskItem": {
+        "priority": "Priorité : {priority}",
+        "due": "Pour le",
+        "pomodorosCompleted": "{completed} sur {total} pomodoros terminés",
+        "markIncomplete": "Marquer la tâche {taskTitle} comme incomplète",
+        "markComplete": "Marquer la tâche {taskTitle} comme terminée",
+        "focusMode": "Mode Focus",
+        "editTask": "Modifier la Tâche",
+        "deleteTask": "Supprimer la Tâche"
+    },
+    "taskForm": {
+        "editTask": "Modifier la Tâche",
+        "addTask": "Ajouter une Nouvelle Tâche",
+        "title": "Titre",
+        "titlePlaceholder": "ex: Finaliser le rapport de projet",
+        "description": "Description",
+        "descriptionPlaceholder": "Ajoutez plus de détails sur la tâche...",
+        "priority": "Priorité",
+        "selectPriority": "Choisir la priorité",
+        "low": "Basse",
+        "medium": "Moyenne",
+        "high": "Haute",
+        "dueDate": "Date d'échéance",
+        "pickDate": "Choisir une date",
+        "tags": "Étiquettes",
+        "tagsPlaceholder": "ex: marketing, design",
+        "pomodoros": "Pomodoros",
+        "cancel": "Annuler",
+        "saveTask": "Sauvegarder",
+        "titleRequired": "Le titre est requis",
+        "pomodorosPositive": "Doit être un nombre positif"
+    },
+    "focusView": {
+        "focusingOn": "Concentration sur",
+        "endSession": "Terminer la Session Focus"
+    },
+    "pomodoro": {
+        "focusSession": "Session de Concentration",
+        "takeBreak": "Prendre une Pause",
+        "pomodorosOf": "{completed} sur {total} pomodoros terminés",
+        "infinite": "∞",
+        "resetTimer": "Réinitialiser",
+        "pauseTimer": "Pause",
+        "startTimer": "Démarrer",
+        "startBreak": "Commencer la Pause",
+        "startWork": "Commencer le Travail"
+    },
+    "theme": {
+        "toggle": "Changer de thème",
+        "light": "Clair",
+        "dark": "Sombre",
+        "system": "Système"
+    },
+    "lang": {
+        "change": "Changer de langue"
+    }
+}

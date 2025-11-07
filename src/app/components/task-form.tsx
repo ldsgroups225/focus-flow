@@ -35,18 +35,19 @@ import { Calendar } from '@/components/ui/calendar';
 import { cn } from '@/lib/utils';
 import { format } from 'date-fns';
 import type { Task } from '@/lib/types';
+import { useI18n } from './i18n-provider';
 
-const taskSchema = z.object({
+const taskSchema = (t: (key: string) => string) => z.object({
   id: z.string().optional(),
-  title: z.string().min(1, 'Title is required'),
+  title: z.string().min(1, t('taskForm.titleRequired')),
   description: z.string().optional(),
   priority: z.enum(['low', 'medium', 'high']),
   tags: z.string().optional(),
   dueDate: z.date().optional(),
-  pomodoros: z.coerce.number().int().min(0, 'Must be a positive number').default(1),
+  pomodoros: z.coerce.number().int().min(0, t('taskForm.pomodorosPositive')).default(1),
 });
 
-type TaskFormValues = z.infer<typeof taskSchema>;
+type TaskFormValues = z.infer<ReturnType<typeof taskSchema>>;
 
 type TaskFormProps = {
   isOpen: boolean;
@@ -56,8 +57,11 @@ type TaskFormProps = {
 };
 
 export function TaskForm({ isOpen, onClose, onSave, task }: TaskFormProps) {
+  const { t, locale } = useI18n();
+  const currentTaskSchema = taskSchema(t);
+
   const form = useForm<TaskFormValues>({
-    resolver: zodResolver(taskSchema),
+    resolver: zodResolver(currentTaskSchema),
     defaultValues: {
       title: '',
       description: '',
@@ -101,7 +105,7 @@ export function TaskForm({ isOpen, onClose, onSave, task }: TaskFormProps) {
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="sm:max-w-[480px]">
         <DialogHeader>
-          <DialogTitle>{task ? 'Edit Task' : 'Add New Task'}</DialogTitle>
+          <DialogTitle>{task ? t('taskForm.editTask') : t('taskForm.addTask')}</DialogTitle>
         </DialogHeader>
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4 py-4">
@@ -110,9 +114,9 @@ export function TaskForm({ isOpen, onClose, onSave, task }: TaskFormProps) {
               name="title"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Title</FormLabel>
+                  <FormLabel>{t('taskForm.title')}</FormLabel>
                   <FormControl>
-                    <Input placeholder="e.g., Finalize project report" {...field} />
+                    <Input placeholder={t('taskForm.titlePlaceholder')} {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -123,9 +127,9 @@ export function TaskForm({ isOpen, onClose, onSave, task }: TaskFormProps) {
               name="description"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Description</FormLabel>
+                  <FormLabel>{t('taskForm.description')}</FormLabel>
                   <FormControl>
-                    <Textarea placeholder="Add more details about the task..." {...field} />
+                    <Textarea placeholder={t('taskForm.descriptionPlaceholder')} {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -137,17 +141,17 @@ export function TaskForm({ isOpen, onClose, onSave, task }: TaskFormProps) {
                 name="priority"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Priority</FormLabel>
+                    <FormLabel>{t('taskForm.priority')}</FormLabel>
                     <Select onValueChange={field.onChange} defaultValue={field.value}>
                       <FormControl>
                         <SelectTrigger>
-                          <SelectValue placeholder="Select priority" />
+                          <SelectValue placeholder={t('taskForm.selectPriority')} />
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>
-                        <SelectItem value="low">Low</SelectItem>
-                        <SelectItem value="medium">Medium</SelectItem>
-                        <SelectItem value="high">High</SelectItem>
+                        <SelectItem value="low">{t('taskForm.low')}</SelectItem>
+                        <SelectItem value="medium">{t('taskForm.medium')}</SelectItem>
+                        <SelectItem value="high">{t('taskForm.high')}</SelectItem>
                       </SelectContent>
                     </Select>
                     <FormMessage />
@@ -159,7 +163,7 @@ export function TaskForm({ isOpen, onClose, onSave, task }: TaskFormProps) {
                 name="dueDate"
                 render={({ field }) => (
                   <FormItem className="flex flex-col pt-2">
-                    <FormLabel className='mb-[6px]'>Due Date</FormLabel>
+                    <FormLabel className='mb-[6px]'>{t('taskForm.dueDate')}</FormLabel>
                     <Popover>
                       <PopoverTrigger asChild>
                         <FormControl>
@@ -173,7 +177,7 @@ export function TaskForm({ isOpen, onClose, onSave, task }: TaskFormProps) {
                             {field.value ? (
                               format(field.value, "PPP")
                             ) : (
-                              <span>Pick a date</span>
+                              <span>{t('taskForm.pickDate')}</span>
                             )}
                             <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
                           </Button>
@@ -200,9 +204,9 @@ export function TaskForm({ isOpen, onClose, onSave, task }: TaskFormProps) {
                 name="tags"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Tags</FormLabel>
+                    <FormLabel>{t('taskForm.tags')}</FormLabel>
                     <FormControl>
-                      <Input placeholder="e.g., marketing, design" {...field} />
+                      <Input placeholder={t('taskForm.tagsPlaceholder')} {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -213,7 +217,7 @@ export function TaskForm({ isOpen, onClose, onSave, task }: TaskFormProps) {
                   name="pomodoros"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel className='flex items-center'>Pomodoros <BrainCircuit className="w-3 h-3 ml-1 text-primary/80" /></FormLabel>
+                      <FormLabel className='flex items-center'>{t('taskForm.pomodoros')} <BrainCircuit className="w-3 h-3 ml-1 text-primary/80" /></FormLabel>
                       <FormControl>
                         <Input type="number" min="0" {...field} />
                       </FormControl>
@@ -224,9 +228,9 @@ export function TaskForm({ isOpen, onClose, onSave, task }: TaskFormProps) {
              </div>
             <DialogFooter>
               <Button type="button" variant="ghost" onClick={onClose}>
-                Cancel
+                {t('taskForm.cancel')}
               </Button>
-              <Button type="submit">Save Task</Button>
+              <Button type="submit">{t('taskForm.saveTask')}</Button>
             </DialogFooter>
           </form>
         </Form>

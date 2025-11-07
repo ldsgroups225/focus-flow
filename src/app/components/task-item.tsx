@@ -10,6 +10,8 @@ import { Progress } from "@/components/ui/progress";
 import type { Task, Priority } from '@/lib/types';
 import { cn } from '@/lib/utils';
 import { formatDistanceToNow } from 'date-fns';
+import { enUS, fr } from 'date-fns/locale';
+import { useI18n } from './i18n-provider';
 
 type TaskItemProps = {
   task: Task;
@@ -23,26 +25,28 @@ type TaskItemProps = {
   onFocus: (task: Task) => void;
 };
 
-const PriorityIcon = ({ priority }: { priority: Priority }) => {
-  const iconMap = {
-    high: <ArrowUp className="h-4 w-4 text-red-500" />,
-    medium: <Minus className="h-4 w-4 text-yellow-500" />,
-    low: <ArrowDown className="h-4 w-4 text-green-500" />,
-  };
-  return <span className="mr-2 flex-shrink-0" title={`Priority: ${priority}`}>{iconMap[priority]}</span>;
+const PriorityIcon = ({ priority, t }: { priority: Priority, t: (key: string) => string }) => {
+    const priorityName = t(`filters.${priority}`);
+    const iconMap = {
+      high: <ArrowUp className="h-4 w-4 text-red-500" />,
+      medium: <Minus className="h-4 w-4 text-yellow-500" />,
+      low: <ArrowDown className="h-4 w-4 text-green-500" />,
+    };
+    return <span className="mr-2 flex-shrink-0" title={t('taskItem.priority').replace('{priority}', priorityName)}>{iconMap[priority]}</span>;
 };
 
 export function TaskItem({ task, isDragging, onDragStart, onDragOver, onDragEnd, onEdit, onDelete, onToggle, onFocus }: TaskItemProps) {
+    const { t, locale } = useI18n();
     const [dueDateText, setDueDateText] = useState('');
+    const dateLocale = locale === 'fr' ? fr : enUS;
 
     useEffect(() => {
-      // This prevents hydration mismatch
       if (task.dueDate) {
-        setDueDateText(formatDistanceToNow(new Date(task.dueDate), { addSuffix: true }));
+        setDueDateText(formatDistanceToNow(new Date(task.dueDate), { addSuffix: true, locale: dateLocale }));
       } else {
           setDueDateText('');
       }
-    }, [task.dueDate]);
+    }, [task.dueDate, locale, dateLocale]);
 
   const pomodoroProgress = task.pomodoros > 0 ? (task.completedPomodoros / task.pomodoros) * 100 : 0;
 
@@ -64,7 +68,7 @@ export function TaskItem({ task, isDragging, onDragStart, onDragOver, onDragEnd,
           checked={task.completed}
           onCheckedChange={() => onToggle(task.id)}
           className="mt-1"
-          aria-label={`Mark task ${task.title} as ${task.completed ? 'incomplete' : 'complete'}`}
+          aria-label={t(task.completed ? 'taskItem.markIncomplete' : 'taskItem.markComplete').replace('{taskTitle}', task.title)}
         />
         <div className="flex-grow space-y-3">
           <label
@@ -81,14 +85,14 @@ export function TaskItem({ task, isDragging, onDragStart, onDragOver, onDragEnd,
           )}
           <div className="flex items-center flex-wrap gap-x-4 gap-y-1 text-sm text-muted-foreground">
             <div className="flex items-center">
-              <PriorityIcon priority={task.priority} />
-              <span className="capitalize">{task.priority}</span>
+              <PriorityIcon priority={task.priority} t={t} />
+              <span className="capitalize">{t(`filters.${task.priority}`)}</span>
             </div>
             {dueDateText && (
-              <span>Due {dueDateText}</span>
+              <span>{t('taskItem.due')} {dueDateText}</span>
             )}
              {task.pomodoros > 0 && (
-                <div className="flex items-center gap-1" title={`${task.completedPomodoros} of ${task.pomodoros} pomodoros completed`}>
+                <div className="flex items-center gap-1" title={t('taskItem.pomodorosCompleted').replace('{completed}', task.completedPomodoros.toString()).replace('{total}', task.pomodoros.toString())}>
                     <BrainCircuit className="w-4 h-4 text-primary/80" />
                     <span>{task.completedPomodoros}/{task.pomodoros}</span>
                 </div>
@@ -106,13 +110,13 @@ export function TaskItem({ task, isDragging, onDragStart, onDragOver, onDragEnd,
            )}
         </div>
         <div className="flex flex-col items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity duration-300 -mr-2 -my-2">
-          <Button variant="ghost" size="icon" onClick={() => onFocus(task)} title="Focus Mode">
+          <Button variant="ghost" size="icon" onClick={() => onFocus(task)} title={t('taskItem.focusMode')}>
             <Crosshair className="h-4 w-4" />
           </Button>
-          <Button variant="ghost" size="icon" onClick={() => onEdit(task)} title="Edit Task">
+          <Button variant="ghost" size="icon" onClick={() => onEdit(task)} title={t('taskItem.editTask')}>
             <Edit className="h-4 w-4" />
           </Button>
-          <Button variant="ghost" size="icon" onClick={() => onDelete(task.id)} className="text-destructive hover:text-destructive" title="Delete Task">
+          <Button variant="ghost" size="icon" onClick={() => onDelete(task.id)} className="text-destructive hover:text-destructive" title={t('taskItem.deleteTask')}>
             <Trash2 className="h-4 w-4" />
           </Button>
         </div>

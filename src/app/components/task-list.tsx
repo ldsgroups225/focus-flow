@@ -5,6 +5,7 @@ import { TaskItem } from './task-item';
 import type { Task } from '@/lib/types';
 import { AnimatePresence, motion } from 'framer-motion';
 import { ListX } from 'lucide-react';
+import { useI18n } from './i18n-provider';
 
 type TaskListProps = {
   tasks: Task[];
@@ -17,6 +18,7 @@ type TaskListProps = {
 
 export function TaskList({ tasks, setTasks, onEdit, onDelete, onToggle, onFocus }: TaskListProps) {
   const [draggedItemId, setDraggedItemId] = useState<string | null>(null);
+  const { t } = useI18n();
 
   const handleDragStart = (e: React.DragEvent<HTMLDivElement>, task: Task) => {
     setDraggedItemId(task.id);
@@ -49,8 +51,8 @@ export function TaskList({ tasks, setTasks, onEdit, onDelete, onToggle, onFocus 
     return (
       <div className="flex flex-col items-center justify-center rounded-lg border-2 border-dashed border-border p-12 text-center h-80">
         <ListX className="text-muted-foreground h-12 w-12 mb-4" />
-        <h3 className="text-xl font-semibold text-foreground">All Clear!</h3>
-        <p className="text-muted-foreground mt-2">No tasks match your current filters. Or maybe you're just that good.</p>
+        <h3 className="text-xl font-semibold text-foreground">{t('taskList.allClear')}</h3>
+        <p className="text-muted-foreground mt-2">{t('taskList.noTasks')}</p>
       </div>
     );
   }
