@@ -30,7 +30,7 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
-import { CalendarIcon } from 'lucide-react';
+import { CalendarIcon, Sparkles } from 'lucide-react';
 import { Calendar } from '@/components/ui/calendar';
 import { cn } from '@/lib/utils';
 import { format } from 'date-fns';
@@ -43,6 +43,7 @@ const taskSchema = z.object({
   priority: z.enum(['low', 'medium', 'high']),
   tags: z.string().optional(),
   dueDate: z.date().optional(),
+  pomodoros: z.coerce.number().int().min(0, 'Must be a positive number').default(0),
 });
 
 type TaskFormValues = z.infer<typeof taskSchema>;
@@ -50,7 +51,7 @@ type TaskFormValues = z.infer<typeof taskSchema>;
 type TaskFormProps = {
   isOpen: boolean;
   onClose: () => void;
-  onSave: (data: Omit<Task, 'completed'>) => void;
+  onSave: (data: Omit<Task, 'completed'|'completedPomodoros'>) => void;
   task?: Task;
 };
 
@@ -63,6 +64,7 @@ export function TaskForm({ isOpen, onClose, onSave, task }: TaskFormProps) {
       priority: 'medium',
       tags: '',
       dueDate: undefined,
+      pomodoros: 1,
     },
   });
 
@@ -75,6 +77,7 @@ export function TaskForm({ isOpen, onClose, onSave, task }: TaskFormProps) {
         priority: task.priority,
         tags: task.tags.join(', '),
         dueDate: task.dueDate,
+        pomodoros: task.pomodoros,
       });
     } else {
       form.reset({
@@ -83,6 +86,7 @@ export function TaskForm({ isOpen, onClose, onSave, task }: TaskFormProps) {
         priority: 'medium',
         tags: '',
         dueDate: undefined,
+        pomodoros: 1,
       });
     }
   }, [task, form, isOpen]);
@@ -94,7 +98,7 @@ export function TaskForm({ isOpen, onClose, onSave, task }: TaskFormProps) {
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-[425px]">
+      <DialogContent className="sm:max-w-[480px]">
         <DialogHeader>
           <DialogTitle>{task ? 'Edit Task' : 'Add New Task'}</DialogTitle>
         </DialogHeader>
@@ -189,19 +193,34 @@ export function TaskForm({ isOpen, onClose, onSave, task }: TaskFormProps) {
                 )}
               />
              </div>
-            <FormField
-              control={form.control}
-              name="tags"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Tags</FormLabel>
-                  <FormControl>
-                    <Input placeholder="e.g., marketing, design" {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+             <div className="grid grid-cols-2 gap-4">
+              <FormField
+                control={form.control}
+                name="tags"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Tags</FormLabel>
+                    <FormControl>
+                      <Input placeholder="e.g., marketing, design" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+               <FormField
+                  control={form.control}
+                  name="pomodoros"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel className='flex items-center'>Pomodoros <Sparkles className="w-3 h-3 ml-1 text-yellow-400" /></FormLabel>
+                      <FormControl>
+                        <Input type="number" min="0" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+             </div>
             <DialogFooter>
               <Button type="button" variant="ghost" onClick={onClose}>
                 Cancel

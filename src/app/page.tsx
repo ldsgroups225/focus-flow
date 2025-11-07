@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useMemo, useCallback } from 'react';
-import { Plus, SlidersHorizontal } from 'lucide-react';
+import { Plus, SlidersHorizontal, Orbit } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { TaskList } from './components/task-list';
 import { TaskForm } from './components/task-form';
@@ -37,7 +37,7 @@ export default function Home() {
     });
   }, [tasks, priorityFilter, tagFilter]);
 
-  const handleSaveTask = useCallback((taskToSave: Omit<Task, 'id' | 'completed'> & { id?: string }) => {
+  const handleSaveTask = useCallback((taskToSave: Omit<Task, 'id' | 'completed' | 'completedPomodoros'> & { id?: string }) => {
     if (taskToSave.id) {
       setTasks(prevTasks => prevTasks.map(task => task.id === taskToSave.id ? { ...task, ...taskToSave } : task));
     } else {
@@ -45,6 +45,7 @@ export default function Home() {
         ...taskToSave,
         id: Date.now().toString(),
         completed: false,
+        completedPomodoros: 0,
       };
       setTasks(prevTasks => [newTask, ...prevTasks]);
     }
@@ -62,12 +63,25 @@ export default function Home() {
   const handleDeleteTask = useCallback((taskId: string) => {
     setTasks(prevTasks => prevTasks.filter(task => task.id !== taskId));
   }, []);
+  
+  const handlePomodoroComplete = useCallback((taskId: string) => {
+    setTasks(prevTasks =>
+      prevTasks.map(task =>
+        task.id === taskId
+          ? { ...task, completedPomodoros: task.completedPomodoros + 1 }
+          : task
+      )
+    );
+  }, []);
 
   return (
-    <div className="min-h-screen bg-background">
-      <main className="container mx-auto max-w-4xl p-4 md:p-8">
+    <div className="min-h-screen bg-background text-foreground">
+      <main className="container mx-auto max-w-5xl p-4 md:p-8">
         <header className="flex items-center justify-between mb-8">
-          <h1 className="text-3xl font-bold text-foreground">FocusFlow</h1>
+          <h1 className="text-3xl font-bold flex items-center gap-2">
+            <Orbit className="w-8 h-8 text-primary" />
+            FocusFlow
+          </h1>
           <div className="flex items-center gap-2">
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
@@ -95,14 +109,16 @@ export default function Home() {
 
         <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
           <aside className="hidden md:block md:col-span-1">
-             <h2 className="text-lg font-semibold mb-4">Filters</h2>
-             <Filters
-                priorityFilter={priorityFilter}
-                setPriorityFilter={setPriorityFilter}
-                tagFilter={tagFilter}
-                setTagFilter={setTagFilter}
-                uniqueTags={uniqueTags}
-              />
+             <div className="sticky top-8">
+                <h2 className="text-lg font-semibold mb-4">Filters</h2>
+                <Filters
+                    priorityFilter={priorityFilter}
+                    setPriorityFilter={setPriorityFilter}
+                    tagFilter={tagFilter}
+                    setTagFilter={setTagFilter}
+                    uniqueTags={uniqueTags}
+                />
+             </div>
           </aside>
           
           <div className="md:col-span-3">
@@ -129,6 +145,7 @@ export default function Home() {
           <FocusView
             task={focusTask}
             onExit={() => setFocusTask(null)}
+            onPomodoroComplete={handlePomodoroComplete}
           />
         )}
       </main>

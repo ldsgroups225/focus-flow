@@ -9,6 +9,8 @@ export const initialTasks: Task[] = [
     priority: 'high',
     tags: ['marketing', 'strategy'],
     dueDate: new Date(new Date().setDate(new Date().getDate() + 2)),
+    pomodoros: 4,
+    completedPomodoros: 1,
   },
   {
     id: 'task-2',
@@ -18,6 +20,8 @@ export const initialTasks: Task[] = [
     priority: 'high',
     tags: ['development', 'feature'],
     dueDate: new Date(new Date().setDate(new Date().getDate() + 5)),
+    pomodoros: 8,
+    completedPomodoros: 0,
   },
   {
     id: 'task-3',
@@ -27,6 +31,8 @@ export const initialTasks: Task[] = [
     priority: 'medium',
     tags: ['docs', 'design-system'],
     dueDate: new Date(new Date().setDate(new Date().getDate() - 1)),
+    pomodoros: 3,
+    completedPomodoros: 3,
   },
   {
     id: 'task-4',
@@ -36,6 +42,8 @@ export const initialTasks: Task[] = [
     priority: 'low',
     tags: ['bugfix', 'css'],
     dueDate: new Date(),
+    pomodoros: 2,
+    completedPomodoros: 1,
   },
   {
     id: 'task-5',
@@ -45,5 +53,7 @@ export const initialTasks: Task[] = [
     priority: 'medium',
     tags: ['team', 'hr'],
     dueDate: new Date(new Date().setDate(new Date().getDate() + 10)),
+    pomodoros: 1,
+    completedPomodoros: 0,
   },
 ];

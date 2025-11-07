@@ -4,6 +4,7 @@ import React, { useState } from 'react';
 import { TaskItem } from './task-item';
 import type { Task } from '@/lib/types';
 import { AnimatePresence, motion } from 'framer-motion';
+import { ListX } from 'lucide-react';
 
 type TaskListProps = {
   tasks: Task[];
@@ -20,6 +21,7 @@ export function TaskList({ tasks, setTasks, onEdit, onDelete, onToggle, onFocus 
   const handleDragStart = (e: React.DragEvent<HTMLDivElement>, task: Task) => {
     setDraggedItemId(task.id);
     e.dataTransfer.effectAllowed = 'move';
+    e.dataTransfer.setData('text/plain', task.id);
   };
 
   const handleDragOver = (e: React.DragEvent<HTMLDivElement>, targetTask: Task) => {
@@ -45,10 +47,10 @@ export function TaskList({ tasks, setTasks, onEdit, onDelete, onToggle, onFocus 
   
   if (tasks.length === 0) {
     return (
-      <div className="flex flex-col items-center justify-center rounded-lg border-2 border-dashed border-gray-300 p-12 text-center">
-        <div className="text-2xl text-gray-400 mb-2">📝</div>
-        <h3 className="text-xl font-semibold text-gray-600">All Clear!</h3>
-        <p className="text-gray-500 mt-2">No tasks match your current filters. Or maybe you're just that good.</p>
+      <div className="flex flex-col items-center justify-center rounded-lg border-2 border-dashed border-border p-12 text-center h-80">
+        <ListX className="text-muted-foreground h-12 w-12 mb-4" />
+        <h3 className="text-xl font-semibold text-foreground">All Clear!</h3>
+        <p className="text-muted-foreground mt-2">No tasks match your current filters. Or maybe you're just that good.</p>
       </div>
     );
   }
@@ -60,10 +62,10 @@ export function TaskList({ tasks, setTasks, onEdit, onDelete, onToggle, onFocus 
            <motion.div
             key={task.id}
             layout
-            initial={{ opacity: 0, y: -20 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, scale: 0.95 }}
-            transition={{ duration: 0.2 }}
+            initial={{ opacity: 0, y: 20, scale: 0.98 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, scale: 0.95, transition: { duration: 0.2 } }}
+            transition={{ duration: 0.3, ease: [0.4, 0, 0.2, 1] }}
            >
             <TaskItem
               task={task}

@@ -8,4 +8,6 @@ export interface Task {
   priority: Priority;
   tags: string[];
   dueDate?: Date;
+  pomodoros: number;
+  completedPomodoros: number;
 }
