@@ -1,4 +1,3 @@
-
 {
     "header": {
         "title": "FocusFlow",
@@ -105,5 +104,23 @@
         "generate": "Generate",
         "generating": "Generating...",
         "error": "Sorry, the review could not be generated. Please try again."
+    },
+    "search": {
+        "placeholder": "Search tasks by title or description...",
+        "description": "Start typing to see your task list filter in real-time."
+    },
+    "bulkActions": {
+        "selected": "{count} selected",
+        "markComplete": "Mark as complete",
+        "changePriority": "Change priority",
+        "delete": "Delete",
+        "deselectAll": "Deselect all"
+    },
+    "shortcuts": {
+        "title": "Keyboard Shortcuts",
+        "description": "Navigate and manage your tasks faster.",
+        "newTask": "Create a new task",
+        "showShortcuts": "Show this help menu",
+        "openSearch": "Open task search"
     }
 }

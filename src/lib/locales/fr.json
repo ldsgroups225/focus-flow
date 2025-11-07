@@ -1,4 +1,3 @@
-
 {
     "header": {
         "title": "FocusFlow",
@@ -105,5 +104,23 @@
         "generate": "Générer",
         "generating": "Génération...",
         "error": "Désolé, la revue n'a pas pu être générée. Veuillez réessayer."
+    },
+     "search": {
+        "placeholder": "Rechercher par titre ou description...",
+        "description": "Commencez à taper pour filtrer votre liste de tâches en temps réel."
+    },
+    "bulkActions": {
+        "selected": "{count} sélectionné(s)",
+        "markComplete": "Marquer comme terminé",
+        "changePriority": "Changer la priorité",
+        "delete": "Supprimer",
+        "deselectAll": "Tout désélectionner"
+    },
+    "shortcuts": {
+        "title": "Raccourcis Clavier",
+        "description": "Naviguez et gérez vos tâches plus rapidement.",
+        "newTask": "Créer une nouvelle tâche",
+        "showShortcuts": "Afficher ce menu d'aide",
+        "openSearch": "Ouvrir la recherche de tâches"
     }
 }

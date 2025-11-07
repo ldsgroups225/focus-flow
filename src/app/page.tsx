@@ -1,8 +1,7 @@
-
 'use client';
 
-import { useState, useMemo, useCallback } from 'react';
-import { Plus, SlidersHorizontal, Orbit, Sparkles } from 'lucide-react';
+import { useState, useMemo, useCallback, useEffect } from 'react';
+import { Plus, SlidersHorizontal, Orbit, Search, Sparkles } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { TaskList } from './components/task-list';
 import { TaskForm } from './components/task-form';
@@ -20,6 +19,9 @@ import { ThemeToggle } from './components/theme-toggle';
 import { LanguageSwitcher } from './components/language-switcher';
 import { WorkspaceSwitcher } from './components/workspace-switcher';
 import { useI18n } from './components/i18n-provider';
+import { CommandSearch } from './components/command-search';
+import { BulkActionsToolbar } from './components/bulk-actions-toolbar';
+import { ShortcutsHelp } from './components/shortcuts-help';
 
 
 export default function Home() {
@@ -28,9 +30,16 @@ export default function Home() {
   const [focusTask, setFocusTask] = useState<Task | null>(null);
   const [isReviewOpen, setIsReviewOpen] = useState(false);
 
+  // Filters & Search State
   const [priorityFilter, setPriorityFilter] = useState<Priority[]>([]);
   const [tagFilter, setTagFilter] = useState<string[]>([]);
+  const [searchQuery, setSearchQuery] = useState('');
   const [activeWorkspace, setActiveWorkspace] = useState<Workspace>('personal');
+  
+  // Productivity Features State
+  const [selectedTaskIds, setSelectedTaskIds] = useState<Set<string>>(new Set());
+  const [isSearchOpen, setIsSearchOpen] = useState(false);
+  const [isShortcutsOpen, setIsShortcutsOpen] = useState(false);
   
   const { t } = useI18n();
 
@@ -42,7 +51,7 @@ export default function Home() {
     const allTags = workspaceTasks.flatMap(task => task.tags);
     return [...new Set(allTags)];
   }, [workspaceTasks]);
-
+  
   const tasksWithStatus = useMemo(() => {
     const taskMap = new Map(tasks.map(t => [t.id, t]));
     return workspaceTasks.map(task => {
@@ -62,9 +71,12 @@ export default function Home() {
     return tasksWithStatus.filter(task => {
       const priorityMatch = priorityFilter.length === 0 || priorityFilter.includes(task.priority);
       const tagMatch = tagFilter.length === 0 || task.tags.some(tag => tagFilter.includes(tag));
-      return priorityMatch && tagMatch;
+      const searchMatch = searchQuery === '' || 
+        task.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        task.description?.toLowerCase().includes(searchQuery.toLowerCase());
+      return priorityMatch && tagMatch && searchMatch;
     });
-  }, [tasksWithStatus, priorityFilter, tagFilter]);
+  }, [tasksWithStatus, priorityFilter, tagFilter, searchQuery]);
 
   const handleSaveTask = useCallback((taskToSave: Omit<Task, 'id' | 'completed' | 'completedPomodoros' | 'timeSpent' | 'completedDate'> & { id?: string }) => {
     setTasks(prevTasks => {
@@ -106,13 +118,16 @@ export default function Home() {
 
   const handleDeleteTask = useCallback((taskId: string) => {
     setTasks(prevTasks => {
-        // First, remove the task itself
         const newTasks = prevTasks.filter(task => task.id !== taskId);
-        // Then, remove this taskId from any other task's dependsOn array
         return newTasks.map(task => ({
             ...task,
             dependsOn: task.dependsOn?.filter(depId => depId !== taskId)
         }));
+    });
+     setSelectedTaskIds(prev => {
+      const newSet = new Set(prev);
+      newSet.delete(taskId);
+      return newSet;
     });
   }, []);
   
@@ -124,7 +139,6 @@ export default function Home() {
           : task
       )
     );
-    // Also update focus task if it's the one being worked on
     setFocusTask(prevTask => prevTask && prevTask.id === taskId ? { ...prevTask, completedPomodoros: prevTask.completedPomodoros + 1 } : prevTask);
   }, []);
 
@@ -136,7 +150,6 @@ export default function Home() {
           : task
       )
     );
-     // Also update focus task if it's the one being worked on
      setFocusTask(prevTask => prevTask && prevTask.id === taskId ? { ...prevTask, timeSpent: prevTask.timeSpent + seconds } : prevTask);
   }, []);
 
@@ -153,10 +166,49 @@ export default function Home() {
         return task;
     }));
   }, []);
+
+  const handleSelectTask = useCallback((taskId: string) => {
+    setSelectedTaskIds(prev => {
+      const newSet = new Set(prev);
+      if (newSet.has(taskId)) {
+        newSet.delete(taskId);
+      } else {
+        newSet.add(taskId);
+      }
+      return newSet;
+    });
+  }, []);
   
+  // Keyboard Shortcuts Effect
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      const isEditing = !!editingTask || !!focusTask;
+      const isMac = navigator.platform.toUpperCase().indexOf('MAC') >= 0;
+      const isCtrlOrMeta = isMac ? e.metaKey : e.ctrlKey;
+
+      if (isCtrlOrMeta && e.key === 'k') {
+        e.preventDefault();
+        setIsSearchOpen(o => !o);
+      }
+      if (e.key === '?' && !isEditing) {
+        e.preventDefault();
+        setIsShortcutsOpen(true);
+      }
+      if (e.key === 'n' && !isEditing) {
+        e.preventDefault();
+        setEditingTask('new');
+      }
+      if (e.key === 'Escape') {
+          setSelectedTaskIds(new Set());
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [editingTask, focusTask]);
+
   const handleSetEditingTask = (task: Task | 'new' | null) => {
     if (task === 'new') {
-        // Clear filters when adding a new task to avoid confusion
         setPriorityFilter([]);
         setTagFilter([]);
     }
@@ -173,14 +225,15 @@ export default function Home() {
           </div>
 
           <div className="flex items-center gap-2">
+             <Button variant="outline" size="icon" onClick={() => setIsSearchOpen(true)} className="hidden md:flex">
+                <Search className="h-4 w-4" />
+            </Button>
             <LanguageSwitcher />
             <ThemeToggle />
-
             <Button variant="outline" size="icon" onClick={() => setIsReviewOpen(true)}>
               <Sparkles className="h-4 w-4" />
               <span className="sr-only">{t('aiReview.title')}</span>
             </Button>
-            
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button variant="outline" size="icon" className="md:hidden">
@@ -228,10 +281,25 @@ export default function Home() {
               onToggle={handleToggleComplete}
               onFocus={setFocusTask}
               onSubTaskToggle={handleSubTaskToggle}
+              selectedTaskIds={selectedTaskIds}
+              onSelectTask={handleSelectTask}
             />
           </div>
         </div>
 
+        {/* Floating Action Button for Quick Capture */}
+        <Button onClick={() => handleSetEditingTask('new')} className="fixed bottom-6 right-6 h-14 w-14 rounded-full shadow-lg z-30" title={t('header.addTask')}>
+            <Plus className="h-6 w-6" />
+        </Button>
+
+        {/* Modals and Other Global UI */}
+        <CommandSearch isOpen={isSearchOpen} setIsOpen={setIsSearchOpen} setSearchQuery={setSearchQuery} />
+        <ShortcutsHelp isOpen={isShortcutsOpen} setIsOpen={setIsShortcutsOpen} />
+        <BulkActionsToolbar 
+            selectedTaskIds={selectedTaskIds}
+            setSelectedTaskIds={setSelectedTaskIds}
+            setTasks={setTasks}
+        />
         {editingTask && (
           <TaskForm
             isOpen={!!editingTask}

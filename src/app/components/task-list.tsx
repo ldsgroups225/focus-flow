@@ -19,10 +19,12 @@ type TaskListProps = {
   onDelete: (taskId: string) => void;
   onToggle: (taskId: string) => void;
   onFocus: (task: Task) => void;
+  selectedTaskIds: Set<string>;
+  onSelectTask: (taskId: string) => void;
   onSubTaskToggle: (taskId: string, subTaskIndex: number) => void;
 };
 
-export function TaskList({ tasks, setTasks, onEdit, onDelete, onToggle, onFocus, onSubTaskToggle }: TaskListProps) {
+export function TaskList({ tasks, setTasks, onEdit, onDelete, onToggle, onFocus, selectedTaskIds, onSelectTask, onSubTaskToggle }: TaskListProps) {
   const [draggedItemId, setDraggedItemId] = useState<string | null>(null);
   const { t } = useI18n();
 
@@ -42,10 +44,19 @@ export function TaskList({ tasks, setTasks, onEdit, onDelete, onToggle, onFocus,
 
       if (draggedIndex === -1 || targetIndex === -1) return currentTasks;
 
-      const newTasks = [...currentTasks];
-      const [draggedItem] = newTasks.splice(draggedIndex, 1);
-      newTasks.splice(targetIndex, 0, draggedItem);
-      return newTasks;
+      // Find the full task objects in the original unfiltered array
+      const fullTasks = [...currentTasks];
+      const draggedTask = fullTasks.find(t => t.id === draggedItemId);
+      if (!draggedTask) return currentTasks;
+      
+      const tasksWithoutDragged = fullTasks.filter(t => t.id !== draggedItemId);
+      const newTargetIndex = tasksWithoutDragged.findIndex(t => t.id === targetTask.id);
+
+      if (newTargetIndex === -1) return currentTasks;
+      
+      tasksWithoutDragged.splice(newTargetIndex, 0, draggedTask);
+      
+      return tasksWithoutDragged;
     });
   };
   
@@ -78,6 +89,7 @@ export function TaskList({ tasks, setTasks, onEdit, onDelete, onToggle, onFocus,
             <TaskItem
               task={task}
               isDragging={draggedItemId === task.id}
+              isSelected={selectedTaskIds.has(task.id)}
               onDragStart={(e) => handleDragStart(e, task)}
               onDragOver={(e) => handleDragOver(e, task)}
               onDragEnd={handleDragEnd}
@@ -85,6 +97,7 @@ export function TaskList({ tasks, setTasks, onEdit, onDelete, onToggle, onFocus,
               onDelete={onDelete}
               onToggle={onToggle}
               onFocus={onFocus}
+              onSelect={onSelectTask}
               onSubTaskToggle={onSubTaskToggle}
             />
           </motion.div>

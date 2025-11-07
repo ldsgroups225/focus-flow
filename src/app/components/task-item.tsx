@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { ArrowDown, ArrowUp, Minus, Trash2, Edit, Crosshair, BrainCircuit, Clock, Link, CheckCircle2, Circle } from 'lucide-react';
+import { ArrowDown, ArrowUp, Minus, Trash2, Edit, Crosshair, BrainCircuit, CheckCircle2, Circle, Link, Clock } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Badge } from '@/components/ui/badge';
@@ -22,6 +22,7 @@ type ExtendedTask = Task & {
 type TaskItemProps = {
   task: ExtendedTask;
   isDragging: boolean;
+  isSelected: boolean;
   onDragStart: (e: React.DragEvent<HTMLDivElement>) => void;
   onDragOver: (e: React.DragEvent<HTMLDivElement>) => void;
   onDragEnd: () => void;
@@ -29,6 +30,7 @@ type TaskItemProps = {
   onDelete: (taskId: string) => void;
   onToggle: (taskId: string) => void;
   onFocus: (task: Task) => void;
+  onSelect: (taskId: string) => void;
   onSubTaskToggle: (taskId: string, subTaskIndex: number) => void;
 };
 
@@ -52,7 +54,7 @@ const formatTimeSpent = (seconds: number) => {
     return result.trim();
 };
 
-export function TaskItem({ task, isDragging, onDragStart, onDragOver, onDragEnd, onEdit, onDelete, onToggle, onFocus, onSubTaskToggle }: TaskItemProps) {
+export function TaskItem({ task, isDragging, isSelected, onDragStart, onDragOver, onDragEnd, onEdit, onDelete, onToggle, onFocus, onSelect, onSubTaskToggle }: TaskItemProps) {
     const { t, locale } = useI18n();
     const [dueDateText, setDueDateText] = useState('');
     const dateLocale = locale === 'fr' ? fr : enUS;
@@ -78,25 +80,33 @@ export function TaskItem({ task, isDragging, onDragStart, onDragOver, onDragEnd,
       onDragStart={isBlocked ? undefined : onDragStart}
       onDragOver={onDragOver}
       onDragEnd={onDragEnd}
+      data-selected={isSelected}
       className={cn(
-        "group transition-all duration-200",
-        isBlocked ? "bg-card/50 border-dashed cursor-not-allowed" : "cursor-grab hover:shadow-lg hover:border-primary/50",
+        "group transition-all duration-200 hover:shadow-lg hover:border-primary/50 data-[selected=true]:border-primary data-[selected=true]:shadow-md",
+        isBlocked ? "bg-card/50 border-dashed cursor-not-allowed" : "cursor-grab",
         isDragging ? 'opacity-30 shadow-2xl scale-105' : 'opacity-100',
         task.completed ? 'bg-card/60' : 'bg-card'
       )}
     >
       <CardContent className="p-4 flex items-start gap-3 sm:gap-4">
-        <Checkbox
-          id={`task-${task.id}`}
-          checked={task.completed}
-          onCheckedChange={() => onToggle(task.id)}
-          className="mt-1"
-          aria-label={t(task.completed ? 'taskItem.markIncomplete' : 'taskItem.markComplete').replace('{taskTitle}', task.title)}
-          disabled={isBlocked}
-        />
+        <div className="flex flex-col items-center gap-4 mt-1">
+             <Checkbox
+              id={`complete-${task.id}`}
+              checked={task.completed}
+              onCheckedChange={() => onToggle(task.id)}
+              aria-label={t(task.completed ? 'taskItem.markIncomplete' : 'taskItem.markComplete').replace('{taskTitle}', task.title)}
+              disabled={isBlocked}
+            />
+            <Checkbox
+              id={`select-${task.id}`}
+              checked={isSelected}
+              onCheckedChange={() => onSelect(task.id)}
+               aria-label={`Select task ${task.title}`}
+            />
+        </div>
         <div className="flex-grow space-y-3">
           <label
-            htmlFor={`task-${task.id}`}
+            htmlFor={`complete-${task.id}`}
             className={cn(
               "font-medium transition-colors",
               isBlocked ? "cursor-not-allowed" : "cursor-pointer",
