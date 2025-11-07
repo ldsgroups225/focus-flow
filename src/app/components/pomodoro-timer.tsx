@@ -15,15 +15,20 @@ type TimerMode = 'work' | 'break';
 type PomodoroTimerProps = {
   task: Task;
   onPomodoroComplete: () => void;
+  onTimerActiveChange: (isActive: boolean) => void;
 };
 
-export function PomodoroTimer({ task, onPomodoroComplete }: PomodoroTimerProps) {
+export function PomodoroTimer({ task, onPomodoroComplete, onTimerActiveChange }: PomodoroTimerProps) {
   const { t } = useI18n();
   const [mode, setMode] = useState<TimerMode>('work');
   const [isActive, setIsActive] = useState(false);
   
   const initialTime = useMemo(() => (mode === 'work' ? WORK_MINUTES * 60 : BREAK_MINUTES * 60), [mode]);
   const [secondsLeft, setSecondsLeft] = useState(initialTime);
+
+  useEffect(() => {
+    onTimerActiveChange(isActive);
+  }, [isActive, onTimerActiveChange]);
 
   const minutes = Math.floor(secondsLeft / 60);
   const seconds = secondsLeft % 60;
