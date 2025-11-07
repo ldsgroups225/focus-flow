@@ -1,0 +1,49 @@
+import type { Task } from './types';
+
+export const initialTasks: Task[] = [
+  {
+    id: 'task-1',
+    title: 'Finalize Q3 marketing strategy',
+    description: 'Review the proposal from the content team, check the budget, and create a presentation for the stakeholders meeting on Friday.',
+    completed: false,
+    priority: 'high',
+    tags: ['marketing', 'strategy'],
+    dueDate: new Date(new Date().setDate(new Date().getDate() + 2)),
+  },
+  {
+    id: 'task-2',
+    title: 'Develop user authentication feature',
+    description: 'Implement JWT-based authentication for the main application. Include sign-up, login, and password-reset flows.',
+    completed: false,
+    priority: 'high',
+    tags: ['development', 'feature'],
+    dueDate: new Date(new Date().setDate(new Date().getDate() + 5)),
+  },
+  {
+    id: 'task-3',
+    title: 'Update component library documentation',
+    description: 'Add examples and usage guidelines for the new Button and Card components. Ensure all props are documented.',
+    completed: true,
+    priority: 'medium',
+    tags: ['docs', 'design-system'],
+    dueDate: new Date(new Date().setDate(new Date().getDate() - 1)),
+  },
+  {
+    id: 'task-4',
+    title: 'Fix mobile layout bug on settings page',
+    description: 'The main content area overflows on small screen sizes. Investigate CSS and fix the flexbox container.',
+    completed: false,
+    priority: 'low',
+    tags: ['bugfix', 'css'],
+    dueDate: new Date(),
+  },
+  {
+    id: 'task-5',
+    title: 'Schedule team-building activity',
+    description: 'Poll the team for preferred activities and dates. Book a venue and send out calendar invites.',
+    completed: false,
+    priority: 'medium',
+    tags: ['team', 'hr'],
+    dueDate: new Date(new Date().setDate(new Date().getDate() + 10)),
+  },
+];
