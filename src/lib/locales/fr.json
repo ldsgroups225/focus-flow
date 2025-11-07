@@ -2,7 +2,7 @@
 {
     "header": {
         "title": "FocusFlow",
-        "addTask": "Ajouter une Tâche",
+        "addTask": "Ajouter",
         "filters": "Filtres"
     },
     "filters": {
