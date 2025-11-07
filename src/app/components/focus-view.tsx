@@ -69,7 +69,7 @@ export function FocusView({ task, onExit, onPomodoroComplete }: FocusViewProps) 
         className="fixed inset-0 z-50 bg-background/95 backdrop-blur-lg flex flex-col p-4 sm:p-8"
       >
         <motion.header 
-          animate={{ opacity: isIdle ? 0.33 : 1 }}
+          animate={{ opacity: isIdle ? 0.33 : 1, filter: isIdle ? 'blur(4px)' : 'blur(0px)' }}
           transition={{ duration: 0.5 }}
           className="w-full flex justify-end relative z-10"
         >
@@ -103,7 +103,7 @@ export function FocusView({ task, onExit, onPomodoroComplete }: FocusViewProps) 
         </main>
         
         <motion.footer 
-            animate={{ opacity: isIdle ? 0.33 : 1 }}
+            animate={{ opacity: isIdle ? 0.33 : 1, filter: isIdle ? 'blur(4px)' : 'blur(0px)' }}
             transition={{ duration: 0.5 }}
             className="w-full flex items-end justify-between"
         >
