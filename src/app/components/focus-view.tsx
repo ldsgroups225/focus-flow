@@ -32,7 +32,7 @@ export function FocusView({ task, onExit, onPomodoroComplete }: FocusViewProps) 
         transition={{ duration: 0.3 }}
         className="fixed inset-0 z-50 bg-background/95 backdrop-blur-lg flex flex-col p-4 sm:p-8"
       >
-        <header className="w-full flex justify-end">
+        <header className="w-full flex justify-end relative z-10">
              <Button onClick={onExit} variant="ghost" size="icon" className="text-muted-foreground" aria-label={t('focusView.endSession')}>
               <X className="h-6 w-6" />
             </Button>
