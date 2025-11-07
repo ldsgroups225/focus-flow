@@ -30,7 +30,7 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
-import { CalendarIcon, Sparkles } from 'lucide-react';
+import { CalendarIcon, BrainCircuit } from 'lucide-react';
 import { Calendar } from '@/components/ui/calendar';
 import { cn } from '@/lib/utils';
 import { format } from 'date-fns';
@@ -43,7 +43,7 @@ const taskSchema = z.object({
   priority: z.enum(['low', 'medium', 'high']),
   tags: z.string().optional(),
   dueDate: z.date().optional(),
-  pomodoros: z.coerce.number().int().min(0, 'Must be a positive number').default(0),
+  pomodoros: z.coerce.number().int().min(0, 'Must be a positive number').default(1),
 });
 
 type TaskFormValues = z.infer<typeof taskSchema>;
@@ -51,7 +51,7 @@ type TaskFormValues = z.infer<typeof taskSchema>;
 type TaskFormProps = {
   isOpen: boolean;
   onClose: () => void;
-  onSave: (data: Omit<Task, 'completed'|'completedPomodoros'>) => void;
+  onSave: (data: Omit<Task, 'completed'|'completedPomodoros' | 'id'> & {id?: string}) => void;
   task?: Task;
 };
 
@@ -76,7 +76,7 @@ export function TaskForm({ isOpen, onClose, onSave, task }: TaskFormProps) {
         description: task.description || '',
         priority: task.priority,
         tags: task.tags.join(', '),
-        dueDate: task.dueDate,
+        dueDate: task.dueDate ? new Date(task.dueDate) : undefined,
         pomodoros: task.pomodoros,
       });
     } else {
@@ -94,6 +94,7 @@ export function TaskForm({ isOpen, onClose, onSave, task }: TaskFormProps) {
   const onSubmit = (data: TaskFormValues) => {
     const tagsArray = data.tags ? data.tags.split(',').map(tag => tag.trim()).filter(Boolean) : [];
     onSave({ ...data, tags: tagsArray });
+    onClose();
   };
 
   return (
@@ -157,8 +158,8 @@ export function TaskForm({ isOpen, onClose, onSave, task }: TaskFormProps) {
                 control={form.control}
                 name="dueDate"
                 render={({ field }) => (
-                  <FormItem className="flex flex-col">
-                    <FormLabel className='mb-2'>Due Date</FormLabel>
+                  <FormItem className="flex flex-col pt-2">
+                    <FormLabel className='mb-[6px]'>Due Date</FormLabel>
                     <Popover>
                       <PopoverTrigger asChild>
                         <FormControl>
@@ -212,7 +213,7 @@ export function TaskForm({ isOpen, onClose, onSave, task }: TaskFormProps) {
                   name="pomodoros"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel className='flex items-center'>Pomodoros <Sparkles className="w-3 h-3 ml-1 text-yellow-400" /></FormLabel>
+                      <FormLabel className='flex items-center'>Pomodoros <BrainCircuit className="w-3 h-3 ml-1 text-primary/80" /></FormLabel>
                       <FormControl>
                         <Input type="number" min="0" {...field} />
                       </FormControl>

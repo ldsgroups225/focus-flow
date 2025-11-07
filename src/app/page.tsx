@@ -14,6 +14,7 @@ import {
   DropdownMenuContent,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { ThemeToggle } from './components/theme-toggle';
 
 
 export default function Home() {
@@ -72,6 +73,8 @@ export default function Home() {
           : task
       )
     );
+    // Also update focus task if it's the one being worked on
+    setFocusTask(prevTask => prevTask && prevTask.id === taskId ? { ...prevTask, completedPomodoros: prevTask.completedPomodoros + 1 } : prevTask);
   }, []);
 
   return (
@@ -83,6 +86,7 @@ export default function Home() {
             FocusFlow
           </h1>
           <div className="flex items-center gap-2">
+             <ThemeToggle />
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button variant="outline" size="icon" className="md:hidden">
@@ -138,7 +142,7 @@ export default function Home() {
             isOpen={!!editingTask}
             onClose={() => setEditingTask(null)}
             onSave={handleSaveTask}
-            task={editingTask === 'new' ? undefined : tasks.find(t => t.id === editingTask.id)}
+            task={editingTask === 'new' ? undefined : tasks.find(t => t.id === (typeof editingTask === 'object' && editingTask.id))}
           />
         )}
         {focusTask && (

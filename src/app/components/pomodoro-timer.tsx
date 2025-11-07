@@ -3,7 +3,7 @@
 import { useState, useEffect, useCallback, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Button } from '@/components/ui/button';
-import { Play, Pause, RefreshCw, Coffee, Sparkles } from 'lucide-react';
+import { Play, Pause, RefreshCw, Coffee, BrainCircuit } from 'lucide-react';
 import { Task } from '@/lib/types';
 
 const WORK_MINUTES = 25;
@@ -28,6 +28,7 @@ export function PomodoroTimer({ task, onPomodoroComplete }: PomodoroTimerProps) 
   const progress = (secondsLeft / initialTime) * 100;
 
   const handleNextSession = useCallback(() => {
+    setIsActive(false);
     if (mode === 'work') {
       onPomodoroComplete();
       setMode('break');
@@ -36,7 +37,6 @@ export function PomodoroTimer({ task, onPomodoroComplete }: PomodoroTimerProps) 
       setMode('work');
       setSecondsLeft(WORK_MINUTES * 60);
     }
-    setIsActive(false);
   }, [mode, onPomodoroComplete]);
 
   useEffect(() => {
@@ -56,8 +56,9 @@ export function PomodoroTimer({ task, onPomodoroComplete }: PomodoroTimerProps) 
   }, [isActive, secondsLeft, handleNextSession]);
 
   useEffect(() => {
-    setSecondsLeft(mode === 'work' ? WORK_MINUTES * 60 : BREAK_MINUTES * 60);
-  }, [mode]);
+    setSecondsLeft(initialTime);
+    setIsActive(false);
+  }, [mode, initialTime]);
   
   const resetTimer = () => {
     setIsActive(false);
@@ -65,7 +66,8 @@ export function PomodoroTimer({ task, onPomodoroComplete }: PomodoroTimerProps) 
   };
 
   const timerLabel = mode === 'work' ? 'Focus Session' : 'Take a Break';
-
+  const pomodoroText = `${task.completedPomodoros} of ${task.pomodoros > 0 ? task.pomodoros : '∞'} pomodoros completed`;
+  
   return (
     <div className="relative w-80 h-80 flex flex-col items-center justify-center">
       <motion.svg className="absolute inset-0" viewBox="0 0 100 100">
@@ -94,24 +96,24 @@ export function PomodoroTimer({ task, onPomodoroComplete }: PomodoroTimerProps) 
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0.5, y: -10 }}
             transition={{ duration: 0.2 }}
-            className="text-6xl font-bold"
+            className="text-6xl font-bold tabular-nums"
           >
             {`${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`}
           </motion.div>
         </AnimatePresence>
-        <div className="flex items-center gap-1 mt-4" title={`${task.completedPomodoros} of ${task.pomodoros} pomodoros completed`}>
-            <Sparkles className="w-4 h-4 text-yellow-400" />
-            <span>{task.completedPomodoros}/{task.pomodoros}</span>
+        <div className="flex items-center gap-2 mt-4 text-sm text-muted-foreground" title={pomodoroText}>
+            <BrainCircuit className="w-4 h-4 text-primary/80" />
+            <span>{task.completedPomodoros} / {task.pomodoros > 0 ? task.pomodoros : '∞'}</span>
         </div>
       </div>
       <div className="absolute bottom-0 flex items-center gap-4">
-        <Button variant="ghost" size="icon" onClick={resetTimer}>
+        <Button variant="ghost" size="icon" onClick={resetTimer} aria-label="Reset Timer">
           <RefreshCw className="w-5 h-5" />
         </Button>
-        <Button size="lg" className="rounded-full w-20 h-20" onClick={() => setIsActive(!isActive)}>
+        <Button size="lg" className="rounded-full w-20 h-20" onClick={() => setIsActive(!isActive)} aria-label={isActive ? "Pause Timer" : "Start Timer"}>
           {isActive ? <Pause className="w-8 h-8" /> : <Play className="w-8 h-8" />}
         </Button>
-        <Button variant="ghost" size="icon" onClick={handleNextSession}>
+        <Button variant="ghost" size="icon" onClick={handleNextSession} aria-label={mode === 'work' ? 'Start Break' : 'Start Work'}>
           {mode === 'work' ? <Coffee className="w-5 h-5" /> : <Play className="w-5 h-5" />}
         </Button>
       </div>
