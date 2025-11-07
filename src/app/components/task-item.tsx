@@ -62,7 +62,7 @@ export function TaskItem({ task, isDragging, onDragStart, onDragOver, onDragEnd,
         task.completed ? 'bg-card/60 border-dashed' : 'bg-card'
       )}
     >
-      <CardContent className="p-4 flex items-start gap-4">
+      <CardContent className="p-4 flex items-start gap-3 sm:gap-4">
         <Checkbox
           id={`task-${task.id}`}
           checked={task.completed}
@@ -99,7 +99,7 @@ export function TaskItem({ task, isDragging, onDragStart, onDragOver, onDragEnd,
             )}
           </div>
           {task.tags.length > 0 && (
-            <div className="flex flex-wrap gap-2">
+            <div className="flex flex-wrap gap-2 pt-1">
               {task.tags.map(tag => (
                 <Badge key={tag} variant="secondary" className="font-normal">{tag}</Badge>
               ))}
@@ -109,7 +109,7 @@ export function TaskItem({ task, isDragging, onDragStart, onDragOver, onDragEnd,
              <Progress value={pomodoroProgress} className="h-1 mt-3" />
            )}
         </div>
-        <div className="flex flex-col items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity duration-300 -mr-2 -my-2">
+        <div className="flex flex-col sm:flex-row items-center gap-0 sm:gap-1 opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity duration-300 -mr-2 -my-2 sm:m-0">
           <Button variant="ghost" size="icon" onClick={() => onFocus(task)} title={t('taskItem.focusMode')}>
             <Crosshair className="h-4 w-4" />
           </Button>

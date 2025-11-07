@@ -83,10 +83,10 @@ export default function Home() {
 
   return (
     <div className="min-h-screen bg-background text-foreground">
-      <main className="container mx-auto max-w-5xl p-4 md:p-8">
-        <header className="flex items-center justify-between mb-8">
-          <h1 className="text-3xl font-bold flex items-center gap-2">
-            <Orbit className="w-8 h-8 text-primary" />
+      <main className="container mx-auto max-w-5xl p-4 sm:p-6 md:p-8">
+        <header className="flex items-center justify-between mb-6 md:mb-8">
+          <h1 className="text-2xl md:text-3xl font-bold flex items-center gap-2">
+            <Orbit className="w-7 h-7 md:w-8 md:h-8 text-primary" />
             {t('header.title')}
           </h1>
           <div className="flex items-center gap-2">
@@ -109,9 +109,9 @@ export default function Home() {
               </DropdownMenuContent>
             </DropdownMenu>
 
-            <Button onClick={() => setEditingTask('new')}>
-              <Plus className="mr-2 h-4 w-4" />
-              {t('header.addTask')}
+            <Button onClick={() => setEditingTask('new')} size="sm" className="sm:size-auto">
+              <Plus className="sm:mr-2 h-4 w-4" />
+              <span className='hidden sm:inline'>{t('header.addTask')}</span>
             </Button>
           </div>
         </header>
