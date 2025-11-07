@@ -1,12 +1,12 @@
 'use client';
 
-import { X } from 'lucide-react';
+import { X, Play, Pause, RefreshCw, Coffee } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import type { Task } from '@/lib/types';
 import { AnimatePresence, motion } from 'framer-motion';
-import { PomodoroTimer } from './pomodoro-timer';
+import { PomodoroTimer, type PomodoroTimerHandles } from './pomodoro-timer';
 import { useI18n } from './i18n-provider';
-import { useState } from 'react';
+import { useState, useRef, useCallback } from 'react';
 
 type FocusViewProps = {
   task: Task;
@@ -16,6 +16,12 @@ type FocusViewProps = {
 
 export function FocusView({ task, onExit, onPomodoroComplete }: FocusViewProps) {
   const { t } = useI18n();
+  const timerRef = useRef<PomodoroTimerHandles>(null);
+  const [timerState, setTimerState] = useState<{mode: 'work' | 'break', isActive: boolean}>({mode: 'work', isActive: false});
+
+  const handleTimerUpdate = useCallback((mode: 'work' | 'break', isActive: boolean) => {
+    setTimerState({mode, isActive});
+  }, []);
 
   return (
     <AnimatePresence>
@@ -58,15 +64,27 @@ export function FocusView({ task, onExit, onPomodoroComplete }: FocusViewProps) 
         </main>
         
         <motion.footer 
-             initial={{ opacity: 0, y: 20 }}
-             animate={{ opacity: 1, y: 0 }}
-             transition={{ duration: 0.5, delay: 0.4 }}
-            className="w-full"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5, delay: 0.4 }}
+            className="w-full flex items-end justify-between"
         >
           <PomodoroTimer 
-            task={task}
             onPomodoroComplete={() => onPomodoroComplete(task.id)}
+            onTimerUpdate={handleTimerUpdate}
+            timerRef={timerRef}
           />
+           <div className="flex items-center gap-2">
+              <Button variant="ghost" size="icon" onClick={() => timerRef.current?.reset()} aria-label={t('pomodoro.resetTimer')}>
+                  <RefreshCw className="w-5 h-5" />
+              </Button>
+              <Button size="icon" className="w-12 h-12 rounded-full" onClick={() => timerRef.current?.toggle()} aria-label={timerState.isActive ? t('pomodoro.pauseTimer') : t('pomodoro.startTimer')}>
+                  {timerState.isActive ? <Pause className="w-6 h-6" /> : <Play className="w-6 h-6" />}
+              </Button>
+              <Button variant="ghost" size="icon" onClick={() => timerRef.current?.next()} aria-label={timerState.mode === 'work' ? t('pomodoro.startBreak') : t('pomodoro.startWork')}>
+                  <Coffee className="w-5 h-5" />
+              </Button>
+          </div>
         </motion.footer>
       </motion.div>
     </AnimatePresence>

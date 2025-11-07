@@ -1,11 +1,8 @@
 'use client';
 
 import { useState, useEffect, useCallback, useMemo } from 'react';
-import { motion } from 'framer-motion';
-import { Button } from '@/components/ui/button';
-import { Play, Pause, RefreshCw, Coffee } from 'lucide-react';
 import { Progress } from "@/components/ui/progress";
-import { Task } from '@/lib/types';
+import type { Task } from '@/lib/types';
 import { useI18n } from './i18n-provider';
 
 const WORK_MINUTES = 25;
@@ -13,13 +10,20 @@ const BREAK_MINUTES = 5;
 
 type TimerMode = 'work' | 'break';
 
-type PomodoroTimerProps = {
-  task: Task;
-  onPomodoroComplete: () => void;
+export type PomodoroTimerHandles = {
+  toggle: () => void;
+  reset: () => void;
+  next: () => void;
+  isActive: boolean;
 };
 
-export function PomodoroTimer({ task, onPomodoroComplete }: PomodoroTimerProps) {
-  const { t } = useI18n();
+type PomodoroTimerProps = {
+  onPomodoroComplete: () => void;
+  onTimerUpdate: (mode: TimerMode, isActive: boolean) => void;
+  timerRef: React.RefObject<PomodoroTimerHandles>;
+};
+
+export function PomodoroTimer({ onPomodoroComplete, onTimerUpdate, timerRef }: PomodoroTimerProps) {
   const [mode, setMode] = useState<TimerMode>('work');
   const [isActive, setIsActive] = useState(false);
   
@@ -60,37 +64,32 @@ export function PomodoroTimer({ task, onPomodoroComplete }: PomodoroTimerProps) 
   useEffect(() => {
     setSecondsLeft(initialTime);
     setIsActive(false);
-  }, [mode, initialTime]);
+  }, [initialTime]);
   
-  const resetTimer = () => {
-    setIsActive(false);
-    setSecondsLeft(initialTime);
-  };
+  useEffect(() => {
+    onTimerUpdate(mode, isActive);
+  }, [mode, isActive, onTimerUpdate]);
+
+  if (timerRef && 'current' in timerRef) {
+    timerRef.current = {
+      toggle: () => setIsActive(!isActive),
+      reset: () => {
+        setIsActive(false);
+        setSecondsLeft(initialTime);
+      },
+      next: handleNextSession,
+      isActive: isActive
+    };
+  }
   
   return (
-    <div className="flex items-end justify-between w-full">
-        <div className="w-48">
-            <div className="flex items-baseline gap-2">
-                <span className="text-4xl font-bold tabular-nums">
-                    {`${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`}
-                </span>
-                <span className="text-muted-foreground text-sm">
-                   {mode === 'work' ? t('pomodoro.focusSession') : t('pomodoro.takeBreak')}
-                </span>
-            </div>
-            <Progress value={progress} className="h-1 mt-2" />
+    <div className="w-36">
+        <div className="flex items-baseline">
+            <span className="text-4xl font-bold tabular-nums">
+                {`${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`}
+            </span>
         </div>
-        <div className="flex items-center gap-2">
-            <Button variant="ghost" size="icon" onClick={resetTimer} aria-label={t('pomodoro.resetTimer')}>
-                <RefreshCw className="w-5 h-5" />
-            </Button>
-            <Button size="icon" className="w-12 h-12 rounded-full" onClick={() => setIsActive(!isActive)} aria-label={isActive ? t('pomodoro.pauseTimer') : t('pomodoro.startTimer')}>
-                {isActive ? <Pause className="w-6 h-6" /> : <Play className="w-6 h-6" />}
-            </Button>
-            <Button variant="ghost" size="icon" onClick={handleNextSession} aria-label={mode === 'work' ? t('pomodoro.startBreak') : t('pomodoro.startWork')}>
-                <Coffee className="w-5 h-5" />
-            </Button>
-        </div>
+        <Progress value={progress} className="h-1 mt-2" />
     </div>
   );
 }
