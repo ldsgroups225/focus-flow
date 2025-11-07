@@ -22,33 +22,29 @@ export function FocusView({ task, onExit, onPomodoroComplete }: FocusViewProps) 
   const [isIdle, setIsIdle] = useState(false);
   const idleTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
-  const handleTimerUpdate = useCallback((mode: 'work' | 'break', isActive: boolean) => {
-    setTimerState({mode, isActive});
-    // When timer starts, reset idle state and start listening for inactivity
-    if (isActive) {
-      setIsIdle(false);
-      resetIdleTimeout();
-    } else {
-       // When timer stops, clear any pending idle timeout and exit idle mode
-      if (idleTimeoutRef.current) {
-        clearTimeout(idleTimeoutRef.current);
-      }
-      setIsIdle(false);
-    }
-  }, []);
-  
   const resetIdleTimeout = useCallback(() => {
     if (idleTimeoutRef.current) {
       clearTimeout(idleTimeoutRef.current);
     }
     setIsIdle(false);
-    // Only set timeout if timer is active
     if (timerState.isActive) {
       idleTimeoutRef.current = setTimeout(() => {
         setIsIdle(true);
-      }, 3000);
+      }, 3000); 
     }
   }, [timerState.isActive]);
+  
+  const handleTimerUpdate = useCallback((mode: 'work' | 'break', isActive: boolean) => {
+    setTimerState({mode, isActive});
+    if (isActive) {
+      resetIdleTimeout();
+    } else {
+      if (idleTimeoutRef.current) {
+        clearTimeout(idleTimeoutRef.current);
+      }
+      setIsIdle(false);
+    }
+  }, [resetIdleTimeout]);
 
   useEffect(() => {
     window.addEventListener('mousemove', resetIdleTimeout);
@@ -87,9 +83,8 @@ export function FocusView({ task, onExit, onPomodoroComplete }: FocusViewProps) 
             className="flex-1 flex flex-col items-center justify-center text-center -mt-16"
         >
             <motion.p 
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: isIdle ? 0 : 1, y: 0 }}
-                transition={{ duration: 0.5, delay: 0.1 }}
+                animate={{ opacity: isIdle ? 0 : 1 }}
+                transition={{ duration: 0.5 }}
                 className="text-lg text-muted-foreground mb-4">{t('focusView.focusingOn')}
             </motion.p>
             <motion.h1 
