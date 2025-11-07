@@ -1,3 +1,4 @@
+
 'use client';
 
 import { X, Play, Pause, RefreshCw, Coffee } from 'lucide-react';
@@ -6,7 +7,7 @@ import type { Task } from '@/lib/types';
 import { AnimatePresence, motion } from 'framer-motion';
 import { PomodoroTimer, type PomodoroTimerHandles } from './pomodoro-timer';
 import { useI18n } from './i18n-provider';
-import { useState, useRef, useCallback } from 'react';
+import { useState, useRef, useCallback, useEffect } from 'react';
 
 type FocusViewProps = {
   task: Task;
@@ -18,10 +19,50 @@ export function FocusView({ task, onExit, onPomodoroComplete }: FocusViewProps) 
   const { t } = useI18n();
   const timerRef = useRef<PomodoroTimerHandles>(null);
   const [timerState, setTimerState] = useState<{mode: 'work' | 'break', isActive: boolean}>({mode: 'work', isActive: false});
+  const [isIdle, setIsIdle] = useState(false);
+  const idleTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   const handleTimerUpdate = useCallback((mode: 'work' | 'break', isActive: boolean) => {
     setTimerState({mode, isActive});
+    // When timer starts, reset idle state and start listening for inactivity
+    if (isActive) {
+      setIsIdle(false);
+      resetIdleTimeout();
+    } else {
+       // When timer stops, clear any pending idle timeout and exit idle mode
+      if (idleTimeoutRef.current) {
+        clearTimeout(idleTimeoutRef.current);
+      }
+      setIsIdle(false);
+    }
   }, []);
+  
+  const resetIdleTimeout = useCallback(() => {
+    if (idleTimeoutRef.current) {
+      clearTimeout(idleTimeoutRef.current);
+    }
+    setIsIdle(false);
+    // Only set timeout if timer is active
+    if (timerState.isActive) {
+      idleTimeoutRef.current = setTimeout(() => {
+        setIsIdle(true);
+      }, 3000);
+    }
+  }, [timerState.isActive]);
+
+  useEffect(() => {
+    window.addEventListener('mousemove', resetIdleTimeout);
+    window.addEventListener('keydown', resetIdleTimeout);
+
+    return () => {
+      window.removeEventListener('mousemove', resetIdleTimeout);
+      window.removeEventListener('keydown', resetIdleTimeout);
+      if (idleTimeoutRef.current) {
+        clearTimeout(idleTimeoutRef.current);
+      }
+    };
+  }, [resetIdleTimeout]);
+
 
   return (
     <AnimatePresence>
@@ -32,18 +73,22 @@ export function FocusView({ task, onExit, onPomodoroComplete }: FocusViewProps) 
         transition={{ duration: 0.3 }}
         className="fixed inset-0 z-50 bg-background/95 backdrop-blur-lg flex flex-col p-4 sm:p-8"
       >
-        <header className="w-full flex justify-end relative z-10">
+        <motion.header 
+          animate={{ opacity: isIdle ? 0 : 1 }}
+          transition={{ duration: 0.5 }}
+          className="w-full flex justify-end relative z-10"
+        >
              <Button onClick={onExit} variant="ghost" size="icon" className="text-muted-foreground" aria-label={t('focusView.endSession')}>
               <X className="h-6 w-6" />
             </Button>
-        </header>
+        </motion.header>
 
         <main 
             className="flex-1 flex flex-col items-center justify-center text-center -mt-16"
         >
             <motion.p 
                 initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
+                animate={{ opacity: isIdle ? 0 : 1, y: 0 }}
                 transition={{ duration: 0.5, delay: 0.1 }}
                 className="text-lg text-muted-foreground mb-4">{t('focusView.focusingOn')}
             </motion.p>
@@ -64,9 +109,8 @@ export function FocusView({ task, onExit, onPomodoroComplete }: FocusViewProps) 
         </main>
         
         <motion.footer 
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5, delay: 0.4 }}
+            animate={{ opacity: isIdle ? 0 : 1 }}
+            transition={{ duration: 0.5 }}
             className="w-full flex items-end justify-between"
         >
           <PomodoroTimer 

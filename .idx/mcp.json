@@ -1,0 +1,45 @@
+{
+  "mcpServers": {
+    "context7": {
+      "args": [
+        "-y",
+        "@upstash/context7-mcp"
+      ],
+      "command": "npx",
+      "disabled": false
+    },
+    "serena": {
+      "args": [
+        "--from",
+        "git+https://github.com/oraios/serena",
+        "serena",
+        "start-mcp-server",
+        "--context",
+        "ide-assistant"
+      ],
+      "command": "uvx"
+    },
+    "time": {
+      "args": [
+        "mcp-server-time"
+      ],
+      "command": "uvx"
+    },
+    "firebase": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "firebase-tools@latest",
+        "experimental:mcp",
+        "--only",
+        "auth,firestore"
+      ]
+    }
+  },
+  "chrome-devtools": {
+    "args": [
+      "chrome-devtools-mcp@latest"
+    ],
+    "command": "npx"
+  }
+}
