@@ -66,7 +66,7 @@ export function FocusView({ task, onExit, onPomodoroComplete }: FocusViewProps) 
         initial={{ opacity: 0 }}
         animate={{ 
           opacity: 1,
-          backgroundColor: timerState.mode === 'break' ? 'hsl(var(--chart-2) / 0.95)' : 'hsl(var(--background) / 0.95)'
+          backgroundColor: timerState.mode === 'break' ? 'hsl(var(--chart-2) / 0.2)' : 'hsl(var(--background) / 0.95)'
         }}
         exit={{ opacity: 0 }}
         transition={{ duration: 0.5 }}
