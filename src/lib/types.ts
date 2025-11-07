@@ -1,4 +1,5 @@
 export type Priority = "low" | "medium" | "high";
+export type Workspace = "personal" | "work" | "side-project";
 
 export interface Task {
   id: string;
@@ -12,4 +13,5 @@ export interface Task {
   completedPomodoros: number;
   timeSpent: number; // in seconds
   dependsOn?: string[];
+  workspace: Workspace;
 }

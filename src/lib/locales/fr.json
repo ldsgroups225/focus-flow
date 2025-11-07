@@ -81,5 +81,11 @@
     },
     "lang": {
         "change": "Changer de langue"
+    },
+    "workspace": {
+        "change": "Changer d'espace de travail",
+        "personal": "Personnel",
+        "work": "Travail",
+        "sideProject": "Projet Annexe"
     }
 }

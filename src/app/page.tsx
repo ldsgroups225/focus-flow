@@ -8,7 +8,7 @@ import { TaskList } from './components/task-list';
 import { TaskForm } from './components/task-form';
 import { Filters } from './components/filters';
 import { FocusView } from './components/focus-view';
-import type { Task, Priority } from '@/lib/types';
+import type { Task, Priority, Workspace } from '@/lib/types';
 import { initialTasks } from '@/lib/initial-tasks';
 import {
   DropdownMenu,
@@ -17,6 +17,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { ThemeToggle } from './components/theme-toggle';
 import { LanguageSwitcher } from './components/language-switcher';
+import { WorkspaceSwitcher } from './components/workspace-switcher';
 import { useI18n } from './components/i18n-provider';
 
 
@@ -27,17 +28,22 @@ export default function Home() {
 
   const [priorityFilter, setPriorityFilter] = useState<Priority[]>([]);
   const [tagFilter, setTagFilter] = useState<string[]>([]);
+  const [activeWorkspace, setActiveWorkspace] = useState<Workspace>('personal');
   
   const { t } = useI18n();
 
+  const workspaceTasks = useMemo(() => {
+    return tasks.filter(task => task.workspace === activeWorkspace);
+  }, [tasks, activeWorkspace]);
+
   const uniqueTags = useMemo(() => {
-    const allTags = tasks.flatMap(task => task.tags);
+    const allTags = workspaceTasks.flatMap(task => task.tags);
     return [...new Set(allTags)];
-  }, [tasks]);
+  }, [workspaceTasks]);
 
   const tasksWithStatus = useMemo(() => {
     const taskMap = new Map(tasks.map(t => [t.id, t]));
-    return tasks.map(task => {
+    return workspaceTasks.map(task => {
       const blockingTasks = (task.dependsOn ?? [])
         .map(depId => taskMap.get(depId))
         .filter((dep): dep is Task => !!dep && !dep.completed);
@@ -48,7 +54,7 @@ export default function Home() {
         blockingTasks: blockingTasks.map(t => t.title),
       };
     });
-  }, [tasks]);
+  }, [tasks, workspaceTasks]);
 
   const filteredTasks = useMemo(() => {
     return tasksWithStatus.filter(task => {
@@ -62,11 +68,12 @@ export default function Home() {
     setTasks(prevTasks => {
       const allTasks = [...prevTasks];
       const dependsOn = taskToSave.dependsOn?.filter(depId => allTasks.some(t => t.id === depId)) || [];
+      const workspace = taskToSave.workspace || activeWorkspace;
 
       if (taskToSave.id) {
         return allTasks.map(task => 
           task.id === taskToSave.id 
-            ? { ...task, ...taskToSave, dependsOn } 
+            ? { ...task, ...taskToSave, dependsOn, workspace } 
             : task
         );
       } else {
@@ -76,13 +83,14 @@ export default function Home() {
           completed: false,
           completedPomodoros: 0,
           timeSpent: 0,
-          dependsOn
+          dependsOn,
+          workspace,
         };
         return [newTask, ...allTasks];
       }
     });
     setEditingTask(null);
-  }, []);
+  }, [activeWorkspace]);
 
   const handleToggleComplete = useCallback((taskId: string) => {
     setTasks(prevTasks =>
@@ -127,15 +135,25 @@ export default function Home() {
      // Also update focus task if it's the one being worked on
      setFocusTask(prevTask => prevTask && prevTask.id === taskId ? { ...prevTask, timeSpent: prevTask.timeSpent + seconds } : prevTask);
   }, []);
+  
+  const handleSetEditingTask = (task: Task | 'new' | null) => {
+    if (task === 'new') {
+        // Clear filters when adding a new task to avoid confusion
+        setPriorityFilter([]);
+        setTagFilter([]);
+    }
+    setEditingTask(task);
+  };
 
   return (
     <div className="min-h-screen bg-background text-foreground">
       <main className="container mx-auto max-w-5xl p-4 sm:p-6 md:p-8">
         <header className="flex items-center justify-between mb-6 md:mb-8">
-          <h1 className="text-2xl md:text-3xl font-bold flex items-center gap-2">
+          <div className="flex items-center gap-4">
             <Orbit className="w-7 h-7 md:w-8 md:h-8 text-primary" />
-            {t('header.title')}
-          </h1>
+             <WorkspaceSwitcher activeWorkspace={activeWorkspace} setActiveWorkspace={setActiveWorkspace} />
+          </div>
+
           <div className="flex items-center gap-2">
             <LanguageSwitcher />
             <ThemeToggle />
@@ -156,7 +174,7 @@ export default function Home() {
               </DropdownMenuContent>
             </DropdownMenu>
 
-            <Button onClick={() => setEditingTask('new')}>
+            <Button onClick={() => handleSetEditingTask('new')}>
               <Plus className="sm:mr-2 h-4 w-4" />
               <span className='hidden sm:inline'>{t('header.addTask')}</span>
             </Button>
@@ -181,7 +199,7 @@ export default function Home() {
             <TaskList
               tasks={filteredTasks}
               setTasks={setTasks}
-              onEdit={setEditingTask}
+              onEdit={handleSetEditingTask}
               onDelete={handleDeleteTask}
               onToggle={handleToggleComplete}
               onFocus={setFocusTask}
@@ -196,6 +214,7 @@ export default function Home() {
             onSave={handleSaveTask}
             task={editingTask === 'new' ? undefined : tasks.find(t => t.id === (typeof editingTask === 'object' && editingTask.id))}
             allTasks={tasks}
+            activeWorkspace={activeWorkspace}
           />
         )}
         {focusTask && (

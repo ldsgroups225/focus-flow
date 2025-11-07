@@ -42,7 +42,7 @@ import { CalendarIcon, BrainCircuit, Link } from 'lucide-react';
 import { Calendar } from '@/components/ui/calendar';
 import { cn } from '@/lib/utils';
 import { format } from 'date-fns';
-import type { Task } from '@/lib/types';
+import type { Task, Workspace } from '@/lib/types';
 import { useI18n } from './i18n-provider';
 
 const taskSchema = (t: (key: string) => string) => z.object({
@@ -54,6 +54,7 @@ const taskSchema = (t: (key: string) => string) => z.object({
   dueDate: z.date().optional(),
   pomodoros: z.coerce.number().int().min(0, t('taskForm.pomodorosPositive')).default(1),
   dependsOn: z.array(z.string()).optional(),
+  workspace: z.enum(['personal', 'work', 'side-project']),
 });
 
 type TaskFormValues = z.infer<ReturnType<typeof taskSchema>>;
@@ -64,9 +65,10 @@ type TaskFormProps = {
   onSave: (data: Omit<Task, 'completed'|'completedPomodoros' | 'id' | 'timeSpent'> & {id?: string}) => void;
   task?: Task;
   allTasks: Task[];
+  activeWorkspace: Workspace;
 };
 
-export function TaskForm({ isOpen, onClose, onSave, task, allTasks }: TaskFormProps) {
+export function TaskForm({ isOpen, onClose, onSave, task, allTasks, activeWorkspace }: TaskFormProps) {
   const { t } = useI18n();
   const currentTaskSchema = taskSchema(t);
 
@@ -80,35 +82,40 @@ export function TaskForm({ isOpen, onClose, onSave, task, allTasks }: TaskFormPr
       dueDate: undefined,
       pomodoros: 1,
       dependsOn: [],
+      workspace: activeWorkspace,
     },
   });
   
-  const potentialDependencies = allTasks.filter(t => t.id !== task?.id);
+  const potentialDependencies = allTasks.filter(t => t.id !== task?.id && t.workspace === activeWorkspace);
 
   useEffect(() => {
-    if (task) {
-      form.reset({
-        id: task.id,
-        title: task.title,
-        description: task.description || '',
-        priority: task.priority,
-        tags: task.tags.join(', '),
-        dueDate: task.dueDate ? new Date(task.dueDate) : undefined,
-        pomodoros: task.pomodoros,
-        dependsOn: task.dependsOn || [],
-      });
-    } else {
-      form.reset({
-        title: '',
-        description: '',
-        priority: 'medium',
-        tags: '',
-        dueDate: undefined,
-        pomodoros: 1,
-        dependsOn: [],
-      });
+    if (isOpen) {
+      if (task) {
+        form.reset({
+          id: task.id,
+          title: task.title,
+          description: task.description || '',
+          priority: task.priority,
+          tags: task.tags.join(', '),
+          dueDate: task.dueDate ? new Date(task.dueDate) : undefined,
+          pomodoros: task.pomodoros,
+          dependsOn: task.dependsOn || [],
+          workspace: task.workspace,
+        });
+      } else {
+        form.reset({
+          title: '',
+          description: '',
+          priority: 'medium',
+          tags: '',
+          dueDate: undefined,
+          pomodoros: 1,
+          dependsOn: [],
+          workspace: activeWorkspace,
+        });
+      }
     }
-  }, [task, form, isOpen]);
+  }, [task, form, isOpen, activeWorkspace]);
 
   const onSubmit = (data: TaskFormValues) => {
     const tagsArray = data.tags ? data.tags.split(',').map(tag => tag.trim()).filter(Boolean) : [];

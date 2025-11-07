@@ -81,5 +81,11 @@
     },
     "lang": {
         "change": "Change language"
+    },
+    "workspace": {
+        "change": "Change workspace",
+        "personal": "Personal",
+        "work": "Work",
+        "sideProject": "Side Project"
     }
 }
