@@ -11,6 +11,7 @@ export const initialTasks: Task[] = [
     dueDate: new Date(new Date().setDate(new Date().getDate() + 2)),
     pomodoros: 4,
     completedPomodoros: 1,
+    timeSpent: 720,
   },
   {
     id: 'task-2',
@@ -22,6 +23,7 @@ export const initialTasks: Task[] = [
     dueDate: new Date(new Date().setDate(new Date().getDate() + 5)),
     pomodoros: 8,
     completedPomodoros: 0,
+    timeSpent: 0,
   },
   {
     id: 'task-3',
@@ -33,6 +35,7 @@ export const initialTasks: Task[] = [
     dueDate: new Date(new Date().setDate(new Date().getDate() - 1)),
     pomodoros: 3,
     completedPomodoros: 3,
+    timeSpent: 5400,
   },
   {
     id: 'task-4',
@@ -44,6 +47,7 @@ export const initialTasks: Task[] = [
     dueDate: new Date(),
     pomodoros: 2,
     completedPomodoros: 1,
+    timeSpent: 1500,
   },
   {
     id: 'task-5',
@@ -55,5 +59,6 @@ export const initialTasks: Task[] = [
     dueDate: new Date(new Date().setDate(new Date().getDate() + 10)),
     pomodoros: 1,
     completedPomodoros: 0,
+    timeSpent: 0,
   },
 ];

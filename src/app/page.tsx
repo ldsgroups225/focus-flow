@@ -43,7 +43,7 @@ export default function Home() {
     });
   }, [tasks, priorityFilter, tagFilter]);
 
-  const handleSaveTask = useCallback((taskToSave: Omit<Task, 'id' | 'completed' | 'completedPomodoros'> & { id?: string }) => {
+  const handleSaveTask = useCallback((taskToSave: Omit<Task, 'id' | 'completed' | 'completedPomodoros' | 'timeSpent'> & { id?: string }) => {
     if (taskToSave.id) {
       setTasks(prevTasks => prevTasks.map(task => task.id === taskToSave.id ? { ...task, ...taskToSave } : task));
     } else {
@@ -52,6 +52,7 @@ export default function Home() {
         id: Date.now().toString(),
         completed: false,
         completedPomodoros: 0,
+        timeSpent: 0,
       };
       setTasks(prevTasks => [newTask, ...prevTasks]);
     }
@@ -82,6 +83,18 @@ export default function Home() {
     setFocusTask(prevTask => prevTask && prevTask.id === taskId ? { ...prevTask, completedPomodoros: prevTask.completedPomodoros + 1 } : prevTask);
   }, []);
 
+  const handleLogTime = useCallback((taskId: string, seconds: number) => {
+    setTasks(prevTasks =>
+      prevTasks.map(task =>
+        task.id === taskId
+          ? { ...task, timeSpent: task.timeSpent + seconds }
+          : task
+      )
+    );
+     // Also update focus task if it's the one being worked on
+     setFocusTask(prevTask => prevTask && prevTask.id === taskId ? { ...prevTask, timeSpent: prevTask.timeSpent + seconds } : prevTask);
+  }, []);
+
   return (
     <div className="min-h-screen bg-background text-foreground">
       <main className="container mx-auto max-w-5xl p-4 sm:p-6 md:p-8">
@@ -110,7 +123,7 @@ export default function Home() {
               </DropdownMenuContent>
             </DropdownMenu>
 
-            <Button onClick={() => setEditingTask('new')} className="sm:size-auto">
+            <Button onClick={() => setEditingTask('new')}>
               <Plus className="sm:mr-2 h-4 w-4" />
               <span className='hidden sm:inline'>{t('header.addTask')}</span>
             </Button>
@@ -156,6 +169,7 @@ export default function Home() {
             task={focusTask}
             onExit={() => setFocusTask(null)}
             onPomodoroComplete={handlePomodoroComplete}
+            onLogTime={handleLogTime}
           />
         )}
       </main>

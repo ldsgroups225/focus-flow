@@ -1,12 +1,13 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { ArrowDown, ArrowUp, Minus, Trash2, Edit, Crosshair, BrainCircuit } from 'lucide-react';
+import { ArrowDown, ArrowUp, Minus, Trash2, Edit, Crosshair, BrainCircuit, Clock } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Progress } from "@/components/ui/progress";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import type { Task, Priority } from '@/lib/types';
 import { cn } from '@/lib/utils';
 import { formatDistanceToNow } from 'date-fns';
@@ -33,6 +34,16 @@ const PriorityIcon = ({ priority, t }: { priority: Priority, t: (key: string) =>
       low: <ArrowDown className="h-4 w-4 text-green-500" />,
     };
     return <span className="mr-2 flex-shrink-0" title={t('taskItem.priority').replace('{priority}', priorityName)}>{iconMap[priority]}</span>;
+};
+
+const formatTimeSpent = (seconds: number) => {
+    if (seconds < 60) return "0m";
+    const hours = Math.floor(seconds / 3600);
+    const minutes = Math.floor((seconds % 3600) / 60);
+    let result = '';
+    if (hours > 0) result += `${hours}h `;
+    if (minutes > 0 || hours === 0) result += `${minutes}m`;
+    return result.trim();
 };
 
 export function TaskItem({ task, isDragging, onDragStart, onDragOver, onDragEnd, onEdit, onDelete, onToggle, onFocus }: TaskItemProps) {
@@ -91,11 +102,35 @@ export function TaskItem({ task, isDragging, onDragStart, onDragOver, onDragEnd,
             {dueDateText && (
               <span>{t('taskItem.due')} {dueDateText}</span>
             )}
-             {task.pomodoros > 0 && (
-                <div className="flex items-center gap-1" title={t('taskItem.pomodorosCompleted').replace('{completed}', task.completedPomodoros.toString()).replace('{total}', task.pomodoros.toString())}>
-                    <BrainCircuit className="w-4 h-4 text-primary/80" />
-                    <span>{task.completedPomodoros}/{task.pomodoros}</span>
-                </div>
+            {task.pomodoros > 0 && (
+                <TooltipProvider>
+                    <Tooltip>
+                        <TooltipTrigger asChild>
+                            <div className="flex items-center gap-1">
+                                <BrainCircuit className="w-4 h-4 text-primary/80" />
+                                <span>{task.completedPomodoros}/{task.pomodoros}</span>
+                            </div>
+                        </TooltipTrigger>
+                        <TooltipContent>
+                            <p>{t('taskItem.pomodorosCompleted').replace('{completed}', task.completedPomodoros.toString()).replace('{total}', task.pomodoros.toString())}</p>
+                        </TooltipContent>
+                    </Tooltip>
+                </TooltipProvider>
+            )}
+             {task.timeSpent > 0 && (
+                <TooltipProvider>
+                    <Tooltip>
+                        <TooltipTrigger asChild>
+                            <div className="flex items-center gap-1">
+                                <Clock className="w-4 h-4 text-primary/80" />
+                                <span>{formatTimeSpent(task.timeSpent)}</span>
+                            </div>
+                        </TooltipTrigger>
+                        <TooltipContent>
+                            <p>{t('taskItem.timeSpent').replace('{time}', formatTimeSpent(task.timeSpent))}</p>
+                        </TooltipContent>
+                    </Tooltip>
+                </TooltipProvider>
             )}
           </div>
           {task.tags.length > 0 && (

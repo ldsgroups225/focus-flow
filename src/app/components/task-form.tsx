@@ -52,7 +52,7 @@ type TaskFormValues = z.infer<ReturnType<typeof taskSchema>>;
 type TaskFormProps = {
   isOpen: boolean;
   onClose: () => void;
-  onSave: (data: Omit<Task, 'completed'|'completedPomodoros' | 'id'> & {id?: string}) => void;
+  onSave: (data: Omit<Task, 'completed'|'completedPomodoros' | 'id' | 'timeSpent'> & {id?: string}) => void;
   task?: Task;
 };
 

@@ -23,6 +23,7 @@
         "priority": "Priorité : {priority}",
         "due": "Pour le",
         "pomodorosCompleted": "{completed} sur {total} pomodoros terminés",
+        "timeSpent": "{time} passé sur cette tâche",
         "markIncomplete": "Marquer la tâche {taskTitle} comme incomplète",
         "markComplete": "Marquer la tâche {taskTitle} comme terminée",
         "focusMode": "Mode Focus",

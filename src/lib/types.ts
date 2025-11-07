@@ -10,4 +10,5 @@ export interface Task {
   dueDate?: Date;
   pomodoros: number;
   completedPomodoros: number;
+  timeSpent: number; // in seconds
 }

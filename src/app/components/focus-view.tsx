@@ -14,14 +14,31 @@ type FocusViewProps = {
   task: Task;
   onExit: () => void;
   onPomodoroComplete: (taskId: string) => void;
+  onLogTime: (taskId: string, seconds: number) => void;
 };
 
-export function FocusView({ task, onExit, onPomodoroComplete }: FocusViewProps) {
+export function FocusView({ task, onExit, onPomodoroComplete, onLogTime }: FocusViewProps) {
   const { t } = useI18n();
   const timerRef = useRef<PomodoroTimerHandles>(null);
   const [timerState, setTimerState] = useState<{mode: 'work' | 'break', isActive: boolean}>({mode: 'work', isActive: false});
   const [isIdle, setIsIdle] = useState(false);
   const idleTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const sessionStartTimeRef = useRef<number | null>(null);
+
+  const logTimeSpent = useCallback(() => {
+    if (sessionStartTimeRef.current && timerState.mode === 'work') {
+      const elapsedSeconds = Math.round((Date.now() - sessionStartTimeRef.current) / 1000);
+      if (elapsedSeconds > 0) {
+        onLogTime(task.id, elapsedSeconds);
+      }
+    }
+    sessionStartTimeRef.current = null;
+  }, [onLogTime, task.id, timerState.mode]);
+  
+  const handleExit = () => {
+    logTimeSpent();
+    onExit();
+  };
 
   const resetIdleTimeout = useCallback(() => {
     if (idleTimeoutRef.current) {
@@ -39,25 +56,45 @@ export function FocusView({ task, onExit, onPomodoroComplete }: FocusViewProps) 
     setTimerState({mode, isActive});
     if (isActive) {
       resetIdleTimeout();
+       // Start tracking time if it's a work session and timer just started
+      if (mode === 'work' && !sessionStartTimeRef.current) {
+        sessionStartTimeRef.current = Date.now();
+      }
     } else {
+       // Stop tracking time and log if it's a work session and timer is paused
+      logTimeSpent();
       if (idleTimeoutRef.current) {
         clearTimeout(idleTimeoutRef.current);
       }
       setIsIdle(false);
     }
-  }, [resetIdleTimeout]);
+  }, [resetIdleTimeout, logTimeSpent]);
 
   useEffect(() => {
     const activityEvents = ['mousemove', 'keydown', 'click', 'scroll'];
     activityEvents.forEach(event => window.addEventListener(event, resetIdleTimeout));
 
+    // Log time when the component is about to unmount (e.g., browser tab close)
+    const handleBeforeUnload = () => {
+        logTimeSpent();
+    };
+    window.addEventListener('beforeunload', handleBeforeUnload);
+
     return () => {
       activityEvents.forEach(event => window.removeEventListener(event, resetIdleTimeout));
+      window.removeEventListener('beforeunload', handleBeforeUnload);
       if (idleTimeoutRef.current) {
         clearTimeout(idleTimeoutRef.current);
       }
+      // Ensure any remaining time is logged when the component unmounts
+      logTimeSpent();
     };
-  }, [resetIdleTimeout]);
+  }, [resetIdleTimeout, logTimeSpent]);
+
+  const handlePomodoroCycleComplete = () => {
+    logTimeSpent();
+    onPomodoroComplete(task.id);
+  };
 
 
   return (
@@ -77,7 +114,7 @@ export function FocusView({ task, onExit, onPomodoroComplete }: FocusViewProps) 
           transition={{ duration: 0.5 }}
           className="w-full flex justify-end relative z-10"
         >
-             <Button onClick={onExit} variant="ghost" size="icon" className="text-muted-foreground" aria-label={t('focusView.endSession')}>
+             <Button onClick={handleExit} variant="ghost" size="icon" className="text-muted-foreground" aria-label={t('focusView.endSession')}>
               <X className="h-6 w-6" />
             </Button>
         </motion.header>
@@ -112,7 +149,7 @@ export function FocusView({ task, onExit, onPomodoroComplete }: FocusViewProps) 
             className="w-full flex items-end justify-between"
         >
           <PomodoroTimer 
-            onPomodoroComplete={() => onPomodoroComplete(task.id)}
+            onPomodoroComplete={handlePomodoroCycleComplete}
             onTimerUpdate={handleTimerUpdate}
             timerRef={timerRef}
           />
