@@ -1,7 +1,7 @@
 
 'use client';
 
-import { X, Play, Pause, RefreshCw, Coffee } from 'lucide-react';
+import { X, Play, Pause, RefreshCw, Coffee, Bot, Send, LoaderCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import type { Task } from '@/lib/types';
 import { AnimatePresence, motion } from 'framer-motion';
@@ -9,12 +9,20 @@ import { PomodoroTimer, type PomodoroTimerHandles } from './pomodoro-timer';
 import { useI18n } from './i18n-provider';
 import { useState, useRef, useCallback, useEffect } from 'react';
 import { cn } from '@/lib/utils';
+import { Input } from '@/components/ui/input';
+import { getFocusAssistantResponse } from '@/ai/flows/features-flow';
+import { ScrollArea } from '@/components/ui/scroll-area';
 
 type FocusViewProps = {
   task: Task;
   onExit: () => void;
   onPomodoroComplete: (taskId: string) => void;
   onLogTime: (taskId: string, seconds: number) => void;
+};
+
+type Message = {
+    role: 'user' | 'model';
+    content: string;
 };
 
 export function FocusView({ task, onExit, onPomodoroComplete, onLogTime }: FocusViewProps) {
@@ -24,6 +32,12 @@ export function FocusView({ task, onExit, onPomodoroComplete, onLogTime }: Focus
   const [isIdle, setIsIdle] = useState(false);
   const idleTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const sessionStartTimeRef = useRef<number | null>(null);
+
+  // Chat state
+  const [messages, setMessages] = useState<Message[]>([]);
+  const [userInput, setUserInput] = useState('');
+  const [isAssistantLoading, setIsAssistantLoading] = useState(false);
+  const chatScrollAreaRef = useRef<HTMLDivElement>(null);
 
   const logTimeSpent = useCallback(() => {
     if (sessionStartTimeRef.current && timerState.mode === 'work') {
@@ -48,7 +62,7 @@ export function FocusView({ task, onExit, onPomodoroComplete, onLogTime }: Focus
     if (timerState.isActive) {
       idleTimeoutRef.current = setTimeout(() => {
         setIsIdle(true);
-      }, 3000); 
+      }, 5000); 
     }
   }, [timerState.isActive]);
   
@@ -74,7 +88,6 @@ export function FocusView({ task, onExit, onPomodoroComplete, onLogTime }: Focus
     const activityEvents = ['mousemove', 'keydown', 'click', 'scroll'];
     activityEvents.forEach(event => window.addEventListener(event, resetIdleTimeout));
 
-    // Log time when the component is about to unmount (e.g., browser tab close)
     const handleBeforeUnload = () => {
         logTimeSpent();
     };
@@ -86,7 +99,6 @@ export function FocusView({ task, onExit, onPomodoroComplete, onLogTime }: Focus
       if (idleTimeoutRef.current) {
         clearTimeout(idleTimeoutRef.current);
       }
-      // Ensure any remaining time is logged when the component unmounts
       logTimeSpent();
     };
   }, [resetIdleTimeout, logTimeSpent]);
@@ -95,6 +107,39 @@ export function FocusView({ task, onExit, onPomodoroComplete, onLogTime }: Focus
     logTimeSpent();
     onPomodoroComplete(task.id);
   };
+
+  const handleSendMessage = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!userInput.trim()) return;
+
+    const newMessages: Message[] = [...messages, { role: 'user', content: userInput }];
+    setMessages(newMessages);
+    const currentUserInput = userInput;
+    setUserInput('');
+    setIsAssistantLoading(true);
+
+    try {
+        const assistantResponse = await getFocusAssistantResponse({
+            taskTitle: task.title,
+            taskDescription: task.description || '',
+            history: messages,
+            currentUserInput: currentUserInput
+        });
+        setMessages([...newMessages, { role: 'model', content: assistantResponse }]);
+    } catch (error) {
+        console.error("Focus assistant failed:", error);
+        setMessages([...newMessages, { role: 'model', content: t('focusView.assistantError') }]);
+    } finally {
+        setIsAssistantLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    // Scroll to bottom of chat when new messages are added
+    if (chatScrollAreaRef.current) {
+        chatScrollAreaRef.current.scrollTo({ top: chatScrollAreaRef.current.scrollHeight, behavior: 'smooth' });
+    }
+  }, [messages]);
 
 
   return (
@@ -143,6 +188,47 @@ export function FocusView({ task, onExit, onPomodoroComplete, onLogTime }: Focus
             )}
         </main>
         
+        {/* Chat Assistant */}
+        <motion.div
+          animate={{ opacity: isIdle ? 0 : 1, y: isIdle ? 20 : 0 }}
+          transition={{ duration: 0.5 }}
+          className="absolute bottom-28 left-1/2 -translate-x-1/2 w-full max-w-2xl px-4"
+        >
+            <div className="bg-background/50 border rounded-lg p-3 shadow-lg">
+                <ScrollArea className="h-48 mb-2" viewportRef={chatScrollAreaRef}>
+                    <div className="space-y-4 text-left px-2">
+                        {messages.map((msg, index) => (
+                            <div key={index} className={cn("flex items-start gap-3", msg.role === 'user' ? "justify-end" : "")}>
+                                {msg.role === 'model' && <Bot className="w-5 h-5 text-primary flex-shrink-0 mt-1" />}
+                                <p className={cn("text-sm rounded-lg px-3 py-2 max-w-md", msg.role === 'model' ? "bg-muted" : "bg-primary text-primary-foreground")}>
+                                    {msg.content}
+                                </p>
+                            </div>
+                        ))}
+                         {isAssistantLoading && (
+                            <div className="flex items-start gap-3">
+                                <Bot className="w-5 h-5 text-primary flex-shrink-0 mt-1" />
+                                <p className="text-sm rounded-lg px-3 py-2 max-w-md bg-muted flex items-center">
+                                    <LoaderCircle className="w-4 h-4 animate-spin" />
+                                </p>
+                            </div>
+                        )}
+                    </div>
+                </ScrollArea>
+                <form onSubmit={handleSendMessage} className="flex items-center gap-2">
+                    <Input 
+                        value={userInput}
+                        onChange={(e) => setUserInput(e.target.value)}
+                        placeholder={t('focusView.askAssistant')}
+                        disabled={isAssistantLoading}
+                    />
+                    <Button type="submit" size="icon" disabled={isAssistantLoading || !userInput.trim()}>
+                        <Send className="w-4 h-4" />
+                    </Button>
+                </form>
+            </div>
+        </motion.div>
+
         <motion.footer 
             animate={{ opacity: isIdle ? 0.33 : 1, filter: isIdle ? 'blur(4px)' : 'blur(0px)' }}
             transition={{ duration: 0.5 }}
@@ -169,3 +255,5 @@ export function FocusView({ task, onExit, onPomodoroComplete, onLogTime }: Focus
     </AnimatePresence>
   );
 }
+
+    

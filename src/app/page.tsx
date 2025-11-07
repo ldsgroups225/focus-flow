@@ -75,7 +75,7 @@ export default function Home() {
       if (taskToSave.id) {
         return allTasks.map(task => 
           task.id === taskToSave.id 
-            ? { ...task, ...taskToSave, dependsOn, workspace } 
+            ? { ...task, ...taskToSave, dependsOn, workspace, subTasks: taskToSave.subTasks || [] } 
             : task
         );
       } else {
@@ -88,6 +88,7 @@ export default function Home() {
           dependsOn,
           workspace,
           completedDate: undefined,
+          subTasks: taskToSave.subTasks || [],
         };
         return [newTask, ...allTasks];
       }
@@ -137,6 +138,20 @@ export default function Home() {
     );
      // Also update focus task if it's the one being worked on
      setFocusTask(prevTask => prevTask && prevTask.id === taskId ? { ...prevTask, timeSpent: prevTask.timeSpent + seconds } : prevTask);
+  }, []);
+
+  const handleSubTaskToggle = useCallback((taskId: string, subTaskIndex: number) => {
+    setTasks(prevTasks => prevTasks.map(task => {
+        if (task.id === taskId && task.subTasks) {
+            const newSubTasks = [...task.subTasks];
+            newSubTasks[subTaskIndex] = {
+                ...newSubTasks[subTaskIndex],
+                completed: !newSubTasks[subTaskIndex].completed
+            };
+            return { ...task, subTasks: newSubTasks };
+        }
+        return task;
+    }));
   }, []);
   
   const handleSetEditingTask = (task: Task | 'new' | null) => {
@@ -212,6 +227,7 @@ export default function Home() {
               onDelete={handleDeleteTask}
               onToggle={handleToggleComplete}
               onFocus={setFocusTask}
+              onSubTaskToggle={handleSubTaskToggle}
             />
           </div>
         </div>

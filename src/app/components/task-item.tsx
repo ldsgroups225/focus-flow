@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { ArrowDown, ArrowUp, Minus, Trash2, Edit, Crosshair, BrainCircuit, Clock, Link } from 'lucide-react';
+import { ArrowDown, ArrowUp, Minus, Trash2, Edit, Crosshair, BrainCircuit, Clock, Link, CheckCircle2, Circle } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Badge } from '@/components/ui/badge';
@@ -29,6 +29,7 @@ type TaskItemProps = {
   onDelete: (taskId: string) => void;
   onToggle: (taskId: string) => void;
   onFocus: (task: Task) => void;
+  onSubTaskToggle: (taskId: string, subTaskIndex: number) => void;
 };
 
 const PriorityIcon = ({ priority, t }: { priority: Priority, t: (key: string) => string }) => {
@@ -51,7 +52,7 @@ const formatTimeSpent = (seconds: number) => {
     return result.trim();
 };
 
-export function TaskItem({ task, isDragging, onDragStart, onDragOver, onDragEnd, onEdit, onDelete, onToggle, onFocus }: TaskItemProps) {
+export function TaskItem({ task, isDragging, onDragStart, onDragOver, onDragEnd, onEdit, onDelete, onToggle, onFocus, onSubTaskToggle }: TaskItemProps) {
     const { t, locale } = useI18n();
     const [dueDateText, setDueDateText] = useState('');
     const dateLocale = locale === 'fr' ? fr : enUS;
@@ -67,6 +68,9 @@ export function TaskItem({ task, isDragging, onDragStart, onDragOver, onDragEnd,
     }, [task.dueDate, locale, dateLocale]);
 
   const pomodoroProgress = task.pomodoros > 0 ? (task.completedPomodoros / task.pomodoros) * 100 : 0;
+  const subTaskProgress = task.subTasks && task.subTasks.length > 0 
+    ? (task.subTasks.filter(st => st.completed).length / task.subTasks.length) * 100 
+    : 0;
 
   return (
     <Card 
@@ -105,6 +109,26 @@ export function TaskItem({ task, isDragging, onDragStart, onDragOver, onDragEnd,
             <p className={cn("text-sm", isBlocked ? "text-muted-foreground/70" : "text-muted-foreground")}>
               {task.description}
             </p>
+          )}
+          {task.subTasks && task.subTasks.length > 0 && (
+            <div className="space-y-2 pt-2">
+                <div className='flex items-center gap-2'>
+                    <Progress value={subTaskProgress} className="h-1 w-24" />
+                    <span className='text-xs text-muted-foreground'>
+                        {task.subTasks.filter(st => st.completed).length}/{task.subTasks.length}
+                    </span>
+                </div>
+              <ul className="text-sm text-muted-foreground space-y-1.5">
+                {task.subTasks.map((sub, index) => (
+                  <li key={index} className="flex items-center gap-2 group/subtask" onClick={() => !task.completed && onSubTaskToggle(task.id, index)}>
+                     <div className={cn("flex items-center gap-2", task.completed ? "cursor-default" : "cursor-pointer")}>
+                        {sub.completed ? <CheckCircle2 className="w-4 h-4 text-green-500" /> : <Circle className="w-4 h-4 group-hover/subtask:text-primary" />}
+                        <span className={cn(sub.completed && "line-through")}>{sub.title}</span>
+                    </div>
+                  </li>
+                ))}
+              </ul>
+            </div>
           )}
           <div className="flex items-center flex-wrap gap-x-4 gap-y-1 text-sm text-muted-foreground">
             <div className="flex items-center">

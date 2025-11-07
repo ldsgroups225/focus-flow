@@ -19,9 +19,10 @@ type TaskListProps = {
   onDelete: (taskId: string) => void;
   onToggle: (taskId: string) => void;
   onFocus: (task: Task) => void;
+  onSubTaskToggle: (taskId: string, subTaskIndex: number) => void;
 };
 
-export function TaskList({ tasks, setTasks, onEdit, onDelete, onToggle, onFocus }: TaskListProps) {
+export function TaskList({ tasks, setTasks, onEdit, onDelete, onToggle, onFocus, onSubTaskToggle }: TaskListProps) {
   const [draggedItemId, setDraggedItemId] = useState<string | null>(null);
   const { t } = useI18n();
 
@@ -84,6 +85,7 @@ export function TaskList({ tasks, setTasks, onEdit, onDelete, onToggle, onFocus 
               onDelete={onDelete}
               onToggle={onToggle}
               onFocus={onFocus}
+              onSubTaskToggle={onSubTaskToggle}
             />
           </motion.div>
         ))}

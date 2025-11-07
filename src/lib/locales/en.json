@@ -56,11 +56,20 @@
         "cancel": "Cancel",
         "saveTask": "Save Task",
         "titleRequired": "Title is required",
-        "pomodorosPositive": "Must be a positive number"
+        "titleRequiredForAi": "Please enter a title to use AI suggestions",
+        "pomodorosPositive": "Must be a positive number",
+        "subTasks": "Sub-tasks",
+        "ai": {
+            "tags": "Suggest Tags with AI",
+            "dueDate": "Suggest Due Date with AI",
+            "subTasks": "Breakdown Task with AI"
+        }
     },
     "focusView": {
         "focusingOn": "Focusing on",
-        "endSession": "End Focus Session"
+        "endSession": "End Focus Session",
+        "askAssistant": "Ask your focus assistant...",
+        "assistantError": "Sorry, I'm having trouble connecting right now."
     },
     "pomodoro": {
         "focusSession": "Focus Session",

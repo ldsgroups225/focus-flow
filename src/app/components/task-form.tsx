@@ -38,12 +38,14 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { CalendarIcon, BrainCircuit, Link } from 'lucide-react';
+import { CalendarIcon, BrainCircuit, Link, Sparkles, LoaderCircle } from 'lucide-react';
 import { Calendar } from '@/components/ui/calendar';
 import { cn } from '@/lib/utils';
 import { format } from 'date-fns';
 import type { Task, Workspace } from '@/lib/types';
 import { useI18n } from './i18n-provider';
+import { suggestTags, suggestDueDate, breakdownTask } from '@/ai/flows/features-flow';
+import { Checkbox } from '@/components/ui/checkbox';
 
 const taskSchema = (t: (key: string) => string) => z.object({
   id: z.string().optional(),
@@ -55,6 +57,7 @@ const taskSchema = (t: (key: string) => string) => z.object({
   pomodoros: z.coerce.number().int().min(0, t('taskForm.pomodorosPositive')).default(1),
   dependsOn: z.array(z.string()).optional(),
   workspace: z.enum(['personal', 'work', 'side-project']),
+  subTasks: z.array(z.object({ title: z.string(), completed: z.boolean() })).optional(),
 });
 
 type TaskFormValues = z.infer<ReturnType<typeof taskSchema>>;
@@ -71,6 +74,7 @@ type TaskFormProps = {
 export function TaskForm({ isOpen, onClose, onSave, task, allTasks, activeWorkspace }: TaskFormProps) {
   const { t } = useI18n();
   const currentTaskSchema = taskSchema(t);
+  const [isAiLoading, setIsAiLoading] = useState<Record<string, boolean>>({});
 
   const form = useForm<TaskFormValues>({
     resolver: zodResolver(currentTaskSchema),
@@ -83,6 +87,7 @@ export function TaskForm({ isOpen, onClose, onSave, task, allTasks, activeWorksp
       pomodoros: 1,
       dependsOn: [],
       workspace: activeWorkspace,
+      subTasks: [],
     },
   });
   
@@ -101,6 +106,7 @@ export function TaskForm({ isOpen, onClose, onSave, task, allTasks, activeWorksp
           pomodoros: task.pomodoros,
           dependsOn: task.dependsOn || [],
           workspace: task.workspace,
+          subTasks: task.subTasks || [],
         });
       } else {
         form.reset({
@@ -112,10 +118,42 @@ export function TaskForm({ isOpen, onClose, onSave, task, allTasks, activeWorksp
           pomodoros: 1,
           dependsOn: [],
           workspace: activeWorkspace,
+          subTasks: [],
         });
       }
     }
   }, [task, form, isOpen, activeWorkspace]);
+
+  const handleAiFeature = async (feature: 'tags' | 'dueDate' | 'subTasks') => {
+    const { title, description } = form.getValues();
+    if (!title) {
+        form.setError('title', { message: t('taskForm.titleRequiredForAi') });
+        return;
+    }
+    setIsAiLoading(prev => ({ ...prev, [feature]: true }));
+    try {
+        if (feature === 'tags') {
+            const tags = await suggestTags({ title, description: description || '' });
+            form.setValue('tags', tags.join(', '));
+        } else if (feature === 'dueDate') {
+            const dateStr = await suggestDueDate({ title, description: description || '' });
+            if (dateStr) {
+                const [year, month, day] = dateStr.split('-').map(Number);
+                if (year && month && day) {
+                    const suggestedDate = new Date(year, month - 1, day);
+                    form.setValue('dueDate', suggestedDate);
+                }
+            }
+        } else if (feature === 'subTasks') {
+            const subTasks = await breakdownTask({ title, description: description || '' });
+            form.setValue('subTasks', subTasks);
+        }
+    } catch (error) {
+        console.error(`AI feature '${feature}' failed:`, error);
+    } finally {
+        setIsAiLoading(prev => ({ ...prev, [feature]: false }));
+    }
+  };
 
   const onSubmit = (data: TaskFormValues) => {
     const tagsArray = data.tags ? data.tags.split(',').map(tag => tag.trim()).filter(Boolean) : [];
@@ -124,6 +162,21 @@ export function TaskForm({ isOpen, onClose, onSave, task, allTasks, activeWorksp
   };
 
   const selectedDependencies = form.watch('dependsOn') || [];
+  const subTasks = form.watch('subTasks') || [];
+
+  const AITriggerButton = ({ feature, className }: { feature: 'tags' | 'dueDate' | 'subTasks', className?: string }) => (
+    <Button
+      type="button"
+      variant="ghost"
+      size="icon"
+      onClick={() => handleAiFeature(feature)}
+      disabled={isAiLoading[feature]}
+      className={cn("h-7 w-7 text-primary/70 hover:text-primary", className)}
+      title={t(`taskForm.ai.${feature}`)}
+    >
+      {isAiLoading[feature] ? <LoaderCircle className="h-4 w-4 animate-spin" /> : <Sparkles className="h-4 w-4" />}
+    </Button>
+  );
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
@@ -186,38 +239,41 @@ export function TaskForm({ isOpen, onClose, onSave, task, allTasks, activeWorksp
                 control={form.control}
                 name="dueDate"
                 render={({ field }) => (
-                  <FormItem className="flex flex-col pt-2">
-                    <FormLabel className='mb-[6px]'>{t('taskForm.dueDate')}</FormLabel>
-                    <Popover>
-                      <PopoverTrigger asChild>
-                        <FormControl>
-                          <Button
-                            variant={"outline"}
-                            className={cn(
-                              "pl-3 text-left font-normal",
-                              !field.value && "text-muted-foreground"
-                            )}
-                          >
-                            {field.value ? (
-                              format(field.value, "PPP")
-                            ) : (
-                              <span>{t('taskForm.pickDate')}</span>
-                            )}
-                            <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
-                          </Button>
-                        </FormControl>
-                      </PopoverTrigger>
-                      <PopoverContent className="w-auto p-0" align="start">
-                        <Calendar
-                          mode="single"
-                          selected={field.value}
-                          onSelect={field.onChange}
-                          disabled={(date) => date < new Date(new Date().setHours(0,0,0,0)) }
-                          initialFocus
-                        />
-                      </PopoverContent>
-                    </Popover>
-                    <FormMessage />
+                  <FormItem className="flex flex-col">
+                    <div className='relative pt-2'>
+                        <FormLabel className='mb-[6px]'>{t('taskForm.dueDate')}</FormLabel>
+                        <Popover>
+                        <PopoverTrigger asChild>
+                            <FormControl>
+                            <Button
+                                variant={"outline"}
+                                className={cn(
+                                "w-full pl-3 text-left font-normal",
+                                !field.value && "text-muted-foreground"
+                                )}
+                            >
+                                {field.value ? (
+                                format(field.value, "PPP")
+                                ) : (
+                                <span>{t('taskForm.pickDate')}</span>
+                                )}
+                                <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
+                            </Button>
+                            </FormControl>
+                        </PopoverTrigger>
+                        <PopoverContent className="w-auto p-0" align="start">
+                            <Calendar
+                            mode="single"
+                            selected={field.value}
+                            onSelect={field.onChange}
+                            disabled={(date) => date < new Date(new Date().setHours(0,0,0,0)) }
+                            initialFocus
+                            />
+                        </PopoverContent>
+                        </Popover>
+                        <AITriggerButton feature="dueDate" className="absolute right-1 top-[55%] -translate-y-1/2" />
+                    </div>
+                    <FormMessage className='pt-1' />
                   </FormItem>
                 )}
               />
@@ -227,11 +283,12 @@ export function TaskForm({ isOpen, onClose, onSave, task, allTasks, activeWorksp
                 control={form.control}
                 name="tags"
                 render={({ field }) => (
-                  <FormItem>
+                  <FormItem className='relative'>
                     <FormLabel>{t('taskForm.tags')}</FormLabel>
                     <FormControl>
                       <Input placeholder={t('taskForm.tagsPlaceholder')} {...field} />
                     </FormControl>
+                    <AITriggerButton feature="tags" className="absolute right-1 top-1/2" />
                     <FormMessage />
                   </FormItem>
                 )}
@@ -297,6 +354,43 @@ export function TaskForm({ isOpen, onClose, onSave, task, allTasks, activeWorksp
                     </FormItem>
                 )}
              />
+             <div>
+                <div className="flex items-center gap-2 mb-2">
+                    <FormLabel>{t('taskForm.subTasks')}</FormLabel>
+                    <AITriggerButton feature="subTasks" className="h-6 w-6" />
+                </div>
+                <div className="space-y-2">
+                    {subTasks.map((sub, index) => (
+                        <div key={index} className="flex items-center gap-2">
+                             <FormField
+                                control={form.control}
+                                name={`subTasks.${index}.completed`}
+                                render={({ field }) => (
+                                    <FormItem>
+                                        <FormControl>
+                                            <Checkbox
+                                                checked={field.value}
+                                                onCheckedChange={field.onChange}
+                                            />
+                                        </FormControl>
+                                    </FormItem>
+                                )}
+                            />
+                            <FormField
+                                control={form.control}
+                                name={`subTasks.${index}.title`}
+                                render={({ field }) => (
+                                     <FormItem className='flex-grow'>
+                                        <FormControl>
+                                            <Input {...field} className="h-8 text-sm" />
+                                        </FormControl>
+                                    </FormItem>
+                                )}
+                            />
+                        </div>
+                    ))}
+                </div>
+             </div>
             <DialogFooter>
               <Button type="button" variant="ghost" onClick={onClose}>
                 {t('taskForm.cancel')}

@@ -56,11 +56,20 @@
         "cancel": "Annuler",
         "saveTask": "Sauvegarder",
         "titleRequired": "Le titre est requis",
-        "pomodorosPositive": "Doit être un nombre positif"
+        "titleRequiredForAi": "Veuillez saisir un titre pour utiliser les suggestions de l'IA",
+        "pomodorosPositive": "Doit être un nombre positif",
+        "subTasks": "Sous-tâches",
+        "ai": {
+            "tags": "Suggérer des Étiquettes avec l'IA",
+            "dueDate": "Suggérer une Date d'Échéance avec l'IA",
+            "subTasks": "Décomposer la Tâche avec l'IA"
+        }
     },
     "focusView": {
         "focusingOn": "Concentration sur",
-        "endSession": "Terminer la Session Focus"
+        "endSession": "Terminer la Session Focus",
+        "askAssistant": "Demandez à votre assistant de concentration...",
+        "assistantError": "Désolé, je n'arrive pas à me connecter pour le moment."
     },
     "pomodoro": {
         "focusSession": "Session de Concentration",
