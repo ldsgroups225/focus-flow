@@ -1,9 +1,10 @@
 'use client';
 
 import { useState, useEffect, useCallback, useMemo } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion } from 'framer-motion';
 import { Button } from '@/components/ui/button';
-import { Play, Pause, RefreshCw, Coffee, BrainCircuit } from 'lucide-react';
+import { Play, Pause, RefreshCw, Coffee } from 'lucide-react';
+import { Progress } from "@/components/ui/progress";
 import { Task } from '@/lib/types';
 import { useI18n } from './i18n-provider';
 
@@ -15,10 +16,9 @@ type TimerMode = 'work' | 'break';
 type PomodoroTimerProps = {
   task: Task;
   onPomodoroComplete: () => void;
-  onTimerActiveChange: (isActive: boolean) => void;
 };
 
-export function PomodoroTimer({ task, onPomodoroComplete, onTimerActiveChange }: PomodoroTimerProps) {
+export function PomodoroTimer({ task, onPomodoroComplete }: PomodoroTimerProps) {
   const { t } = useI18n();
   const [mode, setMode] = useState<TimerMode>('work');
   const [isActive, setIsActive] = useState(false);
@@ -26,13 +26,9 @@ export function PomodoroTimer({ task, onPomodoroComplete, onTimerActiveChange }:
   const initialTime = useMemo(() => (mode === 'work' ? WORK_MINUTES * 60 : BREAK_MINUTES * 60), [mode]);
   const [secondsLeft, setSecondsLeft] = useState(initialTime);
 
-  useEffect(() => {
-    onTimerActiveChange(isActive);
-  }, [isActive, onTimerActiveChange]);
-
   const minutes = Math.floor(secondsLeft / 60);
   const seconds = secondsLeft % 60;
-  const progress = (secondsLeft / initialTime) * 100;
+  const progress = 100 - (secondsLeft / initialTime) * 100;
 
   const handleNextSession = useCallback(() => {
     setIsActive(false);
@@ -54,7 +50,6 @@ export function PomodoroTimer({ task, onPomodoroComplete, onTimerActiveChange }:
       }, 1000);
     } else if (isActive && secondsLeft === 0) {
       handleNextSession();
-      // Play a sound
       new Audio('/notification.mp3').play().catch(e => console.error("Error playing sound:", e));
     }
     return () => {
@@ -71,60 +66,31 @@ export function PomodoroTimer({ task, onPomodoroComplete, onTimerActiveChange }:
     setIsActive(false);
     setSecondsLeft(initialTime);
   };
-
-  const timerLabel = mode === 'work' ? t('pomodoro.focusSession') : t('pomodoro.takeBreak');
-  const pomodorosTextValue = task.pomodoros > 0 ? task.pomodoros : t('pomodoro.infinite');
-  const pomodoroText = t('pomodoro.pomodorosOf').replace('{completed}', task.completedPomodoros.toString()).replace('{total}', pomodorosTextValue.toString());
   
   return (
-    <div className="relative w-80 h-80 flex flex-col items-center justify-center">
-      <motion.svg className="absolute inset-0" viewBox="0 0 100 100">
-        <circle cx="50" cy="50" r="45" className="stroke-current text-border" strokeWidth="4" fill="transparent"/>
-        <motion.circle
-          cx="50"
-          cy="50"
-          r="45"
-          className="stroke-current text-primary"
-          strokeWidth="4"
-          fill="transparent"
-          strokeLinecap="round"
-          transform="rotate(-90 50 50)"
-          initial={{ strokeDashoffset: 283 }}
-          animate={{ strokeDashoffset: 283 - (progress / 100) * 283 }}
-          transition={{ duration: 1, ease: "linear" }}
-          style={{ strokeDasharray: 283 }}
-        />
-      </motion.svg>
-      <div className="z-10 text-center">
-        <p className="text-muted-foreground mb-2">{timerLabel}</p>
-        <AnimatePresence mode="wait">
-          <motion.div
-            key={secondsLeft}
-            initial={{ opacity: 0.5, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0.5, y: -10 }}
-            transition={{ duration: 0.2 }}
-            className="text-6xl font-bold tabular-nums"
-          >
-            {`${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`}
-          </motion.div>
-        </AnimatePresence>
-        <div className="flex items-center gap-2 mt-4 text-sm text-muted-foreground" title={pomodoroText}>
-            <BrainCircuit className="w-4 h-4 text-primary/80" />
-            <span>{task.completedPomodoros} / {pomodorosTextValue}</span>
+    <div className="flex items-end justify-between w-full">
+        <div className="w-48">
+            <div className="flex items-baseline gap-2">
+                <span className="text-4xl font-bold tabular-nums">
+                    {`${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`}
+                </span>
+                <span className="text-muted-foreground text-sm">
+                   {mode === 'work' ? t('pomodoro.focusSession') : t('pomodoro.takeBreak')}
+                </span>
+            </div>
+            <Progress value={progress} className="h-1 mt-2" />
         </div>
-      </div>
-      <div className="absolute bottom-0 flex items-center gap-4">
-        <Button variant="ghost" size="icon" onClick={resetTimer} aria-label={t('pomodoro.resetTimer')}>
-          <RefreshCw className="w-5 h-5" />
-        </Button>
-        <Button size="lg" className="rounded-full w-20 h-20" onClick={() => setIsActive(!isActive)} aria-label={isActive ? t('pomodoro.pauseTimer') : t('pomodoro.startTimer')}>
-          {isActive ? <Pause className="w-8 h-8" /> : <Play className="w-8 h-8" />}
-        </Button>
-        <Button variant="ghost" size="icon" onClick={handleNextSession} aria-label={mode === 'work' ? t('pomodoro.startBreak') : t('pomodoro.startWork')}>
-          {mode === 'work' ? <Coffee className="w-5 h-5" /> : <Play className="w-5 h-5" />}
-        </Button>
-      </div>
+        <div className="flex items-center gap-2">
+            <Button variant="ghost" size="icon" onClick={resetTimer} aria-label={t('pomodoro.resetTimer')}>
+                <RefreshCw className="w-5 h-5" />
+            </Button>
+            <Button size="icon" className="w-12 h-12 rounded-full" onClick={() => setIsActive(!isActive)} aria-label={isActive ? t('pomodoro.pauseTimer') : t('pomodoro.startTimer')}>
+                {isActive ? <Pause className="w-6 h-6" /> : <Play className="w-6 h-6" />}
+            </Button>
+            <Button variant="ghost" size="icon" onClick={handleNextSession} aria-label={mode === 'work' ? t('pomodoro.startBreak') : t('pomodoro.startWork')}>
+                <Coffee className="w-5 h-5" />
+            </Button>
+        </div>
     </div>
   );
 }
