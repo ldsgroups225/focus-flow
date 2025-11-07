@@ -16,7 +16,7 @@ import { Label } from "@/components/ui/label";
 import { Loader2, Sparkles } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
 import { useI18n } from './i18n-provider';
-import type { Task } from '@/lib/types';
+import type { Task, ReviewFlowInput } from '@/lib/types';
 import { generateReview } from '@/ai/flows/review-flow';
 
 type AiReviewDialogProps = {

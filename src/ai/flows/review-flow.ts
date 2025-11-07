@@ -3,24 +3,12 @@
  * @fileoverview A flow that generates a review of completed tasks.
  */
 import { ai } from '@/ai/genkit';
-import { z } from 'zod';
-import { TaskSchema } from '@/lib/types';
-
-export const ReviewFlowInputSchema = z.object({
-  tasks: z.array(TaskSchema).describe('The list of tasks completed in the given period.'),
-  locale: z.enum(['en', 'fr']).describe('The language for the generated review.'),
-  period: z.enum(['Daily', 'Weekly']).describe('The review period.'),
-});
-export type ReviewFlowInput = z.infer<typeof ReviewFlowInputSchema>;
-
-export const ReviewFlowOutputSchema = z.string().describe('A markdown-formatted review of the tasks.');
-export type ReviewFlowOutput = z.infer<typeof ReviewFlowOutputSchema>;
-
-
-export async function generateReview(input: ReviewFlowInput): Promise<ReviewFlowOutput> {
-  return reviewFlow(input);
-}
-
+import {
+  ReviewFlowInputSchema,
+  type ReviewFlowInput,
+  ReviewFlowOutputSchema,
+  type ReviewFlowOutput,
+} from '@/lib/types';
 
 const prompt = ai.definePrompt({
   name: 'reviewPrompt',
@@ -55,3 +43,7 @@ const reviewFlow = ai.defineFlow(
     return output || '';
   }
 );
+
+export async function generateReview(input: ReviewFlowInput): Promise<ReviewFlowOutput> {
+  return reviewFlow(input);
+}
