@@ -125,7 +125,9 @@
     },
     "toast": {
         "taskDeleted": "Task deleted",
-        "undo": "Undo"
+        "undo": "Undo",
+        "deleteError": "Deletion Failed",
+        "deleteErrorDesc": "The task could not be deleted from the database."
     },
     "data": {
         "title": "Data Management",
@@ -135,5 +137,10 @@
         "confirmImportTitle": "Are you sure you want to import tasks?",
         "confirmImportDesc": "This will overwrite all your current tasks. This action cannot be undone. You are about to import {count} tasks.",
         "confirmImport": "Yes, overwrite and import"
+    },
+    "login": {
+        "signInWithGoogle": "Sign in with Google",
+        "signOut": "Sign Out",
+        "tagline": "The ultimate to-do app for productivity enthusiasts."
     }
 }

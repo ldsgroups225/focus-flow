@@ -125,7 +125,9 @@
     },
     "toast": {
         "taskDeleted": "Tâche supprimée",
-        "undo": "Annuler"
+        "undo": "Annuler",
+        "deleteError": "Échec de la suppression",
+        "deleteErrorDesc": "La tâche n'a pas pu être supprimée de la base de données."
     },
     "data": {
         "title": "Gestion des Données",
@@ -135,5 +137,10 @@
         "confirmImportTitle": "Êtes-vous sûr de vouloir importer des tâches ?",
         "confirmImportDesc": "Ceci écrasera toutes vos tâches actuelles. Cette action est irréversible. Vous êtes sur le point d'importer {count} tâches.",
         "confirmImport": "Oui, écraser et importer"
+    },
+    "login": {
+        "signInWithGoogle": "Se connecter avec Google",
+        "signOut": "Se déconnecter",
+        "tagline": "L'application de tâches ultime pour les amateurs de productivité."
     }
 }

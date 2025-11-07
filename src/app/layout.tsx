@@ -3,6 +3,7 @@ import './globals.css';
 import { Toaster } from "@/components/ui/toaster"
 import { ThemeProvider } from './components/theme-provider';
 import { I18nProvider } from './components/i18n-provider';
+import { AuthProvider } from './components/auth-provider';
 
 export const metadata: Metadata = {
   title: 'FocusFlow',
@@ -23,15 +24,17 @@ export default function RootLayout({
       </head>
       <body className="font-body antialiased">
         <I18nProvider>
-          <ThemeProvider
-            attribute="class"
-            defaultTheme="dark"
-            enableSystem
-            disableTransitionOnChange
-          >
-            {children}
-            <Toaster />
-          </ThemeProvider>
+            <ThemeProvider
+                attribute="class"
+                defaultTheme="dark"
+                enableSystem
+                disableTransitionOnChange
+            >
+                <AuthProvider>
+                    {children}
+                    <Toaster />
+                </AuthProvider>
+            </ThemeProvider>
         </I18nProvider>
       </body>
     </html>

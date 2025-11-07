@@ -1,7 +1,8 @@
+
 'use client';
 
 import { useState, useMemo, useCallback, useEffect } from 'react';
-import { Plus, SlidersHorizontal, Orbit, Search, Sparkles } from 'lucide-react';
+import { Plus, SlidersHorizontal, Orbit, Search, Sparkles, User as UserIcon } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { TaskList } from './components/task-list';
 import { TaskForm } from './components/task-form';
@@ -9,10 +10,10 @@ import { Filters } from './components/filters';
 import { FocusView } from './components/focus-view';
 import { AiReviewDialog } from './components/ai-review-dialog';
 import type { Task, Priority, Workspace } from '@/lib/types';
-import { initialTasks } from '@/lib/initial-tasks';
 import {
   DropdownMenu,
   DropdownMenuContent,
+  DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { ThemeToggle } from './components/theme-toggle';
@@ -23,11 +24,38 @@ import { CommandSearch } from './components/command-search';
 import { BulkActionsToolbar } from './components/bulk-actions-toolbar';
 import { ShortcutsHelp } from './components/shortcuts-help';
 import { useToast } from '@/hooks/use-toast';
-import { DataManagement } from './components/data-management';
+import { useAuth } from './components/auth-provider';
+import { getAuth, GoogleAuthProvider, signInWithPopup, signOut } from 'firebase/auth';
+import { app } from '@/lib/firebase/config';
+import { addTask, deleteTask, getTasks, updateTask } from '@/lib/firebase/firebase-services';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 
+
+function LoginScreen() {
+    const { t } = useI18n();
+    const handleLogin = () => {
+        const auth = getAuth(app);
+        const provider = new GoogleAuthProvider();
+        signInWithPopup(auth, provider);
+    };
+
+    return (
+        <div className="flex flex-col items-center justify-center h-screen text-center">
+            <Orbit className="w-16 h-16 text-primary mb-6" />
+            <h1 className="text-4xl font-bold mb-2">{t('header.title')}</h1>
+            <p className="text-lg text-muted-foreground mb-8">{t('login.tagline')}</p>
+            <Button onClick={handleLogin} size="lg">
+                <UserIcon className="mr-2 h-5 w-5" />
+                {t('login.signInWithGoogle')}
+            </Button>
+        </div>
+    )
+}
 
 export default function Home() {
+  const { user } = useAuth();
   const [tasks, setTasks] = useState<Task[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
   const [editingTask, setEditingTask] = useState<Task | 'new' | null>(null);
   const [focusTask, setFocusTask] = useState<Task | null>(null);
   const [isReviewOpen, setIsReviewOpen] = useState(false);
@@ -46,35 +74,19 @@ export default function Home() {
   const { t } = useI18n();
   const { toast } = useToast();
 
-  // Load tasks from local storage on initial render
   useEffect(() => {
-    try {
-      const savedTasks = localStorage.getItem('focus-flow-tasks');
-      if (savedTasks) {
-        // Parse and revive dates
-        const parsedTasks = JSON.parse(savedTasks).map((task: any) => ({
-          ...task,
-          dueDate: task.dueDate ? new Date(task.dueDate) : undefined,
-          completedDate: task.completedDate ? new Date(task.completedDate) : undefined,
-        }));
-        setTasks(parsedTasks);
-      } else {
-        setTasks(initialTasks);
-      }
-    } catch (error) {
-      console.error("Failed to load tasks from local storage:", error);
-      setTasks(initialTasks);
+    if (user) {
+      setIsLoading(true);
+      const unsubscribe = getTasks(user.uid, (newTasks) => {
+        setTasks(newTasks);
+        setIsLoading(false);
+      });
+      return () => unsubscribe();
+    } else {
+      setTasks([]);
+      setIsLoading(false);
     }
-  }, []);
-
-  // Save tasks to local storage whenever they change
-  useEffect(() => {
-    try {
-      localStorage.setItem('focus-flow-tasks', JSON.stringify(tasks));
-    } catch (error) {
-      console.error("Failed to save tasks to local storage:", error);
-    }
-  }, [tasks]);
+  }, [user]);
 
   const workspaceTasks = useMemo(() => {
     return tasks.filter(task => task.workspace === activeWorkspace);
@@ -111,107 +123,113 @@ export default function Home() {
     });
   }, [tasksWithStatus, priorityFilter, tagFilter, searchQuery]);
 
-  const handleSaveTask = useCallback((taskToSave: Omit<Task, 'id' | 'completed' | 'completedPomodoros' | 'timeSpent' | 'completedDate'> & { id?: string }) => {
-    setTasks(prevTasks => {
-      const allTasks = [...prevTasks];
-      const dependsOn = taskToSave.dependsOn?.filter(depId => allTasks.some(t => t.id === depId)) || [];
-      const workspace = taskToSave.workspace || activeWorkspace;
+  const handleSaveTask = useCallback(async (taskToSave: Omit<Task, 'id' | 'completed' | 'completedPomodoros' | 'timeSpent' | 'completedDate'> & { id?: string }) => {
+    if (!user) return;
+    const workspace = taskToSave.workspace || activeWorkspace;
 
-      if (taskToSave.id) {
-        return allTasks.map(task => 
-          task.id === taskToSave.id 
-            ? { ...task, ...taskToSave, dependsOn, workspace, subTasks: taskToSave.subTasks || [] } 
-            : task
-        );
-      } else {
-        const newTask: Task = {
-          ...taskToSave,
-          id: Date.now().toString(),
-          completed: false,
-          completedPomodoros: 0,
-          timeSpent: 0,
-          dependsOn,
-          workspace,
-          completedDate: undefined,
-          subTasks: taskToSave.subTasks || [],
-        };
-        return [newTask, ...allTasks];
-      }
-    });
+    if (taskToSave.id) {
+        await updateTask(user.uid, taskToSave.id, { ...taskToSave, workspace });
+    } else {
+        await addTask(user.uid, { ...taskToSave, workspace });
+    }
     setEditingTask(null);
-  }, [activeWorkspace]);
+  }, [user, activeWorkspace]);
 
-  const handleToggleComplete = useCallback((taskId: string) => {
-    setTasks(prevTasks =>
-      prevTasks.map(task =>
-        task.id === taskId ? { ...task, completed: !task.completed, completedDate: !task.completed ? new Date() : undefined } : task
-      )
-    );
-  }, []);
+  const handleToggleComplete = useCallback(async (taskId: string) => {
+    if (!user) return;
+    const task = tasks.find(t => t.id === taskId);
+    if(task) {
+        await updateTask(user.uid, taskId, { completed: !task.completed, completedDate: !task.completed ? new Date() : undefined });
+    }
+  }, [user, tasks]);
 
-  const handleDeleteTask = useCallback((taskId: string) => {
+  const handleDeleteTask = useCallback(async (taskId: string) => {
+    if(!user) return;
+    
     const taskToDelete = tasks.find(t => t.id === taskId);
     if (!taskToDelete) return;
+    
+    const originalTasks = [...tasks];
 
-    const originalTasks = tasks;
-
-    // Temporarily remove the task for UI responsiveness
+    // Optimistic deletion
     setTasks(prevTasks => prevTasks.filter(task => task.id !== taskId));
 
     toast({
       title: t('toast.taskDeleted'),
       description: taskToDelete.title,
       action: (
-        <Button variant="secondary" size="sm" onClick={() => {
+        <Button variant="secondary" size="sm" onClick={async () => {
           setTasks(originalTasks);
+          // If user undos, we need to re-add the task.
+          // The simplest way is to just call addTask again as we don't have the original doc.
+          await addTask(user.uid, {
+            title: taskToDelete.title,
+            description: taskToDelete.description,
+            priority: taskToDelete.priority,
+            tags: taskToDelete.tags,
+            dueDate: taskToDelete.dueDate,
+            pomodoros: taskToDelete.pomodoros,
+            dependsOn: taskToDelete.dependsOn,
+            workspace: taskToDelete.workspace,
+            subTasks: taskToDelete.subTasks,
+          });
         }}>
           {t('toast.undo')}
         </Button>
       ),
     });
+
+    try {
+        await deleteTask(user.uid, taskId);
+    } catch(e) {
+        console.error("Failed to delete task: ", e);
+        setTasks(originalTasks); // Revert on error
+        toast({
+            variant: "destructive",
+            title: t('toast.deleteError'),
+            description: t('toast.deleteErrorDesc'),
+        });
+    }
     
     setSelectedTaskIds(prev => {
       const newSet = new Set(prev);
       newSet.delete(taskId);
       return newSet;
     });
-  }, [tasks, toast, t]);
+  }, [user, tasks, toast, t]);
   
-  const handlePomodoroComplete = useCallback((taskId: string) => {
-    setTasks(prevTasks =>
-      prevTasks.map(task =>
-        task.id === taskId
-          ? { ...task, completedPomodoros: task.completedPomodoros + 1 }
-          : task
-      )
-    );
-    setFocusTask(prevTask => prevTask && prevTask.id === taskId ? { ...prevTask, completedPomodoros: prevTask.completedPomodoros + 1 } : prevTask);
-  }, []);
+  const handlePomodoroComplete = useCallback(async (taskId: string) => {
+    if (!user) return;
+    const task = tasks.find(t => t.id === taskId);
+    if(task) {
+      const newCount = task.completedPomodoros + 1;
+      await updateTask(user.uid, taskId, { completedPomodoros: newCount });
+      setFocusTask(prevTask => prevTask && prevTask.id === taskId ? { ...prevTask, completedPomodoros: newCount } : prevTask);
+    }
+  }, [user, tasks]);
 
-  const handleLogTime = useCallback((taskId: string, seconds: number) => {
-    setTasks(prevTasks =>
-      prevTasks.map(task =>
-        task.id === taskId
-          ? { ...task, timeSpent: task.timeSpent + seconds }
-          : task
-      )
-    );
-     setFocusTask(prevTask => prevTask && prevTask.id === taskId ? { ...prevTask, timeSpent: prevTask.timeSpent + seconds } : prevTask);
-  }, []);
+  const handleLogTime = useCallback(async (taskId: string, seconds: number) => {
+    if (!user) return;
+    const task = tasks.find(t => t.id === taskId);
+     if(task) {
+      const newTime = task.timeSpent + seconds;
+      await updateTask(user.uid, taskId, { timeSpent: newTime });
+      setFocusTask(prevTask => prevTask && prevTask.id === taskId ? { ...prevTask, timeSpent: newTime } : prevTask);
+    }
+  }, [user, tasks]);
 
-  const handleSubTaskToggle = useCallback((taskId: string, subTaskIndex: number) => {
-    setTasks(prevTasks => prevTasks.map(task => {
-        if (task.id === taskId && task.subTasks) {
-            const newSubTasks = [...task.subTasks];
-            newSubTasks[subTaskIndex] = {
-                ...newSubTasks[subTaskIndex],
-                completed: !newSubTasks[subTaskIndex].completed
-            };
-            return { ...task, subTasks: newSubTasks };
-        }
-        return task;
-    }));
-  }, []);
+  const handleSubTaskToggle = useCallback(async (taskId: string, subTaskIndex: number) => {
+    if (!user) return;
+    const task = tasks.find(t => t.id === taskId);
+     if (task && task.subTasks) {
+        const newSubTasks = [...task.subTasks];
+        newSubTasks[subTaskIndex] = {
+            ...newSubTasks[subTaskIndex],
+            completed: !newSubTasks[subTaskIndex].completed
+        };
+        await updateTask(user.uid, taskId, { subTasks: newSubTasks });
+    }
+  }, [user, tasks]);
 
   const handleSelectTask = useCallback((taskId: string) => {
     setSelectedTaskIds(prev => {
@@ -224,6 +242,11 @@ export default function Home() {
       return newSet;
     });
   }, []);
+
+  const handleSignOut = () => {
+    const auth = getAuth(app);
+    signOut(auth);
+  }
   
   // Keyboard Shortcuts Effect
   useEffect(() => {
@@ -260,6 +283,10 @@ export default function Home() {
     }
     setEditingTask(task);
   };
+  
+  if (!user) {
+    return <LoginScreen />;
+  }
 
   return (
     <div className="min-h-screen bg-background text-foreground">
@@ -297,10 +324,21 @@ export default function Home() {
               </DropdownMenuContent>
             </DropdownMenu>
 
-            <Button onClick={() => handleSetEditingTask('new')}>
-              <Plus className="sm:mr-2 h-4 w-4" />
-              <span className='hidden sm:inline'>{t('header.addTask')}</span>
-            </Button>
+             <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                    <Button variant="ghost" className="relative h-8 w-8 rounded-full">
+                        <Avatar className="h-8 w-8">
+                            <AvatarImage src={user.photoURL || undefined} alt={user.displayName || 'User'} />
+                            <AvatarFallback>{user.displayName?.charAt(0)}</AvatarFallback>
+                        </Avatar>
+                    </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent className="w-56" align="end" forceMount>
+                    <DropdownMenuItem onClick={handleSignOut}>
+                        {t('login.signOut')}
+                    </DropdownMenuItem>
+                </DropdownMenuContent>
+            </DropdownMenu>
           </div>
         </header>
 
@@ -317,25 +355,27 @@ export default function Home() {
                       uniqueTags={uniqueTags}
                   />
                 </div>
-                <div>
-                  <h2 className="text-lg font-semibold mb-4">{t('data.title')}</h2>
-                  <DataManagement tasks={tasks} setTasks={setTasks} />
-                </div>
              </div>
           </aside>
           
           <div className="md:col-span-3">
-            <TaskList
-              tasks={filteredTasks}
-              setTasks={setTasks}
-              onEdit={handleSetEditingTask}
-              onDelete={handleDeleteTask}
-              onToggle={handleToggleComplete}
-              onFocus={setFocusTask}
-              onSubTaskToggle={handleSubTaskToggle}
-              selectedTaskIds={selectedTaskIds}
-              onSelectTask={handleSelectTask}
-            />
+             {isLoading ? (
+                <div className="flex justify-center items-center h-80">
+                    <Loader2 className="h-12 w-12 animate-spin text-primary" />
+                </div>
+             ) : (
+                <TaskList
+                  tasks={filteredTasks}
+                  setTasks={setTasks}
+                  onEdit={handleSetEditingTask}
+                  onDelete={handleDeleteTask}
+                  onToggle={handleToggleComplete}
+                  onFocus={setFocusTask}
+                  onSubTaskToggle={handleSubTaskToggle}
+                  selectedTaskIds={selectedTaskIds}
+                  onSelectTask={handleSelectTask}
+                />
+             )}
           </div>
         </div>
 
