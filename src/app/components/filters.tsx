@@ -1,3 +1,4 @@
+
 'use client';
 
 import {
@@ -32,11 +33,11 @@ export function Filters({ priorityFilter, setPriorityFilter, tagFilter, setTagFi
           variant="outline"
           value={priorityFilter}
           onValueChange={(value: Priority[]) => setPriorityFilter(value)}
-          className="flex-wrap justify-start"
+          className="flex flex-wrap justify-start gap-2"
         >
-          <ToggleGroupItem value="low" aria-label="Toggle low priority">{t('filters.low')}</ToggleGroupItem>
-          <ToggleGroupItem value="medium" aria-label="Toggle medium priority">{t('filters.medium')}</ToggleGroupItem>
-          <ToggleGroupItem value="high" aria-label="Toggle high priority">{t('filters.high')}</ToggleGroupItem>
+          <ToggleGroupItem value="low" aria-label="Toggle low priority" className="rounded-full">{t('filters.low')}</ToggleGroupItem>
+          <ToggleGroupItem value="medium" aria-label="Toggle medium priority" className="rounded-full">{t('filters.medium')}</ToggleGroupItem>
+          <ToggleGroupItem value="high" aria-label="Toggle high priority" className="rounded-full">{t('filters.high')}</ToggleGroupItem>
         </ToggleGroup>
       </div>
 
@@ -76,3 +77,4 @@ export function Filters({ priorityFilter, setPriorityFilter, tagFilter, setTagFi
     </div>
   );
 }
+
