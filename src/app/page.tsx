@@ -22,10 +22,12 @@ import { useI18n } from './components/i18n-provider';
 import { CommandSearch } from './components/command-search';
 import { BulkActionsToolbar } from './components/bulk-actions-toolbar';
 import { ShortcutsHelp } from './components/shortcuts-help';
+import { useToast } from '@/hooks/use-toast';
+import { DataManagement } from './components/data-management';
 
 
 export default function Home() {
-  const [tasks, setTasks] = useState<Task[]>(initialTasks);
+  const [tasks, setTasks] = useState<Task[]>([]);
   const [editingTask, setEditingTask] = useState<Task | 'new' | null>(null);
   const [focusTask, setFocusTask] = useState<Task | null>(null);
   const [isReviewOpen, setIsReviewOpen] = useState(false);
@@ -42,6 +44,37 @@ export default function Home() {
   const [isShortcutsOpen, setIsShortcutsOpen] = useState(false);
   
   const { t } = useI18n();
+  const { toast } = useToast();
+
+  // Load tasks from local storage on initial render
+  useEffect(() => {
+    try {
+      const savedTasks = localStorage.getItem('focus-flow-tasks');
+      if (savedTasks) {
+        // Parse and revive dates
+        const parsedTasks = JSON.parse(savedTasks).map((task: any) => ({
+          ...task,
+          dueDate: task.dueDate ? new Date(task.dueDate) : undefined,
+          completedDate: task.completedDate ? new Date(task.completedDate) : undefined,
+        }));
+        setTasks(parsedTasks);
+      } else {
+        setTasks(initialTasks);
+      }
+    } catch (error) {
+      console.error("Failed to load tasks from local storage:", error);
+      setTasks(initialTasks);
+    }
+  }, []);
+
+  // Save tasks to local storage whenever they change
+  useEffect(() => {
+    try {
+      localStorage.setItem('focus-flow-tasks', JSON.stringify(tasks));
+    } catch (error) {
+      console.error("Failed to save tasks to local storage:", error);
+    }
+  }, [tasks]);
 
   const workspaceTasks = useMemo(() => {
     return tasks.filter(task => task.workspace === activeWorkspace);
@@ -117,19 +150,32 @@ export default function Home() {
   }, []);
 
   const handleDeleteTask = useCallback((taskId: string) => {
-    setTasks(prevTasks => {
-        const newTasks = prevTasks.filter(task => task.id !== taskId);
-        return newTasks.map(task => ({
-            ...task,
-            dependsOn: task.dependsOn?.filter(depId => depId !== taskId)
-        }));
+    const taskToDelete = tasks.find(t => t.id === taskId);
+    if (!taskToDelete) return;
+
+    const originalTasks = tasks;
+
+    // Temporarily remove the task for UI responsiveness
+    setTasks(prevTasks => prevTasks.filter(task => task.id !== taskId));
+
+    toast({
+      title: t('toast.taskDeleted'),
+      description: taskToDelete.title,
+      action: (
+        <Button variant="secondary" size="sm" onClick={() => {
+          setTasks(originalTasks);
+        }}>
+          {t('toast.undo')}
+        </Button>
+      ),
     });
-     setSelectedTaskIds(prev => {
+    
+    setSelectedTaskIds(prev => {
       const newSet = new Set(prev);
       newSet.delete(taskId);
       return newSet;
     });
-  }, []);
+  }, [tasks, toast, t]);
   
   const handlePomodoroComplete = useCallback((taskId: string) => {
     setTasks(prevTasks =>
@@ -260,15 +306,21 @@ export default function Home() {
 
         <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
           <aside className="hidden md:block md:col-span-1">
-             <div className="sticky top-8">
-                <h2 className="text-lg font-semibold mb-4">{t('header.filters')}</h2>
-                <Filters
-                    priorityFilter={priorityFilter}
-                    setPriorityFilter={setPriorityFilter}
-                    tagFilter={tagFilter}
-                    setTagFilter={setTagFilter}
-                    uniqueTags={uniqueTags}
-                />
+             <div className="sticky top-8 space-y-8">
+                <div>
+                  <h2 className="text-lg font-semibold mb-4">{t('header.filters')}</h2>
+                  <Filters
+                      priorityFilter={priorityFilter}
+                      setPriorityFilter={setPriorityFilter}
+                      tagFilter={tagFilter}
+                      setTagFilter={setTagFilter}
+                      uniqueTags={uniqueTags}
+                  />
+                </div>
+                <div>
+                  <h2 className="text-lg font-semibold mb-4">{t('data.title')}</h2>
+                  <DataManagement tasks={tasks} setTasks={setTasks} />
+                </div>
              </div>
           </aside>
           

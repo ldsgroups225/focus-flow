@@ -122,5 +122,18 @@
         "newTask": "Créer une nouvelle tâche",
         "showShortcuts": "Afficher ce menu d'aide",
         "openSearch": "Ouvrir la recherche de tâches"
+    },
+    "toast": {
+        "taskDeleted": "Tâche supprimée",
+        "undo": "Annuler"
+    },
+    "data": {
+        "title": "Gestion des Données",
+        "export": "Exporter en JSON",
+        "import": "Importer depuis JSON",
+        "importError": "Format de fichier invalide. Veuillez téléverser une sauvegarde JSON valide.",
+        "confirmImportTitle": "Êtes-vous sûr de vouloir importer des tâches ?",
+        "confirmImportDesc": "Ceci écrasera toutes vos tâches actuelles. Cette action est irréversible. Vous êtes sur le point d'importer {count} tâches.",
+        "confirmImport": "Oui, écraser et importer"
     }
 }

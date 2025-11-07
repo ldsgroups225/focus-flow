@@ -122,5 +122,18 @@
         "newTask": "Create a new task",
         "showShortcuts": "Show this help menu",
         "openSearch": "Open task search"
+    },
+    "toast": {
+        "taskDeleted": "Task deleted",
+        "undo": "Undo"
+    },
+    "data": {
+        "title": "Data Management",
+        "export": "Export to JSON",
+        "import": "Import from JSON",
+        "importError": "Invalid file format. Please upload a valid JSON backup.",
+        "confirmImportTitle": "Are you sure you want to import tasks?",
+        "confirmImportDesc": "This will overwrite all your current tasks. This action cannot be undone. You are about to import {count} tasks.",
+        "confirmImport": "Yes, overwrite and import"
     }
 }
