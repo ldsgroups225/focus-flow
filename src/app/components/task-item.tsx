@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { ArrowDown, ArrowUp, Minus, Trash2, Edit, Crosshair, BrainCircuit, Clock } from 'lucide-react';
+import { ArrowDown, ArrowUp, Minus, Trash2, Edit, Crosshair, BrainCircuit, Clock, Link } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Badge } from '@/components/ui/badge';
@@ -14,8 +14,13 @@ import { formatDistanceToNow } from 'date-fns';
 import { enUS, fr } from 'date-fns/locale';
 import { useI18n } from './i18n-provider';
 
+type ExtendedTask = Task & {
+  isBlocked?: boolean;
+  blockingTasks?: string[];
+};
+
 type TaskItemProps = {
-  task: Task;
+  task: ExtendedTask;
   isDragging: boolean;
   onDragStart: (e: React.DragEvent<HTMLDivElement>) => void;
   onDragOver: (e: React.DragEvent<HTMLDivElement>) => void;
@@ -50,6 +55,8 @@ export function TaskItem({ task, isDragging, onDragStart, onDragOver, onDragEnd,
     const { t, locale } = useI18n();
     const [dueDateText, setDueDateText] = useState('');
     const dateLocale = locale === 'fr' ? fr : enUS;
+    
+    const { isBlocked, blockingTasks = [] } = task;
 
     useEffect(() => {
       if (task.dueDate) {
@@ -63,14 +70,15 @@ export function TaskItem({ task, isDragging, onDragStart, onDragOver, onDragEnd,
 
   return (
     <Card 
-      draggable
-      onDragStart={onDragStart}
+      draggable={!isBlocked}
+      onDragStart={isBlocked ? undefined : onDragStart}
       onDragOver={onDragOver}
       onDragEnd={onDragEnd}
       className={cn(
-        "group cursor-grab transition-all duration-200 hover:shadow-lg hover:border-primary/50",
+        "group transition-all duration-200",
+        isBlocked ? "bg-card/50 border-dashed cursor-not-allowed" : "cursor-grab hover:shadow-lg hover:border-primary/50",
         isDragging ? 'opacity-30 shadow-2xl scale-105' : 'opacity-100',
-        task.completed ? 'bg-card/60 border-dashed' : 'bg-card'
+        task.completed ? 'bg-card/60' : 'bg-card'
       )}
     >
       <CardContent className="p-4 flex items-start gap-3 sm:gap-4">
@@ -80,19 +88,23 @@ export function TaskItem({ task, isDragging, onDragStart, onDragOver, onDragEnd,
           onCheckedChange={() => onToggle(task.id)}
           className="mt-1"
           aria-label={t(task.completed ? 'taskItem.markIncomplete' : 'taskItem.markComplete').replace('{taskTitle}', task.title)}
+          disabled={isBlocked}
         />
         <div className="flex-grow space-y-3">
           <label
             htmlFor={`task-${task.id}`}
             className={cn(
-              "font-medium transition-colors cursor-pointer",
+              "font-medium transition-colors",
+              isBlocked ? "cursor-not-allowed" : "cursor-pointer",
               task.completed ? 'line-through text-muted-foreground' : 'text-foreground'
             )}
           >
             {task.title}
           </label>
           {task.description && (
-            <p className="text-sm text-muted-foreground">{task.description}</p>
+            <p className={cn("text-sm", isBlocked ? "text-muted-foreground/70" : "text-muted-foreground")}>
+              {task.description}
+            </p>
           )}
           <div className="flex items-center flex-wrap gap-x-4 gap-y-1 text-sm text-muted-foreground">
             <div className="flex items-center">
@@ -101,6 +113,21 @@ export function TaskItem({ task, isDragging, onDragStart, onDragOver, onDragEnd,
             </div>
             {dueDateText && (
               <span>{t('taskItem.due')} {dueDateText}</span>
+            )}
+            {isBlocked && (
+              <TooltipProvider>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <div className="flex items-center gap-1 text-yellow-600 dark:text-yellow-400">
+                      <Link className="w-4 h-4" />
+                      <span>{t('taskItem.blocked')}</span>
+                    </div>
+                  </TooltipTrigger>
+                  <TooltipContent>
+                    <p>{t('taskItem.blockedBy').replace('{tasks}', blockingTasks.join(', '))}</p>
+                  </TooltipContent>
+                </Tooltip>
+              </TooltipProvider>
             )}
             {task.pomodoros > 0 && (
                 <TooltipProvider>
@@ -145,13 +172,13 @@ export function TaskItem({ task, isDragging, onDragStart, onDragOver, onDragEnd,
            )}
         </div>
         <div className="flex flex-col sm:flex-row items-center gap-0 sm:gap-1 opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity duration-300 -mr-2 -my-2 sm:m-0">
-          <Button variant="ghost" size="icon" onClick={() => onFocus(task)} title={t('taskItem.focusMode')}>
+          <Button variant="ghost" size="icon" onClick={() => onFocus(task)} title={t('taskItem.focusMode')} disabled={isBlocked}>
             <Crosshair className="h-4 w-4" />
           </Button>
-          <Button variant="ghost" size="icon" onClick={() => onEdit(task)} title={t('taskItem.editTask')}>
+          <Button variant="ghost" size="icon" onClick={() => onEdit(task)} title={t('taskItem.editTask')} disabled={isBlocked}>
             <Edit className="h-4 w-4" />
           </Button>
-          <Button variant="ghost" size="icon" onClick={() => onDelete(task.id)} className="text-destructive hover:text-destructive" title={t('taskItem.deleteTask')}>
+          <Button variant="ghost" size="icon" onClick={() => onDelete(task.id)} className="text-destructive hover:text-destructive" title={t('taskItem.deleteTask')} disabled={isBlocked}>
             <Trash2 className="h-4 w-4" />
           </Button>
         </div>

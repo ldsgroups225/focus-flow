@@ -28,7 +28,9 @@
         "markComplete": "Marquer la tâche {taskTitle} comme terminée",
         "focusMode": "Mode Focus",
         "editTask": "Modifier la Tâche",
-        "deleteTask": "Supprimer la Tâche"
+        "deleteTask": "Supprimer la Tâche",
+        "blocked": "Bloquée",
+        "blockedBy": "Cette tâche est bloquée par : {tasks}"
     },
     "taskForm": {
         "editTask": "Modifier la Tâche",
@@ -47,6 +49,10 @@
         "tags": "Étiquettes",
         "tagsPlaceholder": "ex: marketing, design",
         "pomodoros": "Pomodoros",
+        "dependencies": "Dépendances",
+        "selectDependencies": "Choisir les dépendances",
+        "noOtherTasks": "Aucune autre tâche disponible.",
+        "clear": "Vider",
         "cancel": "Annuler",
         "saveTask": "Sauvegarder",
         "titleRequired": "Le titre est requis",

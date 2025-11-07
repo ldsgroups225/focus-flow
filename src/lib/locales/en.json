@@ -28,7 +28,9 @@
         "markComplete": "Mark task {taskTitle} as complete",
         "focusMode": "Focus Mode",
         "editTask": "Edit Task",
-        "deleteTask": "Delete Task"
+        "deleteTask": "Delete Task",
+        "blocked": "Blocked",
+        "blockedBy": "This task is blocked by: {tasks}"
     },
     "taskForm": {
         "editTask": "Edit Task",
@@ -47,6 +49,10 @@
         "tags": "Tags",
         "tagsPlaceholder": "e.g., marketing, design",
         "pomodoros": "Pomodoros",
+        "dependencies": "Dependencies",
+        "selectDependencies": "Select dependencies",
+        "noOtherTasks": "No other tasks available to depend on.",
+        "clear": "Clear",
         "cancel": "Cancel",
         "saveTask": "Save Task",
         "titleRequired": "Title is required",

@@ -7,8 +7,13 @@ import { AnimatePresence, motion } from 'framer-motion';
 import { ListX } from 'lucide-react';
 import { useI18n } from './i18n-provider';
 
+type ExtendedTask = Task & {
+  isBlocked?: boolean;
+  blockingTasks?: string[];
+};
+
 type TaskListProps = {
-  tasks: Task[];
+  tasks: ExtendedTask[];
   setTasks: React.Dispatch<React.SetStateAction<Task[]>>;
   onEdit: (task: Task) => void;
   onDelete: (taskId: string) => void;

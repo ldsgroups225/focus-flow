@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
@@ -30,7 +30,15 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
-import { CalendarIcon, BrainCircuit } from 'lucide-react';
+import {
+  DropdownMenu,
+  DropdownMenuCheckboxItem,
+  DropdownMenuContent,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { CalendarIcon, BrainCircuit, Link } from 'lucide-react';
 import { Calendar } from '@/components/ui/calendar';
 import { cn } from '@/lib/utils';
 import { format } from 'date-fns';
@@ -45,6 +53,7 @@ const taskSchema = (t: (key: string) => string) => z.object({
   tags: z.string().optional(),
   dueDate: z.date().optional(),
   pomodoros: z.coerce.number().int().min(0, t('taskForm.pomodorosPositive')).default(1),
+  dependsOn: z.array(z.string()).optional(),
 });
 
 type TaskFormValues = z.infer<ReturnType<typeof taskSchema>>;
@@ -54,10 +63,11 @@ type TaskFormProps = {
   onClose: () => void;
   onSave: (data: Omit<Task, 'completed'|'completedPomodoros' | 'id' | 'timeSpent'> & {id?: string}) => void;
   task?: Task;
+  allTasks: Task[];
 };
 
-export function TaskForm({ isOpen, onClose, onSave, task }: TaskFormProps) {
-  const { t, locale } = useI18n();
+export function TaskForm({ isOpen, onClose, onSave, task, allTasks }: TaskFormProps) {
+  const { t } = useI18n();
   const currentTaskSchema = taskSchema(t);
 
   const form = useForm<TaskFormValues>({
@@ -69,8 +79,11 @@ export function TaskForm({ isOpen, onClose, onSave, task }: TaskFormProps) {
       tags: '',
       dueDate: undefined,
       pomodoros: 1,
+      dependsOn: [],
     },
   });
+  
+  const potentialDependencies = allTasks.filter(t => t.id !== task?.id);
 
   useEffect(() => {
     if (task) {
@@ -82,6 +95,7 @@ export function TaskForm({ isOpen, onClose, onSave, task }: TaskFormProps) {
         tags: task.tags.join(', '),
         dueDate: task.dueDate ? new Date(task.dueDate) : undefined,
         pomodoros: task.pomodoros,
+        dependsOn: task.dependsOn || [],
       });
     } else {
       form.reset({
@@ -91,6 +105,7 @@ export function TaskForm({ isOpen, onClose, onSave, task }: TaskFormProps) {
         tags: '',
         dueDate: undefined,
         pomodoros: 1,
+        dependsOn: [],
       });
     }
   }, [task, form, isOpen]);
@@ -100,6 +115,8 @@ export function TaskForm({ isOpen, onClose, onSave, task }: TaskFormProps) {
     onSave({ ...data, tags: tagsArray });
     onClose();
   };
+
+  const selectedDependencies = form.watch('dependsOn') || [];
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
@@ -226,6 +243,53 @@ export function TaskForm({ isOpen, onClose, onSave, task }: TaskFormProps) {
                   )}
                 />
              </div>
+             <FormField
+                control={form.control}
+                name="dependsOn"
+                render={({ field }) => (
+                    <FormItem>
+                        <FormLabel className="flex items-center">{t('taskForm.dependencies')} <Link className="w-3 h-3 ml-1 text-primary/80" /></FormLabel>
+                        <DropdownMenu>
+                            <DropdownMenuTrigger asChild>
+                                <Button variant="outline" className="w-full justify-start text-left font-normal">
+                                  {selectedDependencies.length > 0 
+                                    ? `${selectedDependencies.length} ${t('filters.selected')}` 
+                                    : t('taskForm.selectDependencies')
+                                  }
+                                </Button>
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent className="w-56" align="start">
+                                <DropdownMenuLabel>{t('taskForm.dependencies')}</DropdownMenuLabel>
+                                <DropdownMenuSeparator />
+                                {potentialDependencies.length > 0 ? (
+                                  potentialDependencies.map(dep => (
+                                    <DropdownMenuCheckboxItem
+                                      key={dep.id}
+                                      checked={field.value?.includes(dep.id)}
+                                      onCheckedChange={(checked) => {
+                                        const newValue = checked
+                                          ? [...(field.value || []), dep.id]
+                                          : (field.value || []).filter(id => id !== dep.id);
+                                        field.onChange(newValue);
+                                      }}
+                                    >
+                                      {dep.title}
+                                    </DropdownMenuCheckboxItem>
+                                  ))
+                                ) : (
+                                  <div className="px-2 py-1.5 text-sm text-muted-foreground">{t('taskForm.noOtherTasks')}</div>
+                                )}
+                                {selectedDependencies.length > 0 && (
+                                    <>
+                                        <DropdownMenuSeparator />
+                                        <Button variant="ghost" className="w-full h-8 text-sm" onClick={() => field.onChange([])}>{t('taskForm.clear')}</Button>
+                                    </>
+                                )}
+                            </DropdownMenuContent>
+                        </DropdownMenu>
+                    </FormItem>
+                )}
+             />
             <DialogFooter>
               <Button type="button" variant="ghost" onClick={onClose}>
                 {t('taskForm.cancel')}

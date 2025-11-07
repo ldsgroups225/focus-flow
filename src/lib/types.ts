@@ -11,4 +11,5 @@ export interface Task {
   pomodoros: number;
   completedPomodoros: number;
   timeSpent: number; // in seconds
+  dependsOn?: string[];
 }

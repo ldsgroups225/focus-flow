@@ -24,6 +24,7 @@ export const initialTasks: Task[] = [
     pomodoros: 8,
     completedPomodoros: 0,
     timeSpent: 0,
+    dependsOn: ['task-4'],
   },
   {
     id: 'task-3',

@@ -35,27 +35,52 @@ export default function Home() {
     return [...new Set(allTags)];
   }, [tasks]);
 
+  const tasksWithStatus = useMemo(() => {
+    const taskMap = new Map(tasks.map(t => [t.id, t]));
+    return tasks.map(task => {
+      const blockingTasks = (task.dependsOn ?? [])
+        .map(depId => taskMap.get(depId))
+        .filter((dep): dep is Task => !!dep && !dep.completed);
+      
+      return {
+        ...task,
+        isBlocked: blockingTasks.length > 0,
+        blockingTasks: blockingTasks.map(t => t.title),
+      };
+    });
+  }, [tasks]);
+
   const filteredTasks = useMemo(() => {
-    return tasks.filter(task => {
+    return tasksWithStatus.filter(task => {
       const priorityMatch = priorityFilter.length === 0 || priorityFilter.includes(task.priority);
       const tagMatch = tagFilter.length === 0 || task.tags.some(tag => tagFilter.includes(tag));
       return priorityMatch && tagMatch;
     });
-  }, [tasks, priorityFilter, tagFilter]);
+  }, [tasksWithStatus, priorityFilter, tagFilter]);
 
   const handleSaveTask = useCallback((taskToSave: Omit<Task, 'id' | 'completed' | 'completedPomodoros' | 'timeSpent'> & { id?: string }) => {
-    if (taskToSave.id) {
-      setTasks(prevTasks => prevTasks.map(task => task.id === taskToSave.id ? { ...task, ...taskToSave } : task));
-    } else {
-      const newTask: Task = {
-        ...taskToSave,
-        id: Date.now().toString(),
-        completed: false,
-        completedPomodoros: 0,
-        timeSpent: 0,
-      };
-      setTasks(prevTasks => [newTask, ...prevTasks]);
-    }
+    setTasks(prevTasks => {
+      const allTasks = [...prevTasks];
+      const dependsOn = taskToSave.dependsOn?.filter(depId => allTasks.some(t => t.id === depId)) || [];
+
+      if (taskToSave.id) {
+        return allTasks.map(task => 
+          task.id === taskToSave.id 
+            ? { ...task, ...taskToSave, dependsOn } 
+            : task
+        );
+      } else {
+        const newTask: Task = {
+          ...taskToSave,
+          id: Date.now().toString(),
+          completed: false,
+          completedPomodoros: 0,
+          timeSpent: 0,
+          dependsOn
+        };
+        return [newTask, ...allTasks];
+      }
+    });
     setEditingTask(null);
   }, []);
 
@@ -68,7 +93,15 @@ export default function Home() {
   }, []);
 
   const handleDeleteTask = useCallback((taskId: string) => {
-    setTasks(prevTasks => prevTasks.filter(task => task.id !== taskId));
+    setTasks(prevTasks => {
+        // First, remove the task itself
+        const newTasks = prevTasks.filter(task => task.id !== taskId);
+        // Then, remove this taskId from any other task's dependsOn array
+        return newTasks.map(task => ({
+            ...task,
+            dependsOn: task.dependsOn?.filter(depId => depId !== taskId)
+        }));
+    });
   }, []);
   
   const handlePomodoroComplete = useCallback((taskId: string) => {
@@ -162,6 +195,7 @@ export default function Home() {
             onClose={() => setEditingTask(null)}
             onSave={handleSaveTask}
             task={editingTask === 'new' ? undefined : tasks.find(t => t.id === (typeof editingTask === 'object' && editingTask.id))}
+            allTasks={tasks}
           />
         )}
         {focusTask && (
