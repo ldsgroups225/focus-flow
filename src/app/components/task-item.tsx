@@ -1,5 +1,6 @@
 'use client';
 
+import { useEffect, useState } from 'react';
 import { ArrowDown, ArrowUp, Minus, Trash2, Edit, Crosshair } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Checkbox } from '@/components/ui/checkbox';
@@ -31,7 +32,16 @@ const PriorityIcon = ({ priority }: { priority: Priority }) => {
 };
 
 export function TaskItem({ task, isDragging, onDragStart, onDragOver, onDragEnd, onEdit, onDelete, onToggle, onFocus }: TaskItemProps) {
-  
+  const [dueDateText, setDueDateText] = useState('');
+
+  useEffect(() => {
+    if (task.dueDate) {
+      setDueDateText(formatDistanceToNow(task.dueDate, { addSuffix: true }));
+    } else {
+        setDueDateText('');
+    }
+  }, [task.dueDate]);
+
   return (
     <Card 
       draggable
@@ -67,8 +77,8 @@ export function TaskItem({ task, isDragging, onDragStart, onDragOver, onDragEnd,
           )}
           <div className="flex items-center gap-2 mt-2 text-sm text-muted-foreground">
             <PriorityIcon priority={task.priority} />
-            {task.dueDate && (
-              <span>Due {formatDistanceToNow(task.dueDate, { addSuffix: true })}</span>
+            {task.dueDate && dueDateText && (
+              <span>Due {dueDateText}</span>
             )}
           </div>
           <div className="mt-2 flex flex-wrap gap-2">
