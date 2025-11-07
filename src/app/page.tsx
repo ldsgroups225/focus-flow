@@ -110,7 +110,7 @@ export default function Home() {
               </DropdownMenuContent>
             </DropdownMenu>
 
-            <Button onClick={() => setEditingTask('new')} size="sm" className="sm:size-auto">
+            <Button onClick={() => setEditingTask('new')} className="sm:size-auto">
               <Plus className="sm:mr-2 h-4 w-4" />
               <span className='hidden sm:inline'>{t('header.addTask')}</span>
             </Button>
