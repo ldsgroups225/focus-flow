@@ -8,23 +8,6 @@
       "command": "npx",
       "disabled": false
     },
-    "serena": {
-      "args": [
-        "--from",
-        "git+https://github.com/oraios/serena",
-        "serena",
-        "start-mcp-server",
-        "--context",
-        "ide-assistant"
-      ],
-      "command": "uvx"
-    },
-    "time": {
-      "args": [
-        "mcp-server-time"
-      ],
-      "command": "uvx"
-    },
     "firebase": {
       "command": "npx",
       "args": [

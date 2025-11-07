@@ -149,9 +149,9 @@ export function FocusView({ task, onExit, onPomodoroComplete, onLogTime }: Focus
             className="w-full flex items-end justify-between"
         >
           <PomodoroTimer 
+            ref={timerRef}
             onPomodoroComplete={handlePomodoroCycleComplete}
             onTimerUpdate={handleTimerUpdate}
-            timerRef={timerRef}
           />
            <div className="flex items-center gap-2">
               <Button variant="ghost" size="icon" onClick={() => timerRef.current?.reset()} aria-label={t('pomodoro.resetTimer')}>

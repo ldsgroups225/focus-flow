@@ -1,6 +1,7 @@
+
 'use client';
 
-import { useState, useEffect, useCallback, useMemo } from 'react';
+import { useState, useEffect, useCallback, useMemo, useImperativeHandle, forwardRef } from 'react';
 import { Progress } from "@/components/ui/progress";
 import type { Task } from '@/lib/types';
 import { useI18n } from './i18n-provider';
@@ -20,10 +21,9 @@ export type PomodoroTimerHandles = {
 type PomodoroTimerProps = {
   onPomodoroComplete: () => void;
   onTimerUpdate: (mode: TimerMode, isActive: boolean) => void;
-  timerRef: React.RefObject<PomodoroTimerHandles>;
 };
 
-export function PomodoroTimer({ onPomodoroComplete, onTimerUpdate, timerRef }: PomodoroTimerProps) {
+export const PomodoroTimer = forwardRef<PomodoroTimerHandles, PomodoroTimerProps>(({ onPomodoroComplete, onTimerUpdate }, ref) => {
   const [mode, setMode] = useState<TimerMode>('work');
   const [isActive, setIsActive] = useState(false);
   
@@ -70,17 +70,15 @@ export function PomodoroTimer({ onPomodoroComplete, onTimerUpdate, timerRef }: P
     onTimerUpdate(mode, isActive);
   }, [mode, isActive, onTimerUpdate]);
 
-  if (timerRef && 'current' in timerRef) {
-    timerRef.current = {
-      toggle: () => setIsActive(!isActive),
-      reset: () => {
-        setIsActive(false);
-        setSecondsLeft(initialTime);
-      },
-      next: handleNextSession,
-      isActive: isActive
-    };
-  }
+  useImperativeHandle(ref, () => ({
+    toggle: () => setIsActive(!isActive),
+    reset: () => {
+      setIsActive(false);
+      setSecondsLeft(initialTime);
+    },
+    next: handleNextSession,
+    isActive: isActive
+  }));
   
   return (
     <div className="w-36">
@@ -92,4 +90,6 @@ export function PomodoroTimer({ onPomodoroComplete, onTimerUpdate, timerRef }: P
         <Progress value={progress} className="h-1 mt-2" />
     </div>
   );
-}
+});
+
+PomodoroTimer.displayName = 'PomodoroTimer';
