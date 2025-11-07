@@ -47,12 +47,11 @@ export function FocusView({ task, onExit, onPomodoroComplete }: FocusViewProps) 
   }, [resetIdleTimeout]);
 
   useEffect(() => {
-    window.addEventListener('mousemove', resetIdleTimeout);
-    window.addEventListener('keydown', resetIdleTimeout);
+    const activityEvents = ['mousemove', 'keydown', 'click', 'scroll'];
+    activityEvents.forEach(event => window.addEventListener(event, resetIdleTimeout));
 
     return () => {
-      window.removeEventListener('mousemove', resetIdleTimeout);
-      window.removeEventListener('keydown', resetIdleTimeout);
+      activityEvents.forEach(event => window.removeEventListener(event, resetIdleTimeout));
       if (idleTimeoutRef.current) {
         clearTimeout(idleTimeoutRef.current);
       }
@@ -70,7 +69,7 @@ export function FocusView({ task, onExit, onPomodoroComplete }: FocusViewProps) 
         className="fixed inset-0 z-50 bg-background/95 backdrop-blur-lg flex flex-col p-4 sm:p-8"
       >
         <motion.header 
-          animate={{ opacity: isIdle ? 0 : 1 }}
+          animate={{ opacity: isIdle ? 0.1 : 1 }}
           transition={{ duration: 0.5 }}
           className="w-full flex justify-end relative z-10"
         >
@@ -83,7 +82,7 @@ export function FocusView({ task, onExit, onPomodoroComplete }: FocusViewProps) 
             className="flex-1 flex flex-col items-center justify-center text-center -mt-16"
         >
             <motion.p 
-                animate={{ opacity: isIdle ? 0 : 1 }}
+                animate={{ opacity: isIdle ? 0 : 1, y: isIdle ? -20 : 0 }}
                 transition={{ duration: 0.5 }}
                 className="text-lg text-muted-foreground mb-4">{t('focusView.focusingOn')}
             </motion.p>
@@ -104,7 +103,7 @@ export function FocusView({ task, onExit, onPomodoroComplete }: FocusViewProps) 
         </main>
         
         <motion.footer 
-            animate={{ opacity: isIdle ? 0 : 1 }}
+            animate={{ opacity: isIdle ? 0.1 : 1 }}
             transition={{ duration: 0.5 }}
             className="w-full flex items-end justify-between"
         >
