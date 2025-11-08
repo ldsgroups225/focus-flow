@@ -17,6 +17,7 @@ import {
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
+  DropdownMenuSeparator,
 } from "@/components/ui/dropdown-menu";
 import { ThemeToggle } from './components/theme-toggle';
 import { LanguageSwitcher } from './components/language-switcher';
@@ -491,8 +492,10 @@ export default function Home() {
              <Button variant="outline" size="icon" onClick={() => setIsSearchOpen(true)} className="hidden md:flex">
                 <Search className="h-4 w-4" />
             </Button>
-            <LanguageSwitcher />
-            <ThemeToggle />
+            <div className="hidden md:flex items-center gap-2">
+              <LanguageSwitcher />
+              <ThemeToggle />
+            </div>
             <Button variant="outline" size="icon" onClick={() => setIsReviewOpen(true)}>
               <Sparkles className="h-4 w-4" />
               <span className="sr-only">{t('aiReview.title')}</span>
@@ -524,6 +527,11 @@ export default function Home() {
                     </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent className="w-56" align="end" forceMount>
+                    <div className="md:hidden flex items-center justify-between px-2 py-2 gap-2">
+                      <LanguageSwitcher />
+                      <ThemeToggle />
+                    </div>
+                    <DropdownMenuSeparator className="md:hidden" />
                     <DropdownMenuItem onClick={handleSignOut}>
                         {t('login.signOut')}
                     </DropdownMenuItem>
