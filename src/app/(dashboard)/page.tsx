@@ -26,6 +26,8 @@ import { useKeyboardShortcuts } from '@/lib/hooks/use-keyboard-shortcuts';
 import { useTaskSelection } from '@/lib/hooks/use-task-selection';
 import { LazyTaskForm, LazyFocusView, LazyAiReviewDialog, LazyCommandSearch, LazyShortcutsHelp, LazyBulkActionsToolbar } from '@/lib/utils/lazy';
 import { useRouter } from 'next/navigation';
+import { DashboardSheet } from '@/components/ui/dashboard-sheet';
+import { BarChart3 } from 'lucide-react';
 
 export default function DashboardPage() {
   const router = useRouter();
@@ -37,6 +39,7 @@ export default function DashboardPage() {
   const [isReviewOpen, setIsReviewOpen] = useState(false);
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [isShortcutsOpen, setIsShortcutsOpen] = useState(false);
+  const [isDashboardOpen, setIsDashboardOpen] = useState(false);
 
   const { t } = useI18n();
 
@@ -127,6 +130,11 @@ export default function DashboardPage() {
                   <ThemeToggle />
                 </div>
                 <DropdownMenuSeparator className="md:hidden" />
+                <DropdownMenuItem onClick={() => setIsDashboardOpen(true)}>
+                  <BarChart3 className="mr-2 h-4 w-4" />
+                  {t('dashboard.title')}
+                </DropdownMenuItem>
+                <DropdownMenuSeparator />
                 <DropdownMenuItem onClick={handleSignOut}>
                   {t('login.signOut')}
                 </DropdownMenuItem>
@@ -241,6 +249,12 @@ export default function DashboardPage() {
             />
           )}
         </Suspense>
+
+        <DashboardSheet
+          isOpen={isDashboardOpen}
+          onClose={() => setIsDashboardOpen(false)}
+          tasks={tasks}
+        />
       </main>
     </div>
   );

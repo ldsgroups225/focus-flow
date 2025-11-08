@@ -105,7 +105,7 @@
         "generating": "Génération...",
         "error": "Désolé, la revue n'a pas pu être générée. Veuillez réessayer."
     },
-     "search": {
+    "search": {
         "placeholder": "Rechercher par titre ou description...",
         "description": "Commencez à taper pour filtrer votre liste de tâches en temps réel."
     },
@@ -142,5 +142,35 @@
         "signInWithGoogle": "Se connecter avec Google",
         "signOut": "Se déconnecter",
         "tagline": "L'application de tâches ultime pour les amateurs de productivité."
+    },
+    "dashboard": {
+        "title": "Stats",
+        "overview": "Aperçu",
+        "timeTracking": "Suivi du Temps",
+        "priority": "Priorité",
+        "workspaces": "Espaces de Travail",
+        "deadlines": "Échéances",
+        "dependencies": "Dépendances",
+        "recentCompletions": "Terminés Récemment",
+        "totalTasks": "Totales",
+        "completed": "Terminées",
+        "inProgress": "En Cours",
+        "timeSpent": "Temps Passé",
+        "hours": "heures",
+        "completedPomodoros": "Terminés",
+        "remainingPomodoros": "Restants",
+        "totalPomodoros": "Total Pomodoros",
+        "estimated": "estimé",
+        "highPriority": "Priorité Haute",
+        "mediumPriority": "Priorité Moyenne",
+        "lowPriority": "Priorité Basse",
+        "tasksWithDeps": "Tâches avec Dépendances",
+        "blockedTasks": "Tâches Bloquées",
+        "overdue": "En Retard",
+        "upcoming": "À Venir",
+        "next7Days": "prochains 7 jours",
+        "today": "Aujourd'hui",
+        "tomorrow": "Demain",
+        "yesterday": "Hier"
     }
 }
