@@ -33,19 +33,19 @@ export function I18nProvider({ children }: { children: ReactNode }) {
 
   const t = useCallback((key: string) => {
     const keys = key.split('.');
-    let result: any = translations[locale];
+    let result: unknown = translations[locale];
     for (const k of keys) {
-      result = result?.[k];
+      result = (result as Record<string, unknown>)?.[k];
       if (result === undefined) {
         // Fallback to English if key not found in current locale
-        let fallbackResult: any = translations.en;
+        let fallbackResult: unknown = translations.en;
         for (const fk of keys) {
-            fallbackResult = fallbackResult?.[fk];
+            fallbackResult = (fallbackResult as Record<string, unknown>)?.[fk];
         }
-        return fallbackResult || key;
+        return (fallbackResult as string) || key;
       }
     }
-    return result || key;
+    return (result as string) || key;
   }, [locale]);
 
   return (

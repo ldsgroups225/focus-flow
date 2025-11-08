@@ -85,6 +85,9 @@ export function FocusView({ task, onExit, onPomodoroComplete, onLogTime }: Focus
   }, [resetIdleTimeout, logTimeSpent]);
 
   useEffect(() => {
+    // Guard for SSR
+    if (typeof window === 'undefined') return;
+
     const activityEvents = ['mousemove', 'keydown', 'click', 'scroll'];
     activityEvents.forEach(event => window.addEventListener(event, resetIdleTimeout));
 
@@ -195,11 +198,11 @@ export function FocusView({ task, onExit, onPomodoroComplete, onLogTime }: Focus
           className="absolute bottom-28 left-1/2 -translate-x-1/2 w-full max-w-2xl px-4"
         >
             <div className="bg-background/50 border rounded-lg p-3 shadow-lg">
-                <ScrollArea className="h-48 mb-2" viewportRef={chatScrollAreaRef}>
-                    <div className="space-y-4 text-left px-2">
+                <ScrollArea className="h-48 mb-2">
+                    <div ref={chatScrollAreaRef} className="space-y-4 text-left px-2">
                         {messages.map((msg, index) => (
                             <div key={index} className={cn("flex items-start gap-3", msg.role === 'user' ? "justify-end" : "")}>
-                                {msg.role === 'model' && <Bot className="w-5 h-5 text-primary flex-shrink-0 mt-1" />}
+                                {msg.role === 'model' && <Bot className="w-5 h-5 text-primary shrink-0 mt-1" />}
                                 <p className={cn("text-sm rounded-lg px-3 py-2 max-w-md", msg.role === 'model' ? "bg-muted" : "bg-primary text-primary-foreground")}>
                                     {msg.content}
                                 </p>
@@ -207,7 +210,7 @@ export function FocusView({ task, onExit, onPomodoroComplete, onLogTime }: Focus
                         ))}
                          {isAssistantLoading && (
                             <div className="flex items-start gap-3">
-                                <Bot className="w-5 h-5 text-primary flex-shrink-0 mt-1" />
+                                <Bot className="w-5 h-5 text-primary shrink-0 mt-1" />
                                 <p className="text-sm rounded-lg px-3 py-2 max-w-md bg-muted flex items-center">
                                     <LoaderCircle className="w-4 h-4 animate-spin" />
                                 </p>

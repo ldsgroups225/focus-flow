@@ -1,8 +1,7 @@
 'use client';
 
 import { createContext, useContext, useEffect, useState, ReactNode } from 'react';
-import { getAuth, onAuthStateChanged, User } from 'firebase/auth';
-import { app } from '@/lib/firebase/config';
+import { convertAppwriteUserToFirebaseUser, getCurrentUser, type User } from '@/lib/appwrite/auth-services';
 import { Loader2 } from 'lucide-react';
 
 const AuthContext = createContext<{ user: User | null; loading: boolean }>({
@@ -17,13 +16,21 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const auth = getAuth(app);
-    const unsubscribe = onAuthStateChanged(auth, (user) => {
-      setUser(user);
-      setLoading(false);
-    });
+    const unsubscribe: (() => void) | null = null;
 
-    return () => unsubscribe();
+    const initializeAuth = async () => {
+      try {
+        const appwriteUser = await getCurrentUser();
+          const user = convertAppwriteUserToFirebaseUser(appwriteUser);
+          setUser(user);
+          setLoading(false);
+      } catch (error) {
+        console.error('Auth initialization error:', error);
+        setLoading(false);
+      }
+    };
+
+    initializeAuth();
   }, []);
 
   if (loading) {

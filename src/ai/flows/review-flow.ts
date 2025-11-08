@@ -4,16 +4,16 @@
  */
 import { ai } from '@/ai/genkit';
 import {
-  ReviewFlowInputSchema,
+  reviewFlowInputSchema,
   type ReviewFlowInput,
-  ReviewFlowOutputSchema,
+  reviewFlowOutputSchema,
   type ReviewFlowOutput,
 } from '@/lib/types';
 
 const prompt = ai.definePrompt({
   name: 'reviewPrompt',
-  input: { schema: ReviewFlowInputSchema },
-  output: { schema: ReviewFlowOutputSchema },
+  input: { schema: reviewFlowInputSchema },
+  output: { schema: reviewFlowOutputSchema },
   prompt: `You are a productivity assistant integrated into a task management app called FocusFlow. Your goal is to provide a helpful and encouraging review of the tasks the user has completed.
 
 The user has requested a {{period}} review. The tasks they completed are provided below in a JSON object.
@@ -35,8 +35,8 @@ Completed Tasks:
 const reviewFlow = ai.defineFlow(
   {
     name: 'reviewFlow',
-    inputSchema: ReviewFlowInputSchema,
-    outputSchema: ReviewFlowOutputSchema,
+    inputSchema: reviewFlowInputSchema,
+    outputSchema: reviewFlowOutputSchema,
   },
   async (input) => {
     const { output } = await prompt(input);

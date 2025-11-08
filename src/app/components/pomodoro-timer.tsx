@@ -1,10 +1,8 @@
 
 'use client';
 
-import { useState, useEffect, useCallback, useMemo, useImperativeHandle, forwardRef } from 'react';
+import { useState, useEffect, useCallback, useMemo, useImperativeHandle, forwardRef, useRef } from 'react';
 import { Progress } from "@/components/ui/progress";
-import type { Task } from '@/lib/types';
-import { useI18n } from './i18n-provider';
 
 const WORK_MINUTES = 25;
 const BREAK_MINUTES = 5;
@@ -29,6 +27,7 @@ export const PomodoroTimer = forwardRef<PomodoroTimerHandles, PomodoroTimerProps
   
   const initialTime = useMemo(() => (mode === 'work' ? WORK_MINUTES * 60 : BREAK_MINUTES * 60), [mode]);
   const [secondsLeft, setSecondsLeft] = useState(initialTime);
+  const completionHandledRef = useRef(false);
 
   const minutes = Math.floor(secondsLeft / 60);
   const seconds = secondsLeft % 60;
@@ -44,27 +43,40 @@ export const PomodoroTimer = forwardRef<PomodoroTimerHandles, PomodoroTimerProps
       setMode('work');
       setSecondsLeft(WORK_MINUTES * 60);
     }
+    completionHandledRef.current = false;
   }, [mode, onPomodoroComplete]);
 
+  // Timer countdown with completion handling
   useEffect(() => {
-    let interval: NodeJS.Timeout | null = null;
-    if (isActive && secondsLeft > 0) {
-      interval = setInterval(() => {
-        setSecondsLeft(seconds => seconds - 1);
-      }, 1000);
-    } else if (isActive && secondsLeft === 0) {
-      handleNextSession();
-      new Audio('/notification.mp3').play().catch(e => console.error("Error playing sound:", e));
+    if (!isActive) {
+      completionHandledRef.current = false;
+      return;
     }
-    return () => {
-      if (interval) clearInterval(interval);
-    };
+    
+    if (secondsLeft === 0) {
+      if (!completionHandledRef.current) {
+        completionHandledRef.current = true;
+        new Audio('/notification.mp3').play().catch(e => console.error("Error playing sound:", e));
+        // Use setTimeout to defer state updates
+        setTimeout(() => handleNextSession(), 0);
+      }
+      return;
+    }
+    
+    const interval = setInterval(() => {
+      setSecondsLeft(seconds => Math.max(0, seconds - 1));
+    }, 1000);
+    
+    return () => clearInterval(interval);
   }, [isActive, secondsLeft, handleNextSession]);
 
-  useEffect(() => {
+  // Reset timer when mode changes
+  const [prevInitialTime, setPrevInitialTime] = useState(initialTime);
+  if (prevInitialTime !== initialTime) {
+    setPrevInitialTime(initialTime);
     setSecondsLeft(initialTime);
     setIsActive(false);
-  }, [initialTime]);
+  }
   
   useEffect(() => {
     onTimerUpdate(mode, isActive);

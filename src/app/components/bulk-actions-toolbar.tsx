@@ -47,7 +47,7 @@ export function BulkActionsToolbar({ selectedTaskIds, setSelectedTaskIds, setTas
           transition={{ type: 'spring', stiffness: 200, damping: 25 }}
           className="fixed bottom-6 left-1/2 -translate-x-1/2 w-auto bg-background border shadow-lg rounded-full flex items-center gap-2 p-2 z-40"
         >
-          <span className="text-sm font-medium px-3">{t('bulkActions.selected', { count: selectedCount })}</span>
+          <span className="text-sm font-medium px-3">{`${selectedCount} ${t('filters.selected')}`}</span>
           <Button variant="ghost" size="icon" title={t('bulkActions.markComplete')} onClick={() => handleBulkComplete(true)}>
             <CheckCircle2 className="w-5 h-5" />
           </Button>

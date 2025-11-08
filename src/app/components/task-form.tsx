@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { useForm } from 'react-hook-form';
+import { useForm, type SubmitHandler } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
 import { Button } from '@/components/ui/button';
@@ -54,7 +54,7 @@ const taskSchema = (t: (key: string) => string) => z.object({
   priority: z.enum(['low', 'medium', 'high']),
   tags: z.string().optional(),
   dueDate: z.date().optional(),
-  pomodoros: z.coerce.number().int().min(0, t('taskForm.pomodorosPositive')).default(1),
+  pomodoros: z.number().int().min(0, t('taskForm.pomodorosPositive')),
   dependsOn: z.array(z.string()).optional(),
   workspace: z.enum(['personal', 'work', 'side-project']),
   subTasks: z.array(z.object({ title: z.string(), completed: z.boolean() })).optional(),
@@ -81,7 +81,7 @@ export function TaskForm({ isOpen, onClose, onSave, task, allTasks, activeWorksp
     defaultValues: {
       title: '',
       description: '',
-      priority: 'medium',
+      priority: 'medium' as const,
       tags: '',
       dueDate: undefined,
       pomodoros: 1,
@@ -155,7 +155,7 @@ export function TaskForm({ isOpen, onClose, onSave, task, allTasks, activeWorksp
     }
   };
 
-  const onSubmit = (data: TaskFormValues) => {
+  const onSubmit: SubmitHandler<TaskFormValues> = (data) => {
     const tagsArray = data.tags ? data.tags.split(',').map(tag => tag.trim()).filter(Boolean) : [];
     onSave({ ...data, tags: tagsArray });
     onClose();
@@ -300,7 +300,16 @@ export function TaskForm({ isOpen, onClose, onSave, task, allTasks, activeWorksp
                     <FormItem>
                       <FormLabel className='flex items-center'>{t('taskForm.pomodoros')} <BrainCircuit className="w-3 h-3 ml-1 text-primary/80" /></FormLabel>
                       <FormControl>
-                        <Input type="number" min="0" {...field} />
+                        <Input
+                          type="number"
+                          min="0"
+                          {...field}
+                          onChange={(e) => {
+                            const v = e.target.value;
+                            const n = v === '' ? 0 : Number(v);
+                            field.onChange(Number.isNaN(n) ? 0 : n);
+                          }}
+                        />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -380,7 +389,7 @@ export function TaskForm({ isOpen, onClose, onSave, task, allTasks, activeWorksp
                                 control={form.control}
                                 name={`subTasks.${index}.title`}
                                 render={({ field }) => (
-                                     <FormItem className='flex-grow'>
+                                     <FormItem className='grow'>
                                         <FormControl>
                                             <Input {...field} className="h-8 text-sm" />
                                         </FormControl>

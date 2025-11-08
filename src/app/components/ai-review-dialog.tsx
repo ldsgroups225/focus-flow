@@ -16,7 +16,7 @@ import { Label } from "@/components/ui/label";
 import { Loader2, Sparkles } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
 import { useI18n } from './i18n-provider';
-import type { Task, ReviewFlowInput } from '@/lib/types';
+import type { Task } from '@/lib/types';
 import { generateReview } from '@/ai/flows/review-flow';
 
 type AiReviewDialogProps = {
@@ -58,7 +58,7 @@ export function AiReviewDialog({ isOpen, onClose, tasks }: AiReviewDialogProps) 
       
       const result = await generateReview({ tasks: relevantTasks, locale, period });
       setReview(result);
-    } catch (e: any) {
+    } catch (e: unknown) {
       console.error(e);
       setError(t('aiReview.error'));
     } finally {

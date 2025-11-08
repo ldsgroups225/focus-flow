@@ -29,12 +29,15 @@ export function CommandSearch({ isOpen, setIsOpen, setSearchQuery }: CommandSear
     return () => clearTimeout(timeoutId);
   }, [inputValue, setSearchQuery]);
 
-  useEffect(() => {
-    if (!isOpen) {
-      setInputValue('');
-      setSearchQuery('');
-    }
-  }, [isOpen, setSearchQuery]);
+  // Reset search when dialog closes
+  const [prevIsOpen, setPrevIsOpen] = useState(isOpen);
+  if (prevIsOpen && !isOpen) {
+    setPrevIsOpen(isOpen);
+    setInputValue('');
+    setSearchQuery('');
+  } else if (prevIsOpen !== isOpen) {
+    setPrevIsOpen(isOpen);
+  }
 
   return (
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
