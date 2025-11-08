@@ -25,9 +25,12 @@ import { useFilters } from '@/lib/hooks/use-filters';
 import { useKeyboardShortcuts } from '@/lib/hooks/use-keyboard-shortcuts';
 import { useTaskSelection } from '@/lib/hooks/use-task-selection';
 import { LazyTaskForm, LazyFocusView, LazyAiReviewDialog, LazyCommandSearch, LazyShortcutsHelp, LazyBulkActionsToolbar } from '@/lib/utils/lazy';
+import { useRouter } from 'next/navigation';
 
 export default function DashboardPage() {
+  const router = useRouter();
   const { user } = useAuth();
+  
   const [activeWorkspace, setActiveWorkspace] = useState<Workspace>('personal');
   const [editingTask, setEditingTask] = useState<Task | 'new' | null>(null);
   const [focusTask, setFocusTask] = useState<Task | null>(null);
@@ -58,6 +61,7 @@ export default function DashboardPage() {
   const handleSignOut = async () => {
     try {
       await signOut();
+      router.replace('/login');
     } catch (error) {
       console.error('Sign out error:', error);
     }

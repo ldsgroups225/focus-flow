@@ -30,13 +30,16 @@ import { useTasks } from '@/lib/hooks/use-tasks';
 import { useFilters } from '@/lib/hooks/use-filters';
 import { useKeyboardShortcuts } from '@/lib/hooks/use-keyboard-shortcuts';
 import { useTaskSelection } from '@/lib/hooks/use-task-selection';
+import { useRouter } from 'next/navigation';
 
 interface ClientDashboardProps {
   initialTasks: Task[];
 }
 
 export function ClientDashboard({ initialTasks }: ClientDashboardProps) {
+  const router = useRouter();
   const { user } = useAuth();
+  
   const [activeWorkspace, setActiveWorkspace] = useState<Workspace>('personal');
   const [editingTask, setEditingTask] = useState<Task | 'new' | null>(null);
   const [focusTask, setFocusTask] = useState<Task | null>(null);
@@ -54,6 +57,7 @@ export function ClientDashboard({ initialTasks }: ClientDashboardProps) {
   const handleSignOut = async () => {
     try {
       await signOut();
+      router.replace('/login');
     } catch (error) {
       console.error('Sign out error:', error);
     }
