@@ -1,176 +1,228 @@
 {
-    "header": {
-        "title": "FocusFlow",
-        "addTask": "Add",
-        "filters": "Filters"
-    },
-    "filters": {
-        "byPriority": "By Priority",
-        "low": "Low",
-        "medium": "Medium",
-        "high": "High",
-        "byTag": "By Tag",
-        "selectTags": "Select tags",
-        "selected": "selected",
-        "clearFilters": "Clear filters"
-    },
-    "taskList": {
-        "allClear": "All Clear!",
-        "noTasks": "No tasks match your current filters. Or maybe you're just that good."
-    },
-    "taskItem": {
-        "priority": "Priority: {priority}",
-        "due": "Due",
-        "pomodorosCompleted": "{completed} of {total} pomodoros completed",
-        "timeSpent": "{time} spent on this task",
-        "markIncomplete": "Mark task {taskTitle} as incomplete",
-        "markComplete": "Mark task {taskTitle} as complete",
-        "focusMode": "Focus Mode",
-        "editTask": "Edit Task",
-        "deleteTask": "Delete Task",
-        "blocked": "Blocked",
-        "blockedBy": "This task is blocked by: {tasks}"
-    },
-    "taskForm": {
-        "editTask": "Edit Task",
-        "addTask": "Add New Task",
-        "title": "Title",
-        "titlePlaceholder": "e.g., Finalize project report",
-        "description": "Description",
-        "descriptionPlaceholder": "Add more details about the task...",
-        "priority": "Priority",
-        "selectPriority": "Select priority",
-        "low": "Low",
-        "medium": "Medium",
-        "high": "High",
-        "dueDate": "Due Date",
-        "pickDate": "Pick a date",
-        "tags": "Tags",
-        "tagsPlaceholder": "e.g., marketing, design",
-        "pomodoros": "Pomodoros",
-        "dependencies": "Dependencies",
-        "selectDependencies": "Select dependencies",
-        "noOtherTasks": "No other tasks available to depend on.",
-        "clear": "Clear",
-        "cancel": "Cancel",
-        "saveTask": "Save Task",
-        "titleRequired": "Title is required",
-        "titleRequiredForAi": "Please enter a title to use AI suggestions",
-        "pomodorosPositive": "Must be a positive number",
-        "subTasks": "Sub-tasks",
-        "ai": {
-            "tags": "Suggest Tags with AI",
-            "dueDate": "Suggest Due Date with AI",
-            "subTasks": "Breakdown Task with AI"
-        }
-    },
-    "focusView": {
-        "focusingOn": "Focusing on",
-        "endSession": "End Focus Session",
-        "askAssistant": "Ask your focus assistant...",
-        "assistantError": "Sorry, I'm having trouble connecting right now."
-    },
-    "pomodoro": {
-        "focusSession": "Focus Session",
-        "takeBreak": "Take a Break",
-        "pomodorosOf": "{completed} of {total} pomodoros completed",
-        "infinite": "∞",
-        "resetTimer": "Reset Timer",
-        "pauseTimer": "Pause Timer",
-        "startTimer": "Start Timer",
-        "startBreak": "Start Break",
-        "startWork": "Start Work"
-    },
-    "theme": {
-        "toggle": "Toggle theme",
-        "light": "Light",
-        "dark": "Dark",
-        "system": "System"
-    },
-    "lang": {
-        "change": "Change language"
-    },
-    "workspace": {
-        "change": "Change workspace",
-        "personal": "Personal",
-        "work": "Work",
-        "sideProject": "Side Project"
-    },
-    "aiReview": {
-        "title": "AI Review",
-        "description": "Let AI generate a summary of your completed tasks.",
-        "daily": "Daily",
-        "weekly": "Weekly",
-        "generate": "Generate",
-        "generating": "Generating...",
-        "error": "Sorry, the review could not be generated. Please try again."
-    },
-    "search": {
-        "placeholder": "Search tasks by title or description...",
-        "description": "Start typing to see your task list filter in real-time."
-    },
-    "bulkActions": {
-        "selected": "{count} selected",
-        "markComplete": "Mark as complete",
-        "changePriority": "Change priority",
-        "delete": "Delete",
-        "deselectAll": "Deselect all"
-    },
-    "shortcuts": {
-        "title": "Keyboard Shortcuts",
-        "description": "Navigate and manage your tasks faster.",
-        "newTask": "Create a new task",
-        "showShortcuts": "Show this help menu",
-        "openSearch": "Open task search"
-    },
-    "toast": {
-        "taskDeleted": "Task deleted",
-        "undo": "Undo",
-        "deleteError": "Deletion Failed",
-        "deleteErrorDesc": "The task could not be deleted from the database."
-    },
-    "data": {
-        "title": "Data Management",
-        "export": "Export to JSON",
-        "import": "Import from JSON",
-        "importError": "Invalid file format. Please upload a valid JSON backup.",
-        "confirmImportTitle": "Are you sure you want to import tasks?",
-        "confirmImportDesc": "This will overwrite all your current tasks. This action cannot be undone. You are about to import {count} tasks.",
-        "confirmImport": "Yes, overwrite and import"
-    },
-    "login": {
-        "signInWithGoogle": "Sign in with Google",
-        "signOut": "Sign Out",
-        "tagline": "The ultimate to-do app for productivity enthusiasts."
-    },
-    "dashboard": {
-        "title": "Dashboard",
-        "overview": "Overview",
-        "timeTracking": "Time Tracking",
-        "priority": "Priority",
-        "workspaces": "Workspaces",
-        "deadlines": "Deadlines",
-        "dependencies": "Dependencies",
-        "recentCompletions": "Recent Completions",
-        "totalTasks": "Total Tasks",
-        "completed": "Completed",
-        "inProgress": "In Progress",
-        "timeSpent": "Time Spent",
-        "hours": "hours",
-        "completedPomodoros": "Completed",
-        "remainingPomodoros": "Remaining",
-        "totalPomodoros": "Total Pomodoros",
-        "estimated": "estimated",
-        "highPriority": "High Priority",
-        "mediumPriority": "Medium Priority",
-        "lowPriority": "Low Priority",
-        "tasksWithDeps": "Tasks with Dependencies",
-        "blockedTasks": "Blocked Tasks",
-        "overdue": "Overdue",
-        "upcoming": "Upcoming",
-        "next7Days": "next 7 days",
-        "today": "Today",
-        "tomorrow": "Tomorrow",
-        "yesterday": "Yesterday"
+  "header": {
+    "title": "FocusFlow",
+    "addTask": "Add",
+    "filters": "Filters"
+  },
+  "filters": {
+    "byPriority": "By Priority",
+    "low": "Low",
+    "medium": "Medium",
+    "high": "High",
+    "byTag": "By Tag",
+    "selectTags": "Select tags",
+    "selected": "selected",
+    "clearFilters": "Clear filters"
+  },
+  "taskList": {
+    "allClear": "All Clear!",
+    "noTasks": "No tasks match your current filters. Or maybe you're just that good."
+  },
+  "taskItem": {
+    "priority": "Priority: {priority}",
+    "due": "Due",
+    "pomodorosCompleted": "{completed} of {total} pomodoros completed",
+    "timeSpent": "{time} spent on this task",
+    "focusMode": "Focus Mode",
+    "editTask": "Edit Task",
+    "deleteTask": "Delete Task",
+    "blocked": "Blocked",
+    "blockedBy": "This task is blocked by: {tasks}"
+  },
+  "taskForm": {
+    "editTask": "Edit Task",
+    "addTask": "Add New Task",
+    "title": "Title",
+    "titlePlaceholder": "e.g., Finalize project report",
+    "description": "Description",
+    "descriptionPlaceholder": "Add more details about the task...",
+    "priority": "Priority",
+    "selectPriority": "Select priority",
+    "low": "Low",
+    "medium": "Medium",
+    "high": "High",
+    "dueDate": "Due Date",
+    "pickDate": "Pick a date",
+    "tags": "Tags",
+    "tagsPlaceholder": "e.g., marketing, design",
+    "pomodoros": "Pomodoros",
+    "dependencies": "Dependencies",
+    "selectDependencies": "Select dependencies",
+    "noOtherTasks": "No other tasks available to depend on.",
+    "clear": "Clear",
+    "cancel": "Cancel",
+    "saveTask": "Save Task",
+    "titleRequired": "Title is required",
+    "titleRequiredForAi": "Please enter a title to use AI suggestions",
+    "pomodorosPositive": "Must be a positive number",
+    "subTasks": "Sub-tasks",
+    "ai": {
+      "tags": "Suggest Tags with AI",
+      "dueDate": "Suggest Due Date with AI",
+      "subTasks": "Breakdown Task with AI"
     }
+  },
+  "focusView": {
+    "focusingOn": "Focusing on",
+    "endSession": "End Focus Session",
+    "askAssistant": "Ask your focus assistant...",
+    "assistantError": "Sorry, I'm having trouble connecting right now."
+  },
+  "pomodoro": {
+    "focusSession": "Focus Session",
+    "takeBreak": "Take a Break",
+    "infinite": "∞",
+    "resetTimer": "Reset Timer",
+    "pauseTimer": "Pause Timer",
+    "startTimer": "Start Timer",
+    "startBreak": "Start Break",
+    "startWork": "Start Work"
+  },
+  "theme": {
+    "toggle": "Toggle theme",
+    "light": "Light",
+    "dark": "Dark",
+    "system": "System"
+  },
+  "lang": {},
+  "workspace": {
+    "personal": "Personal",
+    "work": "Work",
+    "sideProject": "Side Project"
+  },
+  "aiReview": {
+    "title": "AI Review",
+    "description": "Let AI generate a summary of your completed tasks.",
+    "daily": "Daily",
+    "weekly": "Weekly",
+    "generate": "Generate",
+    "generating": "Generating...",
+    "error": "Sorry, the review could not be generated. Please try again."
+  },
+  "search": {
+    "placeholder": "Search tasks by title or description...",
+    "description": "Start typing to see your task list filter in real-time."
+  },
+  "bulkActions": {
+    "selected": "{count} selected",
+    "markComplete": "Mark as complete",
+    "changePriority": "Change priority",
+    "delete": "Delete",
+    "deselectAll": "Deselect all"
+  },
+  "shortcuts": {
+    "title": "Keyboard Shortcuts",
+    "description": "Navigate and manage your tasks faster.",
+    "newTask": "Create a new task",
+    "showShortcuts": "Show this help menu",
+    "openSearch": "Open task search"
+  },
+  "toast": {
+    "taskDeleted": "Task deleted",
+    "undo": "Undo",
+    "deleteError": "Deletion Failed",
+    "deleteErrorDesc": "The task could not be deleted from the database."
+  },
+  "data": {
+    "title": "Data Management",
+    "export": "Export to JSON",
+    "import": "Import from JSON",
+    "importError": "Invalid file format. Please upload a valid JSON backup.",
+    "confirmImportTitle": "Are you sure you want to import tasks?",
+    "confirmImportDesc": "This will overwrite all your current tasks. This action cannot be undone. You are about to import {count} tasks.",
+    "confirmImport": "Yes, overwrite and import"
+  },
+  "login": {
+    "signInWithGoogle": "Sign in with Google",
+    "signOut": "Sign Out",
+    "tagline": "The ultimate to-do app for productivity enthusiasts.",
+    "authFailed": "Authentication Failed",
+    "authFailedDesc": "Unable to sign in with Google. Please try again.",
+    "signInError": "Sign In Error",
+    "sendCodeError": "Failed to send code. Verify your email and try again.",
+    "invalidCode": "Invalid code",
+    "invalidCodeDesc": "Please check the 6-digit code and try again.",
+    "email": "Email",
+    "emailPlaceholder": "you@example.com",
+    "sendCode": "Send code",
+    "enterCode": "Enter 6-digit code",
+    "codePlaceholder": "123456",
+    "back": "Back",
+    "verifySignIn": "Verify & Sign in",
+    "noSession": "Authentication failed - no user session found",
+    "completingSignIn": "Completing sign in...",
+    "success": "Sign in successful!",
+    "redirecting": "Redirecting to your tasks...",
+    "signInFailed": "Sign in failed",
+    "redirectingBack": "Redirecting back to login..."
+  },
+  "error": {
+    "somethingWentWrong": "Something went wrong!",
+    "unexpectedError": "An unexpected error occurred. Please try again.",
+    "tryAgain": "Try again",
+    "http404": "404",
+    "pageNotFound": "Page Not Found",
+    "pageNotFoundDesc": "The page you are looking for doesn't exist or has been moved.",
+    "goHome": "Go Home",
+    "goBack": "Go Back",
+    "errorOccurred": "Error occurred",
+    "retry": "Retry",
+    "dashboardError": "Dashboard Error",
+    "reloadDashboard": "Reload Dashboard",
+    "loadTasksFailed": "Failed to load tasks"
+  },
+  "common": {
+    "loading": "Loading...",
+    "user": "User"
+  },
+  "loading": {
+    "application": "Loading application...",
+    "data": "Loading data...",
+    "dashboard": "Loading your dashboard...",
+    "tasks": "Loading tasks..."
+  },
+  "sampleTasks": {
+    "task1Title": "Finalize Q3 marketing strategy",
+    "task1Desc": "Review the proposal from the content team, check the budget, and create a presentation for the stakeholders meeting on Friday.",
+    "task2Title": "Develop user authentication feature",
+    "task2Desc": "Implement JWT-based authentication for the main application. Include sign-up, login, and password-reset flows.",
+    "task3Title": "Update component library documentation",
+    "task3Desc": "Add examples and usage guidelines for the new Button and Card components. Ensure all props are documented.",
+    "task4Title": "Design database schema for new feature",
+    "task4Desc": "Outline the collections, fields, and relationships for the upcoming analytics module.",
+    "task5Title": "Book annual dental check-up",
+    "task5Desc": "Find a time that works and schedule an appointment with the dentist.",
+    "task6Title": "Plan weekend trip to the mountains",
+    "task6Desc": "Research hiking trails, book accommodation, and plan the itinerary."
+  },
+  "dashboard": {
+    "title": "Dashboard",
+    "overview": "Overview",
+    "timeTracking": "Time Tracking",
+    "priority": "Priority",
+    "workspaces": "Workspaces",
+    "deadlines": "Deadlines",
+    "dependencies": "Dependencies",
+    "recentCompletions": "Recent Completions",
+    "totalTasks": "Total Tasks",
+    "completed": "Completed",
+    "inProgress": "In Progress",
+    "timeSpent": "Time Spent",
+    "hours": "hours",
+    "completedPomodoros": "Completed",
+    "remainingPomodoros": "Remaining",
+    "totalPomodoros": "Total Pomodoros",
+    "estimated": "estimated",
+    "highPriority": "High Priority",
+    "mediumPriority": "Medium Priority",
+    "lowPriority": "Low Priority",
+    "tasksWithDeps": "Tasks with Dependencies",
+    "blockedTasks": "Blocked Tasks",
+    "overdue": "Overdue",
+    "upcoming": "Upcoming",
+    "next7Days": "next 7 days",
+    "today": "Today",
+    "tomorrow": "Tomorrow",
+    "yesterday": "Yesterday"
+  }
 }

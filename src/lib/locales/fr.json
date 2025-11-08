@@ -1,176 +1,228 @@
 {
-    "header": {
-        "title": "FocusFlow",
-        "addTask": "Ajouter",
-        "filters": "Filtres"
-    },
-    "filters": {
-        "byPriority": "Par Priorité",
-        "low": "Basse",
-        "medium": "Moyenne",
-        "high": "Haute",
-        "byTag": "Par Étiquette",
-        "selectTags": "Sélectionner des étiquettes",
-        "selected": "sélectionné(s)",
-        "clearFilters": "Effacer les filtres"
-    },
-    "taskList": {
-        "allClear": "Tout est net !",
-        "noTasks": "Aucune tâche ne correspond à vos filtres actuels. Ou peut-être que vous êtes juste si bon."
-    },
-    "taskItem": {
-        "priority": "Priorité : {priority}",
-        "due": "Pour le",
-        "pomodorosCompleted": "{completed} sur {total} pomodoros terminés",
-        "timeSpent": "{time} passé sur cette tâche",
-        "markIncomplete": "Marquer la tâche {taskTitle} comme incomplète",
-        "markComplete": "Marquer la tâche {taskTitle} comme terminée",
-        "focusMode": "Mode Focus",
-        "editTask": "Modifier la Tâche",
-        "deleteTask": "Supprimer la Tâche",
-        "blocked": "Bloquée",
-        "blockedBy": "Cette tâche est bloquée par : {tasks}"
-    },
-    "taskForm": {
-        "editTask": "Modifier la Tâche",
-        "addTask": "Ajouter une Nouvelle Tâche",
-        "title": "Titre",
-        "titlePlaceholder": "ex: Finaliser le rapport de projet",
-        "description": "Description",
-        "descriptionPlaceholder": "Ajoutez plus de détails sur la tâche...",
-        "priority": "Priorité",
-        "selectPriority": "Choisir la priorité",
-        "low": "Basse",
-        "medium": "Moyenne",
-        "high": "Haute",
-        "dueDate": "Date d'échéance",
-        "pickDate": "Choisir une date",
-        "tags": "Étiquettes",
-        "tagsPlaceholder": "ex: marketing, design",
-        "pomodoros": "Pomodoros",
-        "dependencies": "Dépendances",
-        "selectDependencies": "Choisir les dépendances",
-        "noOtherTasks": "Aucune autre tâche disponible.",
-        "clear": "Vider",
-        "cancel": "Annuler",
-        "saveTask": "Sauvegarder",
-        "titleRequired": "Le titre est requis",
-        "titleRequiredForAi": "Veuillez saisir un titre pour utiliser les suggestions de l'IA",
-        "pomodorosPositive": "Doit être un nombre positif",
-        "subTasks": "Sous-tâches",
-        "ai": {
-            "tags": "Suggérer des Étiquettes avec l'IA",
-            "dueDate": "Suggérer une Date d'Échéance avec l'IA",
-            "subTasks": "Décomposer la Tâche avec l'IA"
-        }
-    },
-    "focusView": {
-        "focusingOn": "Concentration sur",
-        "endSession": "Terminer la Session Focus",
-        "askAssistant": "Demandez à votre assistant de concentration...",
-        "assistantError": "Désolé, je n'arrive pas à me connecter pour le moment."
-    },
-    "pomodoro": {
-        "focusSession": "Session de Concentration",
-        "takeBreak": "Prendre une Pause",
-        "pomodorosOf": "{completed} sur {total} pomodoros terminés",
-        "infinite": "∞",
-        "resetTimer": "Réinitialiser",
-        "pauseTimer": "Pause",
-        "startTimer": "Démarrer",
-        "startBreak": "Commencer la Pause",
-        "startWork": "Commencer le Travail"
-    },
-    "theme": {
-        "toggle": "Changer de thème",
-        "light": "Clair",
-        "dark": "Sombre",
-        "system": "Système"
-    },
-    "lang": {
-        "change": "Changer de langue"
-    },
-    "workspace": {
-        "change": "Changer d'espace de travail",
-        "personal": "Personnel",
-        "work": "Travail",
-        "sideProject": "Projet Annexe"
-    },
-    "aiReview": {
-        "title": "Revue IA",
-        "description": "Laissez l'IA générer un résumé de vos tâches terminées.",
-        "daily": "Quotidienne",
-        "weekly": "Hebdomadaire",
-        "generate": "Générer",
-        "generating": "Génération...",
-        "error": "Désolé, la revue n'a pas pu être générée. Veuillez réessayer."
-    },
-    "search": {
-        "placeholder": "Rechercher par titre ou description...",
-        "description": "Commencez à taper pour filtrer votre liste de tâches en temps réel."
-    },
-    "bulkActions": {
-        "selected": "{count} sélectionné(s)",
-        "markComplete": "Marquer comme terminé",
-        "changePriority": "Changer la priorité",
-        "delete": "Supprimer",
-        "deselectAll": "Tout désélectionner"
-    },
-    "shortcuts": {
-        "title": "Raccourcis Clavier",
-        "description": "Naviguez et gérez vos tâches plus rapidement.",
-        "newTask": "Créer une nouvelle tâche",
-        "showShortcuts": "Afficher ce menu d'aide",
-        "openSearch": "Ouvrir la recherche de tâches"
-    },
-    "toast": {
-        "taskDeleted": "Tâche supprimée",
-        "undo": "Annuler",
-        "deleteError": "Échec de la suppression",
-        "deleteErrorDesc": "La tâche n'a pas pu être supprimée de la base de données."
-    },
-    "data": {
-        "title": "Gestion des Données",
-        "export": "Exporter en JSON",
-        "import": "Importer depuis JSON",
-        "importError": "Format de fichier invalide. Veuillez téléverser une sauvegarde JSON valide.",
-        "confirmImportTitle": "Êtes-vous sûr de vouloir importer des tâches ?",
-        "confirmImportDesc": "Ceci écrasera toutes vos tâches actuelles. Cette action est irréversible. Vous êtes sur le point d'importer {count} tâches.",
-        "confirmImport": "Oui, écraser et importer"
-    },
-    "login": {
-        "signInWithGoogle": "Se connecter avec Google",
-        "signOut": "Se déconnecter",
-        "tagline": "L'application de tâches ultime pour les amateurs de productivité."
-    },
-    "dashboard": {
-        "title": "Stats",
-        "overview": "Aperçu",
-        "timeTracking": "Suivi du Temps",
-        "priority": "Priorité",
-        "workspaces": "Espaces de Travail",
-        "deadlines": "Échéances",
-        "dependencies": "Dépendances",
-        "recentCompletions": "Terminés Récemment",
-        "totalTasks": "Totales",
-        "completed": "Terminées",
-        "inProgress": "En Cours",
-        "timeSpent": "Temps Passé",
-        "hours": "heures",
-        "completedPomodoros": "Terminés",
-        "remainingPomodoros": "Restants",
-        "totalPomodoros": "Total Pomodoros",
-        "estimated": "estimé",
-        "highPriority": "Priorité Haute",
-        "mediumPriority": "Priorité Moyenne",
-        "lowPriority": "Priorité Basse",
-        "tasksWithDeps": "Tâches avec Dépendances",
-        "blockedTasks": "Tâches Bloquées",
-        "overdue": "En Retard",
-        "upcoming": "À Venir",
-        "next7Days": "prochains 7 jours",
-        "today": "Aujourd'hui",
-        "tomorrow": "Demain",
-        "yesterday": "Hier"
+  "header": {
+    "title": "FocusFlow",
+    "addTask": "Ajouter",
+    "filters": "Filtres"
+  },
+  "filters": {
+    "byPriority": "Par Priorité",
+    "low": "Basse",
+    "medium": "Moyenne",
+    "high": "Haute",
+    "byTag": "Par Étiquette",
+    "selectTags": "Sélectionner des étiquettes",
+    "selected": "sélectionné(s)",
+    "clearFilters": "Effacer les filtres"
+  },
+  "taskList": {
+    "allClear": "Tout est net !",
+    "noTasks": "Aucune tâche ne correspond à vos filtres actuels. Ou peut-être que vous êtes juste si bon."
+  },
+  "taskItem": {
+    "priority": "Priorité : {priority}",
+    "due": "Pour le",
+    "pomodorosCompleted": "{completed} sur {total} pomodoros terminés",
+    "timeSpent": "{time} passé sur cette tâche",
+    "focusMode": "Mode Focus",
+    "editTask": "Modifier la Tâche",
+    "deleteTask": "Supprimer la Tâche",
+    "blocked": "Bloquée",
+    "blockedBy": "Cette tâche est bloquée par : {tasks}"
+  },
+  "taskForm": {
+    "editTask": "Modifier la Tâche",
+    "addTask": "Ajouter une Nouvelle Tâche",
+    "title": "Titre",
+    "titlePlaceholder": "ex: Finaliser le rapport de projet",
+    "description": "Description",
+    "descriptionPlaceholder": "Ajoutez plus de détails sur la tâche...",
+    "priority": "Priorité",
+    "selectPriority": "Choisir la priorité",
+    "low": "Basse",
+    "medium": "Moyenne",
+    "high": "Haute",
+    "dueDate": "Date d'échéance",
+    "pickDate": "Choisir une date",
+    "tags": "Étiquettes",
+    "tagsPlaceholder": "ex: marketing, design",
+    "pomodoros": "Pomodoros",
+    "dependencies": "Dépendances",
+    "selectDependencies": "Choisir les dépendances",
+    "noOtherTasks": "Aucune autre tâche disponible.",
+    "clear": "Vider",
+    "cancel": "Annuler",
+    "saveTask": "Sauvegarder",
+    "titleRequired": "Le titre est requis",
+    "titleRequiredForAi": "Veuillez saisir un titre pour utiliser les suggestions de l'IA",
+    "pomodorosPositive": "Doit être un nombre positif",
+    "subTasks": "Sous-tâches",
+    "ai": {
+      "tags": "Suggérer des Étiquettes avec l'IA",
+      "dueDate": "Suggérer une Date d'Échéance avec l'IA",
+      "subTasks": "Décomposer la Tâche avec l'IA"
     }
+  },
+  "focusView": {
+    "focusingOn": "Concentration sur",
+    "endSession": "Terminer la Session Focus",
+    "askAssistant": "Demandez à votre assistant de concentration...",
+    "assistantError": "Désolé, je n'arrive pas à me connecter pour le moment."
+  },
+  "pomodoro": {
+    "focusSession": "Session de Concentration",
+    "takeBreak": "Prendre une Pause",
+    "infinite": "∞",
+    "resetTimer": "Réinitialiser",
+    "pauseTimer": "Pause",
+    "startTimer": "Démarrer",
+    "startBreak": "Commencer la Pause",
+    "startWork": "Commencer le Travail"
+  },
+  "theme": {
+    "toggle": "Changer de thème",
+    "light": "Clair",
+    "dark": "Sombre",
+    "system": "Système"
+  },
+  "lang": {},
+  "workspace": {
+    "personal": "Personnel",
+    "work": "Travail",
+    "sideProject": "Projet Annexe"
+  },
+  "aiReview": {
+    "title": "Revue IA",
+    "description": "Laissez l'IA générer un résumé de vos tâches terminées.",
+    "daily": "Quotidienne",
+    "weekly": "Hebdomadaire",
+    "generate": "Générer",
+    "generating": "Génération...",
+    "error": "Désolé, la revue n'a pas pu être générée. Veuillez réessayer."
+  },
+  "search": {
+    "placeholder": "Rechercher par titre ou description...",
+    "description": "Commencez à taper pour filtrer votre liste de tâches en temps réel."
+  },
+  "bulkActions": {
+    "selected": "{count} sélectionné(s)",
+    "markComplete": "Marquer comme terminé",
+    "changePriority": "Changer la priorité",
+    "delete": "Supprimer",
+    "deselectAll": "Tout désélectionner"
+  },
+  "shortcuts": {
+    "title": "Raccourcis Clavier",
+    "description": "Naviguez et gérez vos tâches plus rapidement.",
+    "newTask": "Créer une nouvelle tâche",
+    "showShortcuts": "Afficher ce menu d'aide",
+    "openSearch": "Ouvrir la recherche de tâches"
+  },
+  "toast": {
+    "taskDeleted": "Tâche supprimée",
+    "undo": "Annuler",
+    "deleteError": "Échec de la suppression",
+    "deleteErrorDesc": "La tâche n'a pas pu être supprimée de la base de données."
+  },
+  "data": {
+    "title": "Gestion des Données",
+    "export": "Exporter en JSON",
+    "import": "Importer depuis JSON",
+    "importError": "Format de fichier invalide. Veuillez téléverser une sauvegarde JSON valide.",
+    "confirmImportTitle": "Êtes-vous sûr de vouloir importer des tâches ?",
+    "confirmImportDesc": "Ceci écrasera toutes vos tâches actuelles. Cette action est irréversible. Vous êtes sur le point d'importer {count} tâches.",
+    "confirmImport": "Oui, écraser et importer"
+  },
+  "login": {
+    "signInWithGoogle": "Se connecter avec Google",
+    "signOut": "Se déconnecter",
+    "tagline": "L'application de tâches ultime pour les amateurs de productivité.",
+    "authFailed": "Échec d'authentification",
+    "authFailedDesc": "Impossible de se connecter avec Google. Veuillez réessayer.",
+    "signInError": "Erreur de connexion",
+    "sendCodeError": "Échec de l'envoi du code. Vérifiez votre email et réessayez.",
+    "invalidCode": "Code invalide",
+    "invalidCodeDesc": "Veuillez vérifier le code à 6 chiffres et réessayer.",
+    "email": "Email",
+    "emailPlaceholder": "vous@exemple.com",
+    "sendCode": "Envoyer le code",
+    "enterCode": "Entrez le code à 6 chiffres",
+    "codePlaceholder": "123456",
+    "back": "Retour",
+    "verifySignIn": "Vérifier et se connecter",
+    "noSession": "Échec d'authentification - aucune session utilisateur trouvée",
+    "completingSignIn": "Finalisation de la connexion...",
+    "success": "Connexion réussie !",
+    "redirecting": "Redirection vers vos tâches...",
+    "signInFailed": "Échec de la connexion",
+    "redirectingBack": "Redirection vers la page de connexion..."
+  },
+  "error": {
+    "somethingWentWrong": "Une erreur s'est produite !",
+    "unexpectedError": "Une erreur inattendue s'est produite. Veuillez réessayer.",
+    "tryAgain": "Réessayer",
+    "http404": "404",
+    "pageNotFound": "Page non trouvée",
+    "pageNotFoundDesc": "La page que vous recherchez n'existe pas ou a été déplacée.",
+    "goHome": "Accueil",
+    "goBack": "Retour",
+    "errorOccurred": "Une erreur s'est produite",
+    "retry": "Réessayer",
+    "dashboardError": "Erreur du tableau de bord",
+    "reloadDashboard": "Recharger le tableau de bord",
+    "loadTasksFailed": "Échec du chargement des tâches"
+  },
+  "common": {
+    "loading": "Chargement...",
+    "user": "Utilisateur"
+  },
+  "loading": {
+    "application": "Chargement de l'application...",
+    "data": "Chargement des données...",
+    "dashboard": "Chargement de votre tableau de bord...",
+    "tasks": "Chargement des tâches..."
+  },
+  "sampleTasks": {
+    "task1Title": "Finaliser la stratégie marketing T3",
+    "task1Desc": "Examinez la proposition de l'équipe contenu, vérifiez le budget, et créez une présentation pour la réunion des parties prenantes vendredi.",
+    "task2Title": "Développer la fonctionnalité d'authentification",
+    "task2Desc": "Implémentez l'authentification basée sur JWT pour l'application principale. Incluez les flux d'inscription, de connexion et de réinitialisation de mot de passe.",
+    "task3Title": "Mettre à jour la documentation de la bibliothèque de composants",
+    "task3Desc": "Ajoutez des exemples et des directives d'utilisation pour les nouveaux composants Button et Card. Assurez-vous que toutes les props sont documentées.",
+    "task4Title": "Concevoir le schéma de base de données pour la nouvelle fonctionnalité",
+    "task4Desc": "Décrivez les collections, champs et relations pour le module d'analyse upcoming.",
+    "task5Title": "Prendre rendez-vous pour le contrôle dentaire annuel",
+    "task5Desc": "Trouvez un moment qui vous convient et planifiez un rendez-vous avec le dentiste.",
+    "task6Title": "Planifier le week-end à la montagne",
+    "task6Desc": "Recherchez les sentiers de randonnée, réservez l'hébergement et planifiez l'itinéraire."
+  },
+  "dashboard": {
+    "title": "Stats",
+    "overview": "Aperçu",
+    "timeTracking": "Suivi du Temps",
+    "priority": "Priorité",
+    "workspaces": "Espaces de Travail",
+    "deadlines": "Échéances",
+    "dependencies": "Dépendances",
+    "recentCompletions": "Terminés Récemment",
+    "totalTasks": "Totales",
+    "completed": "Terminées",
+    "inProgress": "En Cours",
+    "timeSpent": "Temps Passé",
+    "hours": "heures",
+    "completedPomodoros": "Terminés",
+    "remainingPomodoros": "Restants",
+    "totalPomodoros": "Total Pomodoros",
+    "estimated": "estimé",
+    "highPriority": "Priorité Haute",
+    "mediumPriority": "Priorité Moyenne",
+    "lowPriority": "Priorité Basse",
+    "tasksWithDeps": "Tâches avec Dépendances",
+    "blockedTasks": "Tâches Bloquées",
+    "overdue": "En Retard",
+    "upcoming": "À Venir",
+    "next7Days": "prochains 7 jours",
+    "today": "Aujourd'hui",
+    "tomorrow": "Demain",
+    "yesterday": "Hier"
+  }
 }
