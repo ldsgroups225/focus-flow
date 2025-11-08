@@ -1,18 +1,11 @@
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 
-// Public routes that don't require authentication
-const publicRoutes = ['/auth/callback'];
-
-export function middleware(request: NextRequest) {
-  const { pathname } = request.nextUrl;
+export async function proxy(request: NextRequest) {
+  // Note: Proxy cannot access localStorage (client-side only)
+  // Authentication redirects are handled client-side in AuthProvider and layouts
   
-  // Allow public routes
-  if (publicRoutes.some(route => pathname.startsWith(route))) {
-    return NextResponse.next();
-  }
-
-  // Add security headers
+  // Add security headers to all responses
   const response = NextResponse.next();
   
   // Security headers
