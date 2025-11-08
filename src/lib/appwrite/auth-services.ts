@@ -1,4 +1,4 @@
-import { account, client } from './config';
+import { account } from './config';
 import { OAuthProvider, ID } from 'appwrite';
 
 export interface AppwriteUser {

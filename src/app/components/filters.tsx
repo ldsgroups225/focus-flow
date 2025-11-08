@@ -1,6 +1,7 @@
 
 'use client';
 
+import { memo } from 'react';
 import {
   DropdownMenu,
   DropdownMenuCheckboxItem,
@@ -22,7 +23,7 @@ type FiltersProps = {
   uniqueTags: string[];
 };
 
-export function Filters({ priorityFilter, setPriorityFilter, tagFilter, setTagFilter, uniqueTags }: FiltersProps) {
+const Filters = memo(function Filters({ priorityFilter, setPriorityFilter, tagFilter, setTagFilter, uniqueTags }: FiltersProps) {
   const { t } = useI18n();
   return (
     <div className="space-y-6">
@@ -76,5 +77,8 @@ export function Filters({ priorityFilter, setPriorityFilter, tagFilter, setTagFi
       </div>
     </div>
   );
-}
+});
 
+Filters.displayName = 'Filters';
+
+export { Filters };

@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, memo } from 'react';
 import { TaskItem } from './task-item';
 import type { Task } from '@/lib/types';
 import { AnimatePresence, motion } from 'framer-motion';
@@ -24,7 +24,7 @@ type TaskListProps = {
   onSubTaskToggle: (taskId: string, subTaskIndex: number) => void;
 };
 
-export function TaskList({ tasks, setTasks, onEdit, onDelete, onToggle, onFocus, selectedTaskIds, onSelectTask, onSubTaskToggle }: TaskListProps) {
+const TaskList = memo(function TaskList({ tasks, setTasks, onEdit, onDelete, onToggle, onFocus, selectedTaskIds, onSelectTask, onSubTaskToggle }: TaskListProps) {
   const [draggedItemId, setDraggedItemId] = useState<string | null>(null);
   const { t } = useI18n();
 
@@ -95,8 +95,8 @@ export function TaskList({ tasks, setTasks, onEdit, onDelete, onToggle, onFocus,
               task={task}
               isDragging={draggedItemId === task.id}
               isSelected={selectedTaskIds.has(task.id)}
-              onDragStart={(e) => handleDragStart(e, task)}
-              onDragOver={(e) => handleDragOver(e, task)}
+              onDragStart={(e: React.DragEvent<HTMLDivElement>) => handleDragStart(e, task)}
+              onDragOver={(e: React.DragEvent<HTMLDivElement>) => handleDragOver(e, task)}
               onDragEnd={handleDragEnd}
               onEdit={onEdit}
               onDelete={onDelete}
@@ -110,4 +110,8 @@ export function TaskList({ tasks, setTasks, onEdit, onDelete, onToggle, onFocus,
       </AnimatePresence>
     </div>
   );
-}
+});
+
+TaskList.displayName = 'TaskList';
+
+export { TaskList };

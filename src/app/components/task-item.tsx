@@ -1,6 +1,6 @@
 'use client';
 
-import { useMemo } from 'react';
+import { useMemo, memo } from 'react';
 import { ArrowDown, ArrowUp, Minus, Trash2, Edit, Crosshair, BrainCircuit, CheckCircle2, Circle, Link, Clock, GripVertical } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Checkbox } from '@/components/ui/checkbox';
@@ -54,7 +54,7 @@ const formatTimeSpent = (seconds: number) => {
     return result.trim();
 };
 
-export function TaskItem({ task, isDragging, isSelected, onDragStart, onDragOver, onDragEnd, onEdit, onDelete, onToggle, onFocus, onSelect, onSubTaskToggle }: TaskItemProps) {
+const TaskItem = memo(function TaskItem({ task, isDragging, isSelected, onDragStart, onDragOver, onDragEnd, onEdit, onDelete, onToggle, onFocus, onSelect, onSubTaskToggle }: TaskItemProps) {
     const { t, locale } = useI18n();
     const dateLocale = locale === 'fr' ? fr : enUS;
     
@@ -228,4 +228,8 @@ export function TaskItem({ task, isDragging, isSelected, onDragStart, onDragOver
       </CardContent>
     </Card>
   );
-}
+});
+
+TaskItem.displayName = 'TaskItem';
+
+export { TaskItem };

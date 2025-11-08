@@ -1,9 +1,9 @@
 import type {Metadata} from 'next';
 import './globals.css';
 import { Toaster } from "@/components/ui/toaster"
-import { ThemeProvider } from './components/theme-provider';
-import { I18nProvider } from './components/i18n-provider';
-import { AuthProvider } from './components/auth-provider';
+import { ThemeProvider } from '@/components/providers/theme-provider';
+import { I18nProvider } from '@/app/components/i18n-provider';
+import { AuthProvider } from '@/components/providers/auth-provider';
 
 export const metadata: Metadata = {
   title: 'FocusFlow',
