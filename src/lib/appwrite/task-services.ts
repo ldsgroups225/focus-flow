@@ -1,6 +1,6 @@
 import { databases, DATABASE_ID, TASKS_TABLE_ID, client } from './config';
 import type { Task } from '@/lib/types';
-import { ID, Models } from 'appwrite';
+import { ID, Models, Query } from 'appwrite';
 
 type RawTask = Omit<Task, 'dueDate' | 'completedDate'> & {
   dueDate?: string;
@@ -38,9 +38,9 @@ export const getTasks = (
       const { rows } = await databases.listRows({
         databaseId: DATABASE_ID,
         tableId: TASKS_TABLE_ID,
-        // queries: [
-        //   `equal("userId", "${userId}")`,
-        // ],
+        queries: [
+          Query.equal("userId", userId),
+        ],
       });
 
       const tasks = rows.map(row =>
