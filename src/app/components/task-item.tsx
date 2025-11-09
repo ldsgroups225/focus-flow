@@ -143,7 +143,7 @@ const TaskItem = memo(function TaskItem({ task, isDragging, isSelected, onDragSt
               <span className="capitalize">{t(`filters.${task.priority}`)}</span>
             </div>
             {dueDateText && (
-              <span>{t('taskItem.due')} {dueDateText}</span>
+              <span>{dueDateText}</span>
             )}
             {isBlocked && (
               <TooltipProvider>
