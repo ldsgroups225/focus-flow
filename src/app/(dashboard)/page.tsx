@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect, Suspense } from 'react';
-import { Plus, SlidersHorizontal, Orbit, Search, Sparkles } from 'lucide-react';
+import { Plus, SlidersHorizontal, Orbit, Search, Sparkles, User2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { TaskList } from '@/app/components/task-list';
 import { Filters } from '@/app/components/filters';
@@ -28,6 +28,8 @@ import { LazyTaskForm, LazyFocusView, LazyAiReviewDialog, LazyCommandSearch, Laz
 import { useRouter } from 'next/navigation';
 import { DashboardSheet } from '@/components/ui/dashboard-sheet';
 import { BarChart3 } from 'lucide-react';
+import { getNameFromEmail } from '@/lib/utils/get-name-from-email';
+import { getAvatarInitial } from '@/lib/utils/get-avatar-initial';
 
 export default function DashboardPage() {
   const router = useRouter();
@@ -119,8 +121,8 @@ export default function DashboardPage() {
               <DropdownMenuTrigger asChild>
                 <Button variant="ghost" className="relative h-8 w-8 rounded-full">
                   <Avatar className="h-8 w-8">
-                    <AvatarImage src={user?.photoURL || undefined} alt={user?.displayName || 'User'} />
-                    <AvatarFallback>{user?.displayName?.charAt(0)}</AvatarFallback>
+                    <AvatarImage src={user?.photoURL || undefined} alt={getAvatarInitial(user?.displayName || getNameFromEmail(user?.email))} />
+                    <AvatarFallback>{getAvatarInitial(user?.displayName || getNameFromEmail(user?.email))}</AvatarFallback>
                   </Avatar>
                 </Button>
               </DropdownMenuTrigger>
@@ -130,6 +132,13 @@ export default function DashboardPage() {
                   <ThemeToggle />
                 </div>
                 <DropdownMenuSeparator className="md:hidden" />
+
+                <DropdownMenuItem disabled>
+                  <User2 className="mr-2 h-4 w-4" />
+                  {user?.displayName || getNameFromEmail(user?.email)}
+                </DropdownMenuItem>
+                <DropdownMenuSeparator />
+
                 <DropdownMenuItem onClick={() => setIsDashboardOpen(true)}>
                   <BarChart3 className="mr-2 h-4 w-4" />
                   {t('dashboard.title')}

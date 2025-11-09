@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useCallback, useEffect } from 'react';
-import { Plus, SlidersHorizontal, Orbit, Search, Sparkles } from 'lucide-react';
+import { Plus, SlidersHorizontal, Orbit, Search, Sparkles, User2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { TaskList } from '@/app/components/task-list';
 import { TaskForm } from '@/app/components/task-form';
@@ -31,6 +31,8 @@ import { useFilters } from '@/lib/hooks/use-filters';
 import { useKeyboardShortcuts } from '@/lib/hooks/use-keyboard-shortcuts';
 import { useTaskSelection } from '@/lib/hooks/use-task-selection';
 import { useRouter } from 'next/navigation';
+import { getAvatarInitial } from '@/lib/utils/get-avatar-initial';
+import { getNameFromEmail } from '@/lib/utils/get-name-from-email';
 
 interface ClientDashboardProps {
   initialTasks: Task[];
@@ -133,8 +135,8 @@ export function ClientDashboard({ initialTasks }: ClientDashboardProps) {
               <DropdownMenuTrigger asChild>
                 <Button variant="ghost" className="relative h-8 w-8 rounded-full">
                   <Avatar className="h-8 w-8">
-                    <AvatarImage src={user?.photoURL || undefined} alt={user?.displayName || 'User'} />
-                    <AvatarFallback>{user?.displayName?.charAt(0)}</AvatarFallback>
+                    <AvatarImage src={user?.photoURL || undefined} alt={getAvatarInitial(user?.displayName || getNameFromEmail(user?.email))} />
+                    <AvatarFallback>{getAvatarInitial(user?.displayName || getNameFromEmail(user?.email))}</AvatarFallback>
                   </Avatar>
                 </Button>
               </DropdownMenuTrigger>
@@ -144,6 +146,13 @@ export function ClientDashboard({ initialTasks }: ClientDashboardProps) {
                   <ThemeToggle />
                 </div>
                 <DropdownMenuSeparator className="md:hidden" />
+
+                <DropdownMenuItem disabled>
+                  <User2 className="mr-2 h-4 w-4" />
+                  {user?.displayName || getNameFromEmail(user?.email)}
+                </DropdownMenuItem>
+                <DropdownMenuSeparator />
+
                 <DropdownMenuItem onClick={handleSignOut}>
                   {t('login.signOut')}
                 </DropdownMenuItem>
