@@ -4,15 +4,19 @@ import { useState, useMemo, useCallback } from 'react';
 import type { Task, Priority, Workspace } from '@/lib/types';
 import { TaskService } from '@/lib/services/task-service';
 
-export function useFilters(tasks: Task[], activeWorkspace: Workspace) {
+export function useFilters(tasks: Task[], activeWorkspace: Workspace, projectId?: string) {
   const [priorityFilter, setPriorityFilter] = useState<Priority[]>([]);
   const [tagFilter, setTagFilter] = useState<string[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
 
   // Get tasks for the active workspace
   const workspaceTasks = useMemo(() => {
-    return TaskService.filterTasksByWorkspace(tasks, activeWorkspace);
-  }, [tasks, activeWorkspace]);
+    const filteredByWorkspace = TaskService.filterTasksByWorkspace(tasks, activeWorkspace);
+    if (projectId) {
+      return TaskService.filterTasksByProject(filteredByWorkspace, projectId);
+    }
+    return filteredByWorkspace;
+  }, [tasks, activeWorkspace, projectId]);
 
   // Get unique tags from workspace tasks
   const uniqueTags = useMemo(() => {

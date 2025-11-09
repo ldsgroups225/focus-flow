@@ -38,7 +38,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { CalendarIcon, BrainCircuit, Link, Sparkles, LoaderCircle } from 'lucide-react';
+import { CalendarIcon, BrainCircuit, Link, Sparkles, LoaderCircle, Trash2 } from 'lucide-react';
 import { Calendar } from '@/components/ui/calendar';
 import { cn } from '@/lib/utils';
 import { format } from 'date-fns';
@@ -46,6 +46,39 @@ import type { Task, Workspace } from '@/lib/types';
 import { useI18n } from './i18n-provider';
 import { suggestTags, suggestDueDate, breakdownTask } from '@/ai/flows/features-flow';
 import { Checkbox } from '@/components/ui/checkbox';
+import { useFieldArray, Control, UseFormRegister } from 'react-hook-form';
+import { subTaskSchema as globalSubTaskSchema } from '@/lib/types';
+
+interface SubTaskInputProps {
+  control: Control<TaskFormValues>;
+  register: UseFormRegister<TaskFormValues>;
+  name: string;
+  level?: number;
+}
+
+const SubTaskInput = ({ control, register, name, level = 0 }: SubTaskInputProps) => {
+  const { fields, append, remove } = useFieldArray({
+    control,
+    name: name as any,
+  });
+
+  return (
+    <div style={{ marginLeft: `${level * 20}px` }}>
+      {fields.map((item, index) => (
+        <div key={item.id} className="flex items-center gap-2 mt-2">
+          <Input {...register(`${name}.${index}.title`)} className="h-8 text-sm" />
+          <Button type="button" variant="ghost" size="icon" onClick={() => remove(index)}>
+            <Trash2 className="h-4 w-4" />
+          </Button>
+          <SubTaskInput control={control} register={register} name={`${name}.${index}.subTasks`} level={level + 1} />
+        </div>
+      ))}
+      <Button type="button" variant="outline" size="sm" onClick={() => append({ title: '', completed: false, subTasks: [] })}>
+        Add Sub-task
+      </Button>
+    </div>
+  );
+};
 
 const taskSchema = (t: (key: string) => string) => z.object({
   id: z.string().optional(),
@@ -57,10 +90,13 @@ const taskSchema = (t: (key: string) => string) => z.object({
   pomodoros: z.number().int().min(0, t('taskForm.pomodorosPositive')),
   dependsOn: z.array(z.string()).optional(),
   workspace: z.enum(['personal', 'work', 'side-project']),
-  subTasks: z.array(z.object({ title: z.string(), completed: z.boolean() })).optional(),
+  subTasks: z.array(globalSubTaskSchema).optional(),
+  projectId: z.string().optional(),
 });
 
 type TaskFormValues = z.infer<ReturnType<typeof taskSchema>>;
+
+import { Project } from '@/lib/types';
 
 type TaskFormProps = {
   isOpen: boolean;
@@ -69,9 +105,10 @@ type TaskFormProps = {
   task?: Task;
   allTasks: Task[];
   activeWorkspace: Workspace;
+  projects: Project[];
 };
 
-export function TaskForm({ isOpen, onClose, onSave, task, allTasks, activeWorkspace }: TaskFormProps) {
+export function TaskForm({ isOpen, onClose, onSave, task, allTasks, activeWorkspace, projects }: TaskFormProps) {
   const { t } = useI18n();
   const currentTaskSchema = taskSchema(t);
   const [isAiLoading, setIsAiLoading] = useState<Record<string, boolean>>({});
@@ -318,6 +355,28 @@ export function TaskForm({ isOpen, onClose, onSave, task, allTasks, activeWorksp
              </div>
              <FormField
                 control={form.control}
+                name="projectId"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>{t('taskForm.project')}</FormLabel>
+                    <Select onValueChange={field.onChange} defaultValue={field.value}>
+                      <FormControl>
+                        <SelectTrigger>
+                          <SelectValue placeholder={t('taskForm.selectProject')} />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        {projects.filter(p => p.workspace === activeWorkspace).map((project) => (
+                          <SelectItem key={project.id} value={project.id}>{project.name}</SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+             <FormField
+                control={form.control}
                 name="dependsOn"
                 render={({ field }) => (
                     <FormItem>
@@ -368,37 +427,7 @@ export function TaskForm({ isOpen, onClose, onSave, task, allTasks, activeWorksp
                     <FormLabel>{t('taskForm.subTasks')}</FormLabel>
                     <AITriggerButton feature="subTasks" className="h-6 w-6" />
                 </div>
-                <div className="space-y-2">
-                    {subTasks.map((sub, index) => (
-                        <div key={index} className="flex items-center gap-2">
-                             <FormField
-                                control={form.control}
-                                name={`subTasks.${index}.completed`}
-                                render={({ field }) => (
-                                    <FormItem>
-                                        <FormControl>
-                                            <Checkbox
-                                                checked={field.value}
-                                                onCheckedChange={field.onChange}
-                                            />
-                                        </FormControl>
-                                    </FormItem>
-                                )}
-                            />
-                            <FormField
-                                control={form.control}
-                                name={`subTasks.${index}.title`}
-                                render={({ field }) => (
-                                     <FormItem className='grow'>
-                                        <FormControl>
-                                            <Input {...field} className="h-8 text-sm" />
-                                        </FormControl>
-                                    </FormItem>
-                                )}
-                            />
-                        </div>
-                    ))}
-                </div>
+                <SubTaskInput control={form.control} register={form.register} name="subTasks" />
              </div>
             <DialogFooter>
               <Button type="button" variant="ghost" onClick={onClose}>

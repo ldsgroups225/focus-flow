@@ -202,10 +202,25 @@ export function useTasks(userId: string | null) {
   }, [userId, tasks]);
 
   // Toggle subtask
-  const toggleSubTask = useCallback(async (taskId: string, subTaskIndex: number) => {
-    // TODO: implement in database
-    // This is a placeholder for future implementation
-  }, []);
+  const toggleSubTask = useCallback(async (taskId: string, subTaskPath: number[]) => {
+    if (!userId) return;
+    const task = tasks.find(t => t.id === taskId);
+    if (task && task.subTasks) {
+      const newSubTasks = JSON.parse(JSON.stringify(task.subTasks));
+      let current = newSubTasks;
+      for (let i = 0; i < subTaskPath.length - 1; i++) {
+        if (!current[subTaskPath[i]]?.subTasks) {
+          return;
+        }
+        current = current[subTaskPath[i]].subTasks;
+      }
+      const subTask = current[subTaskPath[subTaskPath.length - 1]];
+      if (subTask) {
+        subTask.completed = !subTask.completed;
+        await TaskService.updateTaskData(userId, taskId, { subTasks: newSubTasks });
+      }
+    }
+  }, [userId, tasks]);
 
   return {
     tasks: optimisticTasks,

@@ -131,6 +131,16 @@ export class TaskService {
   }
 
   /**
+   * Filter tasks by project
+   */
+  static filterTasksByProject(
+    tasks: Task[],
+    projectId: string
+  ): Task[] {
+    return tasks.filter(task => task.projectId === projectId);
+  }
+
+  /**
    * Get unique tags from tasks
    */
   static getUniqueTags(tasks: Task[]): string[] {
