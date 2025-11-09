@@ -21,12 +21,14 @@ import { useAuth } from '@/components/providers/auth-provider';
 import { signOut } from '@/lib/appwrite/auth-services';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { useTasks } from '@/lib/hooks/use-tasks';
+import { useProjects } from '@/lib/hooks/use-projects';
 import { useFilters } from '@/lib/hooks/use-filters';
 import { useKeyboardShortcuts } from '@/lib/hooks/use-keyboard-shortcuts';
 import { useTaskSelection } from '@/lib/hooks/use-task-selection';
 import { LazyTaskForm, LazyFocusView, LazyAiReviewDialog, LazyCommandSearch, LazyShortcutsHelp, LazyBulkActionsToolbar } from '@/lib/utils/lazy';
 import { useRouter } from 'next/navigation';
 import { DashboardSheet } from '@/components/ui/dashboard-sheet';
+import { SidebarContent } from '@/app/components/sidebar-content';
 import { BarChart3 } from 'lucide-react';
 
 export default function DashboardPage() {
@@ -40,18 +42,21 @@ export default function DashboardPage() {
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [isShortcutsOpen, setIsShortcutsOpen] = useState(false);
   const [isDashboardOpen, setIsDashboardOpen] = useState(false);
+  const [selectedProjectId, setSelectedProjectId] = useState<string | undefined>(undefined);
 
   const { t } = useI18n();
 
   // Custom hooks
   const { tasks, isLoading, saveTask, toggleComplete, deleteTask, updatePomodoro, logTime, toggleSubTask, fetchTasks } = useTasks(user?.uid ?? null);
-  const { priorityFilter, setPriorityFilter, tagFilter, setTagFilter, setSearchQuery, uniqueTags, filteredTasks, clearFilters } = useFilters(tasks, activeWorkspace);
+  const { projects, fetchProjects } = useProjects(user?.uid ?? null);
+  const { priorityFilter, setPriorityFilter, tagFilter, setTagFilter, setSearchQuery, uniqueTags, filteredTasks, clearFilters } = useFilters(tasks, activeWorkspace, selectedProjectId);
   const { selectedTaskIds, selectTask, deselectAll } = useTaskSelection();
 
   // Fetch tasks when user changes
   useEffect(() => {
     fetchTasks();
-  }, [fetchTasks]);
+    fetchProjects();
+  }, [fetchTasks, fetchProjects]);
 
   // Keyboard shortcuts
   useKeyboardShortcuts({
@@ -145,18 +150,15 @@ export default function DashboardPage() {
 
         <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
           <aside className="hidden md:block md:col-span-1">
-            <div className="sticky top-8 space-y-8">
-              <div>
-                <h2 className="text-lg font-semibold mb-4">{t('header.filters')}</h2>
-                <Filters
-                  priorityFilter={priorityFilter}
-                  setPriorityFilter={setPriorityFilter}
-                  tagFilter={tagFilter}
-                  setTagFilter={setTagFilter}
-                  uniqueTags={uniqueTags}
-                />
-              </div>
-            </div>
+            <SidebarContent
+              priorityFilter={priorityFilter}
+              setPriorityFilter={setPriorityFilter}
+              tagFilter={tagFilter}
+              setTagFilter={setTagFilter}
+              uniqueTags={uniqueTags}
+              projects={projects}
+              setSelectedProjectId={setSelectedProjectId}
+            />
           </aside>
 
           <div className="md:col-span-3">
@@ -225,6 +227,7 @@ export default function DashboardPage() {
               task={editingTask === 'new' ? undefined : tasks.find(t => t.id === (typeof editingTask === 'object' ? editingTask.id : undefined))}
               allTasks={tasks}
               activeWorkspace={activeWorkspace}
+              projects={projects}
             />
           )}
         </Suspense>
