@@ -24,6 +24,8 @@ export const taskSchema = z.object({
   workspace: z.enum(['personal', 'work', 'side-project']),
   completedDate: z.coerce.date().optional(),
   subTasks: z.array(subTaskSchema).optional(),
+  startDate: z.coerce.date().optional(),
+  duration: z.number().optional(), // Duration in days
 }).describe('A task object');
 
 export type Task = z.infer<typeof taskSchema>;
