@@ -240,8 +240,11 @@ export function TaskForm({ isOpen, onClose, onSave, task, allTasks, activeWorksp
                 name="dueDate"
                 render={({ field }) => (
                   <FormItem className="flex flex-col">
-                    <div className='relative pt-2'>
-                        <FormLabel className='mb-[6px]'>{t('taskForm.dueDate')}</FormLabel>
+                    <div className='relative pt-1'>
+                        <FormLabel className='mb-[6px] flex items-center flex-row'>
+                          {t('taskForm.dueDate')}
+                          <AITriggerButton feature="dueDate" className="w-3 h-3 ml-4" />
+                        </FormLabel>
                         <Popover>
                         <PopoverTrigger asChild>
                             <FormControl>
@@ -267,11 +270,9 @@ export function TaskForm({ isOpen, onClose, onSave, task, allTasks, activeWorksp
                             selected={field.value}
                             onSelect={field.onChange}
                             disabled={(date) => date < new Date(new Date().setHours(0,0,0,0)) }
-                            initialFocus
                             />
                         </PopoverContent>
                         </Popover>
-                        <AITriggerButton feature="dueDate" className="absolute right-1 top-[55%] -translate-y-1/2" />
                     </div>
                     <FormMessage className='pt-1' />
                   </FormItem>
@@ -284,11 +285,10 @@ export function TaskForm({ isOpen, onClose, onSave, task, allTasks, activeWorksp
                 name="tags"
                 render={({ field }) => (
                   <FormItem className='relative'>
-                    <FormLabel>{t('taskForm.tags')}</FormLabel>
+                    <FormLabel className='flex items-center'>{t('taskForm.tags')} <AITriggerButton feature="tags" className="w-3 h-3 ml-4" /></FormLabel>
                     <FormControl>
                       <Input placeholder={t('taskForm.tagsPlaceholder')} {...field} />
                     </FormControl>
-                    <AITriggerButton feature="tags" className="absolute right-1 top-1/2" />
                     <FormMessage />
                   </FormItem>
                 )}
