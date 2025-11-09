@@ -217,10 +217,10 @@ const TaskItem = memo(function TaskItem({ task, isDragging, isSelected, onDragSt
               <Button variant="ghost" size="icon" onClick={() => onFocus(task)} title={t('taskItem.focusMode')} disabled={isBlocked}>
                 <Crosshair className="h-4 w-4" />
               </Button>
-              <Button variant="ghost" size="icon" onClick={() => onEdit(task)} title={t('taskItem.editTask')} disabled={isBlocked}>
+              <Button variant="ghost" size="icon" onClick={() => onEdit(task)} title={t('taskItem.editTask')}>
                 <Edit className="h-4 w-4" />
               </Button>
-              <Button variant="ghost" size="icon" onClick={() => onDelete(task.id)} className="text-destructive hover:text-destructive" title={t('taskItem.deleteTask')} disabled={isBlocked}>
+              <Button variant="ghost" size="icon" onClick={() => onDelete(task.id)} className="text-destructive hover:text-destructive" title={t('taskItem.deleteTask')}>
                 <Trash2 className="h-4 w-4" />
               </Button>
             </div>
