@@ -30,6 +30,7 @@ const Filters = memo(function Filters({ priorityFilter, setPriorityFilter, tagFi
       <div>
         <h3 className="text-sm font-medium mb-2">{t('filters.byPriority')}</h3>
         <ToggleGroup
+          size="xs"
           type="multiple"
           variant="outline"
           value={priorityFilter}
