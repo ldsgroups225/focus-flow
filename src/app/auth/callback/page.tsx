@@ -17,10 +17,10 @@ export default function AuthCallback() {
       try {
         // Wait a moment for the session to be fully established
         await new Promise(resolve => setTimeout(resolve, 1000));
-        
+
         // Verify the user is authenticated
         const user = await getCurrentUser();
-        
+
         if (user) {
           setStatus('success');
           // Redirect to home after a brief success message
@@ -34,7 +34,7 @@ export default function AuthCallback() {
         console.error('Auth callback error:', error);
         setStatus('error');
         setErrorMessage(error instanceof Error ? error.message : t('login.authFailedDesc'));
-        
+
         // Redirect to login after showing error
         setTimeout(() => {
           router.push('/?error=auth_failed');
@@ -43,7 +43,7 @@ export default function AuthCallback() {
     };
 
     handleCallback();
-  }, [router]);
+  }, [router, t]);
 
   return (
     <div className="flex flex-col items-center justify-center h-screen bg-background">

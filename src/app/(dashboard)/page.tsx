@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect, Suspense } from 'react';
-import { Plus, SlidersHorizontal, Orbit, Search, Sparkles, User2 } from 'lucide-react';
+import { Plus, SlidersHorizontal, Orbit, Search, Sparkles, User2, Settings, BarChart3, FileText } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { TaskList } from '@/app/components/task-list';
 import { Filters } from '@/app/components/filters';
@@ -30,7 +30,6 @@ import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { DashboardSheet } from '@/components/ui/dashboard-sheet';
 import { SidebarContent } from '@/app/components/sidebar-content';
-import { BarChart3 } from 'lucide-react';
 import { getNameFromEmail } from '@/lib/utils/get-name-from-email';
 import { getAvatarInitial } from '@/lib/utils/get-avatar-initial';
 
@@ -150,6 +149,13 @@ export default function DashboardPage() {
                   {t('dashboard.title')}
                 </DropdownMenuItem>
                 <DropdownMenuSeparator />
+                <DropdownMenuItem asChild>
+                  <Link href="/settings">
+                    <Settings className="mr-2 h-4 w-4" />
+                    {t('settings.title')}
+                  </Link>
+                </DropdownMenuItem>
+                <DropdownMenuSeparator />
                 <DropdownMenuItem onClick={handleSignOut}>
                   {t('login.signOut')}
                 </DropdownMenuItem>
@@ -176,6 +182,18 @@ export default function DashboardPage() {
               </Button>
               <Button variant="outline" size="sm" className="w-full" asChild>
                 <Link href="/timeline">{t('dashboard.timeline')}</Link>
+              </Button>
+              <Button variant="outline" size="sm" className="w-full" asChild>
+                <Link href="/analytics">
+                  <BarChart3 className="mr-2 h-4 w-4" />
+                  {t('analytics.title')}
+                </Link>
+              </Button>
+              <Button variant="outline" size="sm" className="w-full" asChild>
+                <Link href="/templates">
+                  <FileText className="mr-2 h-4 w-4" />
+                  {t('templates.title')}
+                </Link>
               </Button>
             </div>
           </aside>

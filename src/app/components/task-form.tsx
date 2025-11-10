@@ -11,6 +11,7 @@ import {
   DialogHeader,
   DialogTitle,
   DialogFooter,
+  DialogDescription,
 } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
@@ -38,7 +39,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { CalendarIcon, BrainCircuit, Link, Sparkles, LoaderCircle, Trash2 } from 'lucide-react';
+import { CalendarIcon, BrainCircuit, Link, Sparkles, LoaderCircle, Trash2, FileText } from 'lucide-react';
 import { Calendar } from '@/components/ui/calendar';
 import { cn } from '@/lib/utils';
 import { format } from 'date-fns';
@@ -46,6 +47,8 @@ import type { Task, Workspace } from '@/lib/types';
 import { useI18n } from './i18n-provider';
 import { suggestTags, suggestDueDate, breakdownTask } from '@/ai/flows/features-flow';
 import { useFieldArray, Control, UseFormRegister } from 'react-hook-form';
+import { TemplateService } from '@/lib/services/template-service';
+import { useAuth } from './auth-provider';
 
 // Simple subtask for form (before saving to DB)
 const formSubTaskSchema = z.object({
@@ -105,6 +108,7 @@ type TaskFormValues = z.infer<ReturnType<typeof taskSchema>>;
 import { Project } from '@/lib/types';
 
 import type { TaskWithSubTasks } from '@/lib/types';
+import { Label } from '@/components/ui/label';
 
 type TaskFormProps = {
   isOpen: boolean;
@@ -118,8 +122,12 @@ type TaskFormProps = {
 
 export function TaskForm({ isOpen, onClose, onSave, task, allTasks, activeWorkspace, projects }: TaskFormProps) {
   const { t } = useI18n();
+  const { user } = useAuth();
   const currentTaskSchema = taskSchema(t);
   const [isAiLoading, setIsAiLoading] = useState<Record<string, boolean>>({});
+  const [isSaveTemplateOpen, setIsSaveTemplateOpen] = useState(false);
+  const [templateName, setTemplateName] = useState('');
+  const [templateDescription, setTemplateDescription] = useState('');
 
   const form = useForm<TaskFormValues>({
     resolver: zodResolver(currentTaskSchema),
@@ -206,6 +214,30 @@ export function TaskForm({ isOpen, onClose, onSave, task, allTasks, activeWorksp
     onClose();
   };
 
+  const handleSaveTemplate = () => {
+    if (!user?.uid) return;
+
+    const data = form.getValues();
+    const tagsArray = data.tags ? data.tags.split(',').map(tag => tag.trim()).filter(Boolean) : [];
+
+    const templateData = {
+      name: templateName || data.title,
+      description: templateDescription,
+      title: data.title,
+      priority: data.priority,
+      tags: tagsArray,
+      pomodoros: data.pomodoros,
+      workspace: data.workspace,
+      subTasks: data.subTasks || [],
+      userId: user.uid,
+    };
+
+    TemplateService.save(templateData);
+    setIsSaveTemplateOpen(false);
+    setTemplateName('');
+    setTemplateDescription('');
+  };
+
   const selectedDependencies = form.watch('dependsOn') || [];
 
   const AITriggerButton = ({ feature, className }: { feature: 'tags' | 'dueDate' | 'subTasks', className?: string }) => (
@@ -224,55 +256,159 @@ export function TaskForm({ isOpen, onClose, onSave, task, allTasks, activeWorksp
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-[480px]">
-        <DialogHeader>
+      <DialogContent className="sm:max-w-[480px] max-h-[90vh] flex flex-col">
+        <DialogHeader className="shrink-0">
           <DialogTitle>{task ? t('taskForm.editTask') : t('taskForm.addTask')}</DialogTitle>
         </DialogHeader>
         <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4 py-4">
-            <FormField
-              control={form.control}
-              name="title"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>{t('taskForm.title')}</FormLabel>
-                  <FormControl>
-                    <Input placeholder={t('taskForm.titlePlaceholder')} {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <FormField
-              control={form.control}
-              name="description"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>{t('taskForm.description')}</FormLabel>
-                  <FormControl>
-                    <Textarea placeholder={t('taskForm.descriptionPlaceholder')} {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <div className="grid grid-cols-2 gap-4">
+          <form onSubmit={form.handleSubmit(onSubmit)} className="flex flex-col flex-1 min-h-0">
+            <div className="space-y-3 py-3 overflow-y-auto flex-1 scrollbar-hide px-1">
               <FormField
                 control={form.control}
-                name="priority"
+                name="title"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>{t('taskForm.priority')}</FormLabel>
+                    <FormLabel>{t('taskForm.title')}</FormLabel>
+                    <FormControl>
+                      <Input placeholder={t('taskForm.titlePlaceholder')} {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="description"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>{t('taskForm.description')}</FormLabel>
+                    <FormControl>
+                      <Textarea placeholder={t('taskForm.descriptionPlaceholder')} {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <div className="grid grid-cols-2 gap-4">
+                <FormField
+                  control={form.control}
+                  name="priority"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>{t('taskForm.priority')}</FormLabel>
+                      <Select onValueChange={field.onChange} defaultValue={field.value}>
+                        <FormControl>
+                          <SelectTrigger>
+                            <SelectValue placeholder={t('taskForm.selectPriority')} />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          <SelectItem value="low">{t('taskForm.low')}</SelectItem>
+                          <SelectItem value="medium">{t('taskForm.medium')}</SelectItem>
+                          <SelectItem value="high">{t('taskForm.high')}</SelectItem>
+                        </SelectContent>
+                      </Select>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="dueDate"
+                  render={({ field }) => (
+                    <FormItem className="flex flex-col">
+                      <div className='relative pt-1'>
+                        <FormLabel className='mb-[6px] flex items-center flex-row'>
+                          {t('taskForm.dueDate')}
+                          <AITriggerButton feature="dueDate" className="w-3 h-3 ml-4" />
+                        </FormLabel>
+                        <Popover>
+                          <PopoverTrigger asChild>
+                            <FormControl>
+                              <Button
+                                variant={"outline"}
+                                className={cn(
+                                  "w-full pl-3 text-left font-normal",
+                                  !field.value && "text-muted-foreground"
+                                )}
+                              >
+                                {field.value ? (
+                                  format(field.value, "PPP")
+                                ) : (
+                                  <span>{t('taskForm.pickDate')}</span>
+                                )}
+                                <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
+                              </Button>
+                            </FormControl>
+                          </PopoverTrigger>
+                          <PopoverContent className="w-auto p-0" align="start">
+                            <Calendar
+                              mode="single"
+                              selected={field.value}
+                              onSelect={field.onChange}
+                              disabled={(date) => date < new Date(new Date().setHours(0, 0, 0, 0))}
+                            />
+                          </PopoverContent>
+                        </Popover>
+                      </div>
+                      <FormMessage className='pt-1' />
+                    </FormItem>
+                  )}
+                />
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <FormField
+                  control={form.control}
+                  name="tags"
+                  render={({ field }) => (
+                    <FormItem className='relative'>
+                      <FormLabel className='flex items-center'>{t('taskForm.tags')} <AITriggerButton feature="tags" className="w-3 h-3 ml-4" /></FormLabel>
+                      <FormControl>
+                        <Input placeholder={t('taskForm.tagsPlaceholder')} {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="pomodoros"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel className='flex items-center'>{t('taskForm.pomodoros')} <BrainCircuit className="w-3 h-3 ml-1 text-primary/80" /></FormLabel>
+                      <FormControl>
+                        <Input
+                          type="number"
+                          min="0"
+                          {...field}
+                          onChange={(e) => {
+                            const v = e.target.value;
+                            const n = v === '' ? 0 : Number(v);
+                            field.onChange(Number.isNaN(n) ? 0 : n);
+                          }}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
+              <FormField
+                control={form.control}
+                name="projectId"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>{t('taskForm.project')}</FormLabel>
                     <Select onValueChange={field.onChange} defaultValue={field.value}>
                       <FormControl>
                         <SelectTrigger>
-                          <SelectValue placeholder={t('taskForm.selectPriority')} />
+                          <SelectValue placeholder={t('taskForm.selectProject')} />
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>
-                        <SelectItem value="low">{t('taskForm.low')}</SelectItem>
-                        <SelectItem value="medium">{t('taskForm.medium')}</SelectItem>
-                        <SelectItem value="high">{t('taskForm.high')}</SelectItem>
+                        {projects.filter(p => p.workspace === activeWorkspace).map((project) => (
+                          <SelectItem key={project.id} value={project.id}>{project.name}</SelectItem>
+                        ))}
                       </SelectContent>
                     </Select>
                     <FormMessage />
@@ -281,170 +417,124 @@ export function TaskForm({ isOpen, onClose, onSave, task, allTasks, activeWorksp
               />
               <FormField
                 control={form.control}
-                name="dueDate"
-                render={({ field }) => (
-                  <FormItem className="flex flex-col">
-                    <div className='relative pt-1'>
-                      <FormLabel className='mb-[6px] flex items-center flex-row'>
-                        {t('taskForm.dueDate')}
-                        <AITriggerButton feature="dueDate" className="w-3 h-3 ml-4" />
-                      </FormLabel>
-                      <Popover>
-                        <PopoverTrigger asChild>
-                          <FormControl>
-                            <Button
-                              variant={"outline"}
-                              className={cn(
-                                "w-full pl-3 text-left font-normal",
-                                !field.value && "text-muted-foreground"
-                              )}
-                            >
-                              {field.value ? (
-                                format(field.value, "PPP")
-                              ) : (
-                                <span>{t('taskForm.pickDate')}</span>
-                              )}
-                              <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
-                            </Button>
-                          </FormControl>
-                        </PopoverTrigger>
-                        <PopoverContent className="w-auto p-0" align="start">
-                          <Calendar
-                            mode="single"
-                            selected={field.value}
-                            onSelect={field.onChange}
-                            disabled={(date) => date < new Date(new Date().setHours(0, 0, 0, 0))}
-                          />
-                        </PopoverContent>
-                      </Popover>
-                    </div>
-                    <FormMessage className='pt-1' />
-                  </FormItem>
-                )}
-              />
-            </div>
-            <div className="grid grid-cols-2 gap-4">
-              <FormField
-                control={form.control}
-                name="tags"
-                render={({ field }) => (
-                  <FormItem className='relative'>
-                    <FormLabel className='flex items-center'>{t('taskForm.tags')} <AITriggerButton feature="tags" className="w-3 h-3 ml-4" /></FormLabel>
-                    <FormControl>
-                      <Input placeholder={t('taskForm.tagsPlaceholder')} {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={form.control}
-                name="pomodoros"
+                name="dependsOn"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel className='flex items-center'>{t('taskForm.pomodoros')} <BrainCircuit className="w-3 h-3 ml-1 text-primary/80" /></FormLabel>
-                    <FormControl>
-                      <Input
-                        type="number"
-                        min="0"
-                        {...field}
-                        onChange={(e) => {
-                          const v = e.target.value;
-                          const n = v === '' ? 0 : Number(v);
-                          field.onChange(Number.isNaN(n) ? 0 : n);
-                        }}
-                      />
-                    </FormControl>
-                    <FormMessage />
+                    <FormLabel className="flex items-center">{t('taskForm.dependencies')} <Link className="w-3 h-3 ml-1 text-primary/80" /></FormLabel>
+                    <DropdownMenu>
+                      <DropdownMenuTrigger asChild>
+                        <Button variant="outline" className="w-full justify-start text-left font-normal">
+                          {selectedDependencies.length > 0
+                            ? `${selectedDependencies.length} ${t('filters.selected')}`
+                            : t('taskForm.selectDependencies')
+                          }
+                        </Button>
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent className="w-56" align="start">
+                        <DropdownMenuLabel>{t('taskForm.dependencies')}</DropdownMenuLabel>
+                        <DropdownMenuSeparator />
+                        {potentialDependencies.length > 0 ? (
+                          potentialDependencies.map(dep => (
+                            <DropdownMenuCheckboxItem
+                              key={dep.id}
+                              checked={field.value?.includes(dep.id)}
+                              onCheckedChange={(checked) => {
+                                const newValue = checked
+                                  ? [...(field.value || []), dep.id]
+                                  : (field.value || []).filter(id => id !== dep.id);
+                                field.onChange(newValue);
+                              }}
+                            >
+                              {dep.title}
+                            </DropdownMenuCheckboxItem>
+                          ))
+                        ) : (
+                          <div className="px-2 py-1.5 text-sm text-muted-foreground">{t('taskForm.noOtherTasks')}</div>
+                        )}
+                        {selectedDependencies.length > 0 && (
+                          <>
+                            <DropdownMenuSeparator />
+                            <Button variant="ghost" className="w-full h-8 text-sm" onClick={() => field.onChange([])}>{t('taskForm.clear')}</Button>
+                          </>
+                        )}
+                      </DropdownMenuContent>
+                    </DropdownMenu>
                   </FormItem>
                 )}
               />
-            </div>
-            <FormField
-              control={form.control}
-              name="projectId"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>{t('taskForm.project')}</FormLabel>
-                  <Select onValueChange={field.onChange} defaultValue={field.value}>
-                    <FormControl>
-                      <SelectTrigger>
-                        <SelectValue placeholder={t('taskForm.selectProject')} />
-                      </SelectTrigger>
-                    </FormControl>
-                    <SelectContent>
-                      {projects.filter(p => p.workspace === activeWorkspace).map((project) => (
-                        <SelectItem key={project.id} value={project.id}>{project.name}</SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <FormField
-              control={form.control}
-              name="dependsOn"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel className="flex items-center">{t('taskForm.dependencies')} <Link className="w-3 h-3 ml-1 text-primary/80" /></FormLabel>
-                  <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
-                      <Button variant="outline" className="w-full justify-start text-left font-normal">
-                        {selectedDependencies.length > 0
-                          ? `${selectedDependencies.length} ${t('filters.selected')}`
-                          : t('taskForm.selectDependencies')
-                        }
-                      </Button>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent className="w-56" align="start">
-                      <DropdownMenuLabel>{t('taskForm.dependencies')}</DropdownMenuLabel>
-                      <DropdownMenuSeparator />
-                      {potentialDependencies.length > 0 ? (
-                        potentialDependencies.map(dep => (
-                          <DropdownMenuCheckboxItem
-                            key={dep.id}
-                            checked={field.value?.includes(dep.id)}
-                            onCheckedChange={(checked) => {
-                              const newValue = checked
-                                ? [...(field.value || []), dep.id]
-                                : (field.value || []).filter(id => id !== dep.id);
-                              field.onChange(newValue);
-                            }}
-                          >
-                            {dep.title}
-                          </DropdownMenuCheckboxItem>
-                        ))
-                      ) : (
-                        <div className="px-2 py-1.5 text-sm text-muted-foreground">{t('taskForm.noOtherTasks')}</div>
-                      )}
-                      {selectedDependencies.length > 0 && (
-                        <>
-                          <DropdownMenuSeparator />
-                          <Button variant="ghost" className="w-full h-8 text-sm" onClick={() => field.onChange([])}>{t('taskForm.clear')}</Button>
-                        </>
-                      )}
-                    </DropdownMenuContent>
-                  </DropdownMenu>
-                </FormItem>
-              )}
-            />
-            <div>
-              <div className="flex items-center gap-2 mb-2">
-                <FormLabel>{t('taskForm.subTasks')}</FormLabel>
-                <AITriggerButton feature="subTasks" className="h-6 w-6" />
+              <div>
+                <div className="flex items-center gap-2 mb-2">
+                  <FormLabel>{t('taskForm.subTasks')}</FormLabel>
+                  <AITriggerButton feature="subTasks" className="h-6 w-6" />
+                </div>
+                <SubTaskInput control={form.control} register={form.register} name="subTasks" />
               </div>
-              <SubTaskInput control={form.control} register={form.register} name="subTasks" />
             </div>
-            <DialogFooter>
+            <DialogFooter className="shrink-0 pt-4 border-t mt-4">
               <Button type="button" variant="ghost" onClick={onClose}>
                 {t('taskForm.cancel')}
               </Button>
-              <Button type="submit">{t('taskForm.saveTask')}</Button>
+              <div className="flex gap-2">
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={() => setIsSaveTemplateOpen(true)}
+                  disabled={!form.getValues('title')}
+                >
+                  <FileText className="mr-2 h-4 w-4" />
+                  {t('templates.form.saveAsTemplate')}
+                </Button>
+                <Button type="submit">{t('taskForm.saveTask')}</Button>
+              </div>
             </DialogFooter>
           </form>
         </Form>
       </DialogContent>
+
+      <Dialog open={isSaveTemplateOpen} onOpenChange={setIsSaveTemplateOpen}>
+        <DialogContent className="sm:max-w-[425px]">
+          <DialogHeader>
+            <DialogTitle>{t('templates.create.title')}</DialogTitle>
+            <DialogDescription>
+              {t('templates.description')}
+            </DialogDescription>
+          </DialogHeader>
+          <div className="grid gap-4 py-4">
+            <div className="grid grid-cols-4 items-center gap-4">
+              <Label htmlFor="template-name" className="text-right">
+                {t('templates.create.name')}
+              </Label>
+              <Input
+                id="template-name"
+                value={templateName}
+                onChange={(e) => setTemplateName(e.target.value)}
+                className="col-span-3"
+                placeholder={t('templates.create.namePlaceholder')}
+              />
+            </div>
+            <div className="grid grid-cols-4 items-center gap-4">
+              <Label htmlFor="template-description" className="text-right">
+                {t('templates.create.description')}
+              </Label>
+              <Textarea
+                id="template-description"
+                value={templateDescription}
+                onChange={(e) => setTemplateDescription(e.target.value)}
+                className="col-span-3"
+                placeholder={t('templates.create.descriptionPlaceholder')}
+              />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button type="button" variant="outline" onClick={() => setIsSaveTemplateOpen(false)}>
+              {t('taskForm.cancel')}
+            </Button>
+            <Button type="button" onClick={handleSaveTemplate}>
+              {t('templates.create.save')}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </Dialog>
   );
 }

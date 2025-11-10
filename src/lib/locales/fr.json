@@ -264,5 +264,105 @@
   "navigation": {
     "back": "Retour",
     "views": "Vues"
+  },
+  "settings": {
+    "title": "Paramètres",
+    "theme": {
+      "title": "Thème",
+      "description": "Choisissez l'apparence de FocusFlow",
+      "light": "Clair",
+      "dark": "Sombre",
+      "system": "Système"
+    },
+    "defaults": {
+      "title": "Paramètres par Défaut des Tâches",
+      "description": "Définissez les valeurs par défaut pour les nouvelles tâches",
+      "priority": "Priorité par Défaut",
+      "workspace": "Espace de Travail par Défaut",
+      "pomodoros": "Pomodoros par Défaut"
+    },
+    "pomodoro": {
+      "title": "Paramètres Pomodoro",
+      "description": "Configurez votre minuteur de concentration",
+      "workDuration": "Durée de Travail (minutes)",
+      "shortBreak": "Pause Courte (minutes)",
+      "longBreak": "Pause Longue (minutes)",
+      "longBreakInterval": "Intervalle de Pause Longue"
+    },
+    "notifications": {
+      "title": "Notifications",
+      "description": "Gérez vos préférences de notifications",
+      "enableNotifications": "Activer les Notifications",
+      "taskReminders": "Rappels de Tâches",
+      "breakReminders": "Rappels de Pause"
+    },
+    "keyboard": {
+      "title": "Raccourcis Clavier",
+      "description": "Personnalisez les raccourcis clavier",
+      "enableShortcuts": "Activer les Raccourcis Clavier"
+    }
+  },
+  "analytics": {
+    "title": "Analytique",
+    "overview": "Aperçu",
+    "timeRange": "Période",
+    "last7Days": "7 derniers jours",
+    "last30Days": "30 derniers jours",
+    "thisMonth": "Ce mois",
+    "custom": "Personnalisé",
+    "tasks": {
+      "title": "Métriques des Tâches",
+      "completed": "Tâches Terminées",
+      "created": "Tâches Créées",
+      "inProgress": "En Cours",
+      "completionRate": "Taux de Completion"
+    },
+    "pomodoro": {
+      "title": "Analytique Pomodoro",
+      "completed": "Sessions Terminées",
+      "totalTime": "Temps de Concentration Total",
+      "average": "Moyenne par Jour"
+    },
+    "productivity": {
+      "title": "Tendances de Productivité",
+      "dailyTasks": "Tâches Quotidiennes",
+      "weeklyComparison": "Comparaison Hebdomadaire"
+    },
+    "workspace": {
+      "title": "Distribution des Espaces",
+      "timeAllocation": "Répartition du Temps par Espace"
+    },
+    "priority": {
+      "title": "Distribution des Priorités",
+      "breakdown": "Tâches par Priorité"
+    }
+  },
+  "templates": {
+    "title": "Modèles de Tâches",
+    "description": "Sauvegardez et réutilisez des modèles de tâches courants",
+    "create": {
+      "title": "Créer un Modèle",
+      "edit": "Modifier le Modèle",
+      "name": "Nom du Modèle",
+      "namePlaceholder": "ex: Modèle de Rapport de Bug",
+      "description": "Description",
+      "descriptionPlaceholder": "Description de ce modèle...",
+      "save": "Sauvegarder le Modèle"
+    },
+    "list": {
+      "title": "Vos Modèles",
+      "use": "Utiliser le Modèle",
+      "edit": "Modifier",
+      "delete": "Supprimer",
+      "noTemplates": "Aucun modèle pour le moment. Créez-en un à partir d'une tâche ou à partir de zéro."
+    },
+    "select": {
+      "title": "Choisir un Modèle",
+      "searchPlaceholder": "Rechercher des modèles...",
+      "useTemplate": "Utiliser ce Modèle"
+    },
+    "form": {
+      "saveAsTemplate": "Ajouter au Modèle"
+    }
   }
 }

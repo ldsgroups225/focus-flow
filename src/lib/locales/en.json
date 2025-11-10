@@ -264,5 +264,105 @@
   "navigation": {
     "back": "Back",
     "views": "Views"
+  },
+  "settings": {
+    "title": "Settings",
+    "theme": {
+      "title": "Theme",
+      "description": "Choose how FocusFlow looks to you",
+      "light": "Light",
+      "dark": "Dark",
+      "system": "System"
+    },
+    "defaults": {
+      "title": "Default Task Settings",
+      "description": "Set default values for new tasks",
+      "priority": "Default Priority",
+      "workspace": "Default Workspace",
+      "pomodoros": "Default Pomodoros"
+    },
+    "pomodoro": {
+      "title": "Pomodoro Settings",
+      "description": "Configure your focus timer",
+      "workDuration": "Work Duration (minutes)",
+      "shortBreak": "Short Break (minutes)",
+      "longBreak": "Long Break (minutes)",
+      "longBreakInterval": "Long Break Interval"
+    },
+    "notifications": {
+      "title": "Notifications",
+      "description": "Manage your notification preferences",
+      "enableNotifications": "Enable Notifications",
+      "taskReminders": "Task Reminders",
+      "breakReminders": "Break Reminders"
+    },
+    "keyboard": {
+      "title": "Keyboard Shortcuts",
+      "description": "Customize keyboard shortcuts",
+      "enableShortcuts": "Enable Keyboard Shortcuts"
+    }
+  },
+  "analytics": {
+    "title": "Analytics",
+    "overview": "Overview",
+    "timeRange": "Time Range",
+    "last7Days": "Last 7 days",
+    "last30Days": "Last 30 days",
+    "thisMonth": "This month",
+    "custom": "Custom",
+    "tasks": {
+      "title": "Task Metrics",
+      "completed": "Completed Tasks",
+      "created": "Created Tasks",
+      "inProgress": "In Progress",
+      "completionRate": "Completion Rate"
+    },
+    "pomodoro": {
+      "title": "Pomodoro Analytics",
+      "completed": "Completed Sessions",
+      "totalTime": "Total Focus Time",
+      "average": "Average per Day"
+    },
+    "productivity": {
+      "title": "Productivity Trends",
+      "dailyTasks": "Daily Task Completion",
+      "weeklyComparison": "Weekly Comparison"
+    },
+    "workspace": {
+      "title": "Workspace Distribution",
+      "timeAllocation": "Time Allocation by Workspace"
+    },
+    "priority": {
+      "title": "Priority Distribution",
+      "breakdown": "Tasks by Priority"
+    }
+  },
+  "templates": {
+    "title": "Task Templates",
+    "description": "Save and reuse common task patterns",
+    "create": {
+      "title": "Create Template",
+      "edit": "Edit Template",
+      "name": "Template Name",
+      "namePlaceholder": "e.g., Bug Report Template",
+      "description": "Description",
+      "descriptionPlaceholder": "Description of this template...",
+      "save": "Save Template"
+    },
+    "list": {
+      "title": "Your Templates",
+      "use": "Use Template",
+      "edit": "Edit",
+      "delete": "Delete",
+      "noTemplates": "No templates yet. Create one from a task or from scratch."
+    },
+    "select": {
+      "title": "Choose a Template",
+      "searchPlaceholder": "Search templates...",
+      "useTemplate": "Use This Template"
+    },
+    "form": {
+      "saveAsTemplate": "Save as Template"
+    }
   }
 }

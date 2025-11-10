@@ -52,7 +52,6 @@ const serializeTask = (task: Task): SerializableTask => {
     workspace,
     projectId,
     duration,
-    ...rest
   } = task;
 
   const rawTags = tags as unknown;
@@ -222,7 +221,7 @@ export function AiReviewDialog({ isOpen, onClose, tasks }: AiReviewDialogProps) 
             <Loader2 className="h-8 w-8 animate-spin text-primary" />
           </div>
         )}
-        
+
         {error && (
           <div className="py-4 text-center text-destructive">
             <p>{error}</p>
