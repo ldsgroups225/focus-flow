@@ -27,6 +27,7 @@ import { useKeyboardShortcuts } from '@/lib/hooks/use-keyboard-shortcuts';
 import { useTaskSelection } from '@/lib/hooks/use-task-selection';
 import { LazyTaskForm, LazyFocusView, LazyAiReviewDialog, LazyCommandSearch, LazyShortcutsHelp, LazyBulkActionsToolbar } from '@/lib/utils/lazy';
 import { useRouter } from 'next/navigation';
+import Link from 'next/link';
 import { DashboardSheet } from '@/components/ui/dashboard-sheet';
 import { SidebarContent } from '@/app/components/sidebar-content';
 import { BarChart3 } from 'lucide-react';
@@ -168,6 +169,15 @@ export default function DashboardPage() {
               projects={projects}
               setSelectedProjectId={setSelectedProjectId}
             />
+            <div className="mt-8 space-y-2">
+              <h2 className="text-lg font-semibold mb-4">{t('navigation.views')}</h2>
+              <Button variant="outline" size="sm" className="w-full" asChild>
+                <Link href="/calendar">{t('dashboard.calendar')}</Link>
+              </Button>
+              <Button variant="outline" size="sm" className="w-full" asChild>
+                <Link href="/timeline">{t('dashboard.timeline')}</Link>
+              </Button>
+            </div>
           </aside>
 
           <div className="md:col-span-3">

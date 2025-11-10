@@ -232,7 +232,9 @@
     "next7Days": "prochains 7 jours",
     "today": "Aujourd'hui",
     "tomorrow": "Demain",
-    "yesterday": "Hier"
+    "yesterday": "Hier",
+    "calendar": "Calendrier",
+    "timeline": "Chronologie"
   },
   "projects": {
     "title": "Gérer les Projets",
@@ -258,5 +260,9 @@
       "edit": "Modifier",
       "delete": "Supprimer"
     }
+  },
+  "navigation": {
+    "back": "Retour",
+    "views": "Vues"
   }
 }
