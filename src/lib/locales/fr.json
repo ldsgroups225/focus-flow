@@ -12,7 +12,11 @@
     "byTag": "Par Étiquette",
     "selectTags": "Selection ...",
     "selected": "sélectionné(s)",
-    "clearFilters": "Effacer les filtres"
+    "clearFilters": "Effacer les filtres",
+    "byType": "Par Type",
+    "tasks": "Tâches",
+    "milestones": "Jalons",
+    "subtasks": "Sous-tâches"
   },
   "taskList": {
     "allClear": "Tout est net !",
@@ -29,7 +33,12 @@
     "blocked": "Bloquée",
     "blockedBy": "Cette tâche est bloquée par : {tasks}",
     "markComplete": "Marquer la tâche comme terminée : {taskTitle}",
-    "markIncomplete": "Marquer la tâche comme non terminée : {taskTitle}"
+    "markIncomplete": "Marquer la tâche comme non terminée : {taskTitle}",
+    "milestone": "Jalon",
+    "subtask": "Sous-tâche",
+    "durationDays": "{count} jour",
+    "durationDaysPlural": "{count} jours",
+    "startsOn": "Commence le {date}"
   },
   "taskForm": {
     "editTask": "Modifier la Tâche",
@@ -62,6 +71,19 @@
     "addSubTask": "Ajouter une Sous-tâche",
     "project": "Projet",
     "selectProject": "Sélectionner un projet",
+    "type": "Type de Tâche",
+    "taskType": "Tâche",
+    "milestoneType": "Jalon",
+    "subtaskType": "Sous-tâche",
+    "dateInputMode": "Mode de Planification",
+    "dueDateMode": "Date d'Échéance",
+    "durationMode": "Durée",
+    "startDate": "Date de Début",
+    "duration": "Durée (jours)",
+    "durationPlaceholder": "Nombre de jours",
+    "milestoneNote": "Les jalons marquent un point dans le temps (durée zéro)",
+    "durationCalculated": "La date d'échéance sera calculée à partir de la date de début + durée",
+    "milestoneZeroDuration": "Les jalons doivent avoir une durée zéro",
     "ai": {
       "tags": "Suggérer des Étiquettes avec l'IA",
       "dueDate": "Suggérer une Date d'Échéance avec l'IA",

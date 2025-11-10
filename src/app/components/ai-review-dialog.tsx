@@ -79,6 +79,7 @@ const serializeTask = (task: Task): SerializableTask => {
     id,
     title,
     completed: Boolean(completed),
+    type: (task.type ?? 'task') as SerializableTask['type'],
     priority: priority as SerializableTask['priority'],
     workspace: workspace as SerializableTask['workspace'],
     tags: normalizedTags,

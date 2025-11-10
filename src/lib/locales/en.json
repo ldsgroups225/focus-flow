@@ -12,7 +12,11 @@
     "byTag": "By Tag",
     "selectTags": "Select tags",
     "selected": "selected",
-    "clearFilters": "Clear filters"
+    "clearFilters": "Clear filters",
+    "byType": "By Type",
+    "tasks": "Tasks",
+    "milestones": "Milestones",
+    "subtasks": "Subtasks"
   },
   "taskList": {
     "allClear": "All Clear!",
@@ -29,7 +33,12 @@
     "blocked": "Blocked",
     "blockedBy": "This task is blocked by: {tasks}",
     "markComplete": "Mark task complete: {taskTitle}",
-    "markIncomplete": "Mark task incomplete: {taskTitle}"
+    "markIncomplete": "Mark task incomplete: {taskTitle}",
+    "milestone": "Milestone",
+    "subtask": "Subtask",
+    "durationDays": "{count} day",
+    "durationDaysPlural": "{count} days",
+    "startsOn": "Starts {date}"
   },
   "taskForm": {
     "editTask": "Edit Task",
@@ -62,6 +71,19 @@
     "addSubTask": "Add Sub-task",
     "project": "Project",
     "selectProject": "Select a project",
+    "type": "Task Type",
+    "taskType": "Task",
+    "milestoneType": "Milestone",
+    "subtaskType": "Subtask",
+    "dateInputMode": "Scheduling Mode",
+    "dueDateMode": "Due Date",
+    "durationMode": "Duration",
+    "startDate": "Start Date",
+    "duration": "Duration (days)",
+    "durationPlaceholder": "Number of days",
+    "milestoneNote": "Milestones mark a point in time (zero duration)",
+    "durationCalculated": "Due date will be calculated from start date + duration",
+    "milestoneZeroDuration": "Milestones must have zero duration",
     "ai": {
       "tags": "Suggest Tags with AI",
       "dueDate": "Suggest Due Date with AI",

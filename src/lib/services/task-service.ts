@@ -161,12 +161,12 @@ export class TaskService {
     // Helper to recursively add a task and its dependents
     const addTaskWithDependents = (task: TaskWithSubTasks & { isBlocked?: boolean; blockingTasks?: string[] }) => {
       if (processed.has(task.id)) return;
-      
+
       processed.add(task.id);
       result.push(task);
 
       // Find tasks that depend on this one
-      const dependents = tasks.filter(t => 
+      const dependents = tasks.filter(t =>
         t.dependsOn?.includes(task.id) && !processed.has(t.id)
       );
 
@@ -193,6 +193,7 @@ export class TaskService {
       priorityFilter: string[];
       tagFilter: string[];
       searchQuery: string;
+      typeFilter?: string[];
     }
   ): (TaskWithSubTasks & { isBlocked?: boolean; blockingTasks?: string[] })[] {
     return tasks.filter(task => {
@@ -203,6 +204,11 @@ export class TaskService {
 
       // Tag filter
       if (filters.tagFilter.length > 0 && !filters.tagFilter.some(tag => task.tags.includes(tag))) {
+        return false;
+      }
+
+      // Type filter
+      if (filters.typeFilter && filters.typeFilter.length > 0 && !filters.typeFilter.includes(task.type || 'task')) {
         return false;
       }
 
@@ -220,5 +226,21 @@ export class TaskService {
 
       return true;
     });
+  }
+
+  static filterTasksByType(tasks: TaskWithSubTasks[], types: string[]): TaskWithSubTasks[] {
+    if (types.length === 0) return tasks;
+    return tasks.filter(task => types.includes(task.type || 'task'));
+  }
+
+  static getMilestones(tasks: TaskWithSubTasks[]): TaskWithSubTasks[] {
+    return tasks.filter(task => task.type === 'milestone');
+  }
+
+  static validateMilestone(task: Partial<Task>): boolean {
+    if (task.type === 'milestone' && task.duration && task.duration !== 0) {
+      throw new Error('Milestones must have zero duration');
+    }
+    return true;
   }
 }

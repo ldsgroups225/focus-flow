@@ -2,6 +2,7 @@ import { z } from 'genkit';
 
 export type Priority = "low" | "medium" | "high";
 export type Workspace = "personal" | "work" | "side-project";
+export type TaskType = "task" | "milestone" | "subtask";
 
 // SubTask now stored in separate table
 export const subTaskSchema = z.object({
@@ -30,6 +31,7 @@ export const taskSchema = z.object({
   description: z.string().optional(),
   completed: z.boolean(),
   priority: z.enum(['low', 'medium', 'high']),
+  type: z.enum(['task', 'milestone', 'subtask']).default('task'),
   tags: z.array(z.string()),
   dueDate: z.coerce.date().optional(),
   pomodoros: z.number(),
@@ -41,7 +43,16 @@ export const taskSchema = z.object({
   startDate: z.coerce.date().optional(),
   duration: z.number().optional(), // Duration in days
   projectId: z.string().optional(),
-}).describe('A task object');
+}).describe('A task object').refine((data) => {
+  // Milestones must have zero duration
+  if (data.type === 'milestone' && data.duration && data.duration !== 0) {
+    return false;
+  }
+  return true;
+}, {
+  message: "Milestones must have zero duration",
+  path: ["duration"],
+});
 
 export type Task = z.infer<typeof taskSchema>;
 

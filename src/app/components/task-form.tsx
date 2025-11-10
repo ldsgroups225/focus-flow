@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { useForm, type SubmitHandler } from 'react-hook-form';
+import { useForm, useFieldArray, Control, UseFormRegister, type SubmitHandler, type Resolver } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
 import { Button } from '@/components/ui/button';
@@ -39,6 +39,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group';
 import { CalendarIcon, BrainCircuit, Link, Sparkles, LoaderCircle, Trash2, FileText } from 'lucide-react';
 import { Calendar } from '@/components/ui/calendar';
 import { cn } from '@/lib/utils';
@@ -46,7 +47,6 @@ import { format } from 'date-fns';
 import type { Task, Workspace } from '@/lib/types';
 import { useI18n } from './i18n-provider';
 import { suggestTags, suggestDueDate, breakdownTask } from '@/ai/flows/features-flow';
-import { useFieldArray, Control, UseFormRegister } from 'react-hook-form';
 import { TemplateService } from '@/lib/services/template-service';
 import { useAuth } from './auth-provider';
 
@@ -94,8 +94,11 @@ const taskSchema = (t: (key: string) => string) => z.object({
   title: z.string().min(1, t('taskForm.titleRequired')),
   description: z.string().optional(),
   priority: z.enum(['low', 'medium', 'high']),
+  type: z.enum(['task', 'milestone', 'subtask']),
   tags: z.string().optional(),
   dueDate: z.date().optional(),
+  startDate: z.date().optional(),
+  duration: z.number().int().min(0).optional(),
   pomodoros: z.number().int().min(0, t('taskForm.pomodorosPositive')),
   dependsOn: z.array(z.string()).optional(),
   workspace: z.enum(['personal', 'work', 'side-project']),
@@ -129,14 +132,19 @@ export function TaskForm({ isOpen, onClose, onSave, task, allTasks, activeWorksp
   const [templateName, setTemplateName] = useState('');
   const [templateDescription, setTemplateDescription] = useState('');
 
+  const [dateInputMode, setDateInputMode] = useState<'dueDate' | 'duration'>('dueDate');
+
   const form = useForm<TaskFormValues>({
-    resolver: zodResolver(currentTaskSchema),
+    resolver: zodResolver(currentTaskSchema) as Resolver<TaskFormValues>,
     defaultValues: {
       title: '',
       description: '',
       priority: 'medium' as const,
+      type: 'task',
       tags: '',
       dueDate: undefined,
+      startDate: undefined,
+      duration: 0,
       pomodoros: 1,
       dependsOn: [],
       workspace: activeWorkspace,
@@ -154,25 +162,36 @@ export function TaskForm({ isOpen, onClose, onSave, task, allTasks, activeWorksp
           title: task.title,
           description: task.description || '',
           priority: task.priority,
+          type: task.type || 'task',
           tags: task.tags.join(', '),
           dueDate: task.dueDate ? new Date(task.dueDate) : undefined,
+          startDate: task.startDate ? new Date(task.startDate) : undefined,
+          duration: task.duration || 0,
           pomodoros: task.pomodoros,
           dependsOn: task.dependsOn || [],
           workspace: task.workspace,
           subTasks: task.subTasks || [],
         });
+        // Set date input mode based on existing data
+        if (task.duration && task.duration > 0 && task.startDate) {
+          setDateInputMode('duration');
+        }
       } else {
         form.reset({
           title: '',
           description: '',
           priority: 'medium',
+          type: 'task',
           tags: '',
           dueDate: undefined,
+          startDate: undefined,
+          duration: 0,
           pomodoros: 1,
           dependsOn: [],
           workspace: activeWorkspace,
           subTasks: [],
         });
+        setDateInputMode('dueDate');
       }
     }
   }, [task, form, isOpen, activeWorkspace]);
@@ -208,7 +227,51 @@ export function TaskForm({ isOpen, onClose, onSave, task, allTasks, activeWorksp
     }
   };
 
+  // Watch for changes and auto-calculate duration/dueDate
+  const taskType = form.watch('type');
+  const startDate = form.watch('startDate');
+  const duration = form.watch('duration');
+  const dueDate = form.watch('dueDate');
+  const hasDependencies = (form.watch('dependsOn') ?? []).length > 0;
+
+  // Auto-switch to duration mode when dependencies are added
+  useEffect(() => {
+    if (hasDependencies && dateInputMode === 'dueDate' && !task) {
+      setDateInputMode('duration');
+    }
+  }, [hasDependencies, dateInputMode, task]);
+
+  // Calculate dueDate from startDate + duration
+  useEffect(() => {
+    if (dateInputMode === 'duration' && startDate && duration && duration > 0) {
+      const calculated = new Date(startDate);
+      calculated.setDate(calculated.getDate() + duration);
+      form.setValue('dueDate', calculated, { shouldValidate: false });
+    }
+  }, [startDate, duration, dateInputMode, form]);
+
+  // Calculate duration from dueDate - startDate
+  useEffect(() => {
+    if (dateInputMode === 'dueDate' && startDate && dueDate) {
+      const days = Math.ceil((dueDate.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24));
+      form.setValue('duration', Math.max(0, days), { shouldValidate: false });
+    }
+  }, [startDate, dueDate, dateInputMode, form]);
+
+  // Lock duration to 0 for milestones
+  useEffect(() => {
+    if (taskType === 'milestone') {
+      form.setValue('duration', 0, { shouldValidate: false });
+    }
+  }, [taskType, form]);
+
   const onSubmit: SubmitHandler<TaskFormValues> = (data) => {
+    // Validate milestone duration
+    if (data.type === 'milestone' && data.duration && data.duration !== 0) {
+      form.setError('duration', { message: t('taskForm.milestoneZeroDuration') });
+      return;
+    }
+
     const tagsArray = data.tags ? data.tags.split(',').map(tag => tag.trim()).filter(Boolean) : [];
     onSave({ ...data, tags: tagsArray });
     onClose();
@@ -314,14 +377,139 @@ export function TaskForm({ isOpen, onClose, onSave, task, allTasks, activeWorksp
                 />
                 <FormField
                   control={form.control}
+                  name="type"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>{t('taskForm.type')}</FormLabel>
+                      <Select onValueChange={field.onChange} defaultValue={field.value}>
+                        <FormControl>
+                          <SelectTrigger>
+                            <SelectValue />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          <SelectItem value="task">📋 {t('taskForm.taskType')}</SelectItem>
+                          <SelectItem value="milestone">💎 {t('taskForm.milestoneType')}</SelectItem>
+                          <SelectItem value="subtask">📝 {t('taskForm.subtaskType')}</SelectItem>
+                        </SelectContent>
+                      </Select>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+              </div>
+              {taskType !== 'milestone' && (
+                <div className="mb-2">
+                  <ToggleGroup
+                    type="single"
+                    value={dateInputMode}
+                    onValueChange={(value) => value && setDateInputMode(value as 'dueDate' | 'duration')}
+                    size="xs"
+                    spacing={0}
+                    variant="outline"
+                  >
+                    <ToggleGroupItem value="dueDate" aria-label="Due date mode">
+                      {t('taskForm.dueDateMode')}
+                    </ToggleGroupItem>
+                    <ToggleGroupItem value="duration" aria-label="Duration mode">
+                      {t('taskForm.durationMode')}
+                    </ToggleGroupItem>
+                  </ToggleGroup>
+                </div>
+              )}
+              {taskType === 'milestone' ? (
+                <FormField
+                  control={form.control}
                   name="dueDate"
                   render={({ field }) => (
                     <FormItem className="flex flex-col">
-                      <div className='relative pt-1'>
-                        <FormLabel className='mb-[6px] flex items-center flex-row'>
-                          {t('taskForm.dueDate')}
-                          <AITriggerButton feature="dueDate" className="w-3 h-3 ml-4" />
-                        </FormLabel>
+                      <FormLabel className='flex items-center'>
+                        {t('taskForm.dueDate')}
+                        <AITriggerButton feature="dueDate" className="w-3 h-3 ml-4" />
+                      </FormLabel>
+                      <Popover>
+                        <PopoverTrigger asChild>
+                          <FormControl>
+                            <Button
+                              variant={"outline"}
+                              className={cn(
+                                "w-full pl-3 text-left font-normal",
+                                !field.value && "text-muted-foreground"
+                              )}
+                            >
+                              {field.value ? (
+                                format(field.value, "PPP")
+                              ) : (
+                                <span>{t('taskForm.pickDate')}</span>
+                              )}
+                              <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
+                            </Button>
+                          </FormControl>
+                        </PopoverTrigger>
+                        <PopoverContent className="w-auto p-0" align="start">
+                          <Calendar
+                            mode="single"
+                            selected={field.value}
+                            onSelect={field.onChange}
+                            disabled={(date) => date < new Date(new Date().setHours(0, 0, 0, 0))}
+                          />
+                        </PopoverContent>
+                      </Popover>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              ) : dateInputMode === 'dueDate' ? (
+                <FormField
+                  control={form.control}
+                  name="dueDate"
+                  render={({ field }) => (
+                    <FormItem className="flex flex-col">
+                      <FormLabel className='flex items-center'>
+                        {t('taskForm.dueDate')}
+                        <AITriggerButton feature="dueDate" className="w-3 h-3 ml-4" />
+                      </FormLabel>
+                      <Popover>
+                        <PopoverTrigger asChild>
+                          <FormControl>
+                            <Button
+                              variant={"outline"}
+                              className={cn(
+                                "w-full pl-3 text-left font-normal",
+                                !field.value && "text-muted-foreground"
+                              )}
+                            >
+                              {field.value ? (
+                                format(field.value, "PPP")
+                              ) : (
+                                <span>{t('taskForm.pickDate')}</span>
+                              )}
+                              <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
+                            </Button>
+                          </FormControl>
+                        </PopoverTrigger>
+                        <PopoverContent className="w-auto p-0" align="start">
+                          <Calendar
+                            mode="single"
+                            selected={field.value}
+                            onSelect={field.onChange}
+                            disabled={(date) => date < new Date(new Date().setHours(0, 0, 0, 0))}
+                          />
+                        </PopoverContent>
+                      </Popover>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              ) : (
+                <div className="grid grid-cols-2 gap-4">
+                  <FormField
+                    control={form.control}
+                    name="startDate"
+                    render={({ field }) => (
+                      <FormItem className="flex flex-col">
+                        <FormLabel>{t('taskForm.startDate')}</FormLabel>
                         <Popover>
                           <PopoverTrigger asChild>
                             <FormControl>
@@ -350,12 +538,35 @@ export function TaskForm({ isOpen, onClose, onSave, task, allTasks, activeWorksp
                             />
                           </PopoverContent>
                         </Popover>
-                      </div>
-                      <FormMessage className='pt-1' />
-                    </FormItem>
-                  )}
-                />
-              </div>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={form.control}
+                    name="duration"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>{t('taskForm.duration')}</FormLabel>
+                        <FormControl>
+                          <Input
+                            type="number"
+                            min="0"
+                            placeholder={t('taskForm.durationPlaceholder')}
+                            {...field}
+                            onChange={(e) => {
+                              const v = e.target.value;
+                              const n = v === '' ? 0 : Number(v);
+                              field.onChange(Number.isNaN(n) ? 0 : n);
+                            }}
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
+              )}
               <div className="grid grid-cols-2 gap-4">
                 <FormField
                   control={form.control}
