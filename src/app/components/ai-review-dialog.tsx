@@ -45,6 +45,7 @@ const serializeTask = (task: Task): SerializableTask => {
     completedPomodoros,
     timeSpent,
     id,
+    $id,
     title,
     description,
     completed,
@@ -52,6 +53,8 @@ const serializeTask = (task: Task): SerializableTask => {
     workspace,
     projectId,
     duration,
+    $createdAt,
+    $updatedAt,
   } = task;
 
   const rawTags = tags as unknown;
@@ -77,6 +80,7 @@ const serializeTask = (task: Task): SerializableTask => {
 
   const baseTask: SerializableTask = {
     id,
+    $id,
     title,
     completed: Boolean(completed),
     priority: priority as SerializableTask['priority'],
@@ -85,6 +89,8 @@ const serializeTask = (task: Task): SerializableTask => {
     pomodoros: normalizedPomodoros,
     completedPomodoros: normalizedCompletedPomodoros,
     timeSpent: normalizedTimeSpent,
+    $createdAt,
+    $updatedAt,
   };
 
   if (typeof description === 'string' && description.length > 0) {

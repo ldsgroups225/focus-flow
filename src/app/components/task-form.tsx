@@ -113,7 +113,7 @@ import { Label } from '@/components/ui/label';
 type TaskFormProps = {
   isOpen: boolean;
   onClose: () => void;
-  onSave: (data: Omit<Task, 'completed' | 'completedPomodoros' | 'id' | 'timeSpent' | 'completedDate'> & { id?: string; subTasks?: { title: string; completed?: boolean; order?: number }[] }) => void;
+  onSave: (data: Partial<Task> & { subTasks?: { title: string; completed?: boolean; order?: number }[] }) => void;
   task?: TaskWithSubTasks;
   allTasks: TaskWithSubTasks[];
   activeWorkspace: Workspace;
@@ -210,7 +210,19 @@ export function TaskForm({ isOpen, onClose, onSave, task, allTasks, activeWorksp
 
   const onSubmit: SubmitHandler<TaskFormValues> = (data) => {
     const tagsArray = data.tags ? data.tags.split(',').map(tag => tag.trim()).filter(Boolean) : [];
-    onSave({ ...data, tags: tagsArray });
+    const taskData = {
+        ...data,
+        tags: tagsArray,
+        id: task?.id,
+        $id: task?.$id,
+        completed: task?.completed || false,
+        completedPomodoros: task?.completedPomodoros || 0,
+        timeSpent: task?.timeSpent || 0,
+        completedDate: task?.completedDate,
+        $createdAt: task?.$createdAt || new Date().toISOString(),
+        $updatedAt: new Date().toISOString(),
+    };
+    onSave(taskData);
     onClose();
   };
 

@@ -1,5 +1,6 @@
 import { fileURLToPath } from "node:url";
 import createJiti from "jiti";
+import withPWA from "next-pwa";
 
 // Import env here to validate during build. Using jiti we can import .ts files :)
 const jiti = createJiti(fileURLToPath(import.meta.url));
@@ -7,6 +8,7 @@ jiti("./src/env");
 
 /** @type {import('next').NextConfig} */
 const nextConfig = {
+  turbopack: {},
   /* config options here */
   typescript: {
     ignoreBuildErrors: true,
@@ -43,4 +45,8 @@ const nextConfig = {
   transpilePackages: ["@t3-oss/env-nextjs", "@t3-oss/env-core"],
 };
 
-export default nextConfig;
+export default withPWA({
+  dest: "public",
+  register: true,
+  skipWaiting: true,
+})(nextConfig);

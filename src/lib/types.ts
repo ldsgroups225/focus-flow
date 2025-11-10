@@ -26,6 +26,7 @@ export type Project = z.infer<typeof projectSchema>;
 
 export const taskSchema = z.object({
   id: z.string(),
+  $id: z.string(),
   title: z.string(),
   description: z.string().optional(),
   completed: z.boolean(),
@@ -41,6 +42,9 @@ export const taskSchema = z.object({
   startDate: z.coerce.date().optional(),
   duration: z.number().optional(), // Duration in days
   projectId: z.string().optional(),
+  status: z.string().optional(),
+  $createdAt: z.string(),
+  $updatedAt: z.string(),
 }).describe('A task object');
 
 export type Task = z.infer<typeof taskSchema>;
