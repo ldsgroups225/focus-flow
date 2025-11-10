@@ -88,6 +88,7 @@ export function useEnhancedTasks(tasksPromise: Promise<Task[]> | null) {
       const tempId = `temp-${Date.now()}`;
       const tempTask: Task = {
         id: tempId,
+        $id: tempId,
         title: taskToSave.title,
         description: taskToSave.description,
         completed: false,
@@ -99,6 +100,8 @@ export function useEnhancedTasks(tasksPromise: Promise<Task[]> | null) {
         timeSpent: 0,
         dependsOn: taskToSave.dependsOn,
         workspace: activeWorkspace,
+        $createdAt: new Date().toISOString(),
+        $updatedAt: new Date().toISOString(),
       };
       startTransition(async () => {
         addOptimistic({ type: 'add', task: tempTask });

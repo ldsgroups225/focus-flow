@@ -3,9 +3,11 @@
 import { useState, useCallback, useTransition } from 'react';
 import { useOptimistic } from 'react';
 import type { Task, TaskWithSubTasks } from '@/lib/types';
-import { TaskService } from '@/lib/services/task-service';
 import { useToast } from '@/hooks/use-toast';
 import { useI18n } from '@/app/components/i18n-provider';
+import { offlineDB } from '../services/offline-db';
+import { syncService } from '../services/sync';
+import { ID } from 'appwrite';
 
 type OptimisticAction =
   | { type: 'add'; task: TaskWithSubTasks }
@@ -34,120 +36,89 @@ export function useTasks(userId: string | null) {
   });
 
   // Fetch tasks
-  const fetchTasks = useCallback(() => {
+  const fetchTasks = useCallback(async () => {
     if (!userId) {
       setTasks([]);
       setIsLoading(false);
       return;
     }
 
-    TaskService.fetchTasks(userId, (newTasks) => {
-      setTasks(newTasks);
-      setIsLoading(false);
-    });
+    const localTasks = await offlineDB.query('SELECT * FROM tasks WHERE isDeleted = FALSE');
+    setTasks(localTasks.rows as TaskWithSubTasks[]);
+    setIsLoading(false);
+
+    await syncService.sync();
+    const updatedLocalTasks = await offlineDB.query('SELECT * FROM tasks WHERE isDeleted = FALSE');
+    setTasks(updatedLocalTasks.rows as TaskWithSubTasks[]);
   }, [userId]);
+
 
   // Save task (create or update)
   const saveTask = useCallback(async (
-    taskToSave: Omit<Task, 'id' | 'completed' | 'completedPomodoros' | 'timeSpent' | 'completedDate'> & { id?: string; subTasks?: { title: string; completed?: boolean; order?: number }[] },
+    taskToSave: Partial<Task> & { subTasks?: { title: string; completed?: boolean; order?: number }[] },
     activeWorkspace: 'personal' | 'work' | 'side-project'
   ) => {
     if (!userId) return;
 
     if (taskToSave.id) {
       // Update existing task
-      const original = [...tasks];
-      const patch: Partial<Task> = { ...taskToSave, workspace: activeWorkspace };
+      const patch: Partial<Task> = { ...taskToSave, workspace: activeWorkspace, $updatedAt: new Date().toISOString() };
       startTransition(async () => {
         addOptimistic({ type: 'update', id: taskToSave.id!, patch });
-        try {
-          await TaskService.updateTaskData(userId, taskToSave.id!, patch);
-          startTransition(() => {
-            setTasks(prev => prev.map(taskItem => (taskItem.id === taskToSave.id ? { ...taskItem, ...patch } : taskItem)));
-          });
-        } catch {
-          startTransition(() => {
-            setTasks(original);
-          });
-          toast({ variant: 'destructive', title: t('toast.updateError'), description: t('toast.updateErrorDesc') });
-        }
+        await offlineDB.query(
+          `UPDATE tasks SET title = $1, description = $2, status = $3, priority = $4, dueDate = $5, $updatedAt = $6, subTasks = $7 WHERE $id = $8`,
+          [patch.title, patch.description, patch.status, patch.priority, patch.dueDate, patch.$updatedAt, JSON.stringify(taskToSave.subTasks), taskToSave.id]
+        );
+        await syncService.sync();
       });
     } else {
       // Create new task
-      const tempId = `temp-${Date.now()}`;
-      const tempTask: TaskWithSubTasks = {
-        id: tempId,
-        title: taskToSave.title,
+      const newId = ID.unique();
+      const newTask: TaskWithSubTasks = {
+        id: newId,
+        $id: newId,
+        title: taskToSave.title || '',
         description: taskToSave.description,
         completed: false,
-        priority: taskToSave.priority,
+        priority: taskToSave.priority || 'medium',
         tags: taskToSave.tags ?? [],
         dueDate: taskToSave.dueDate,
-        pomodoros: taskToSave.pomodoros,
+        pomodoros: taskToSave.pomodoros || 0,
         completedPomodoros: 0,
         timeSpent: 0,
         dependsOn: taskToSave.dependsOn,
         workspace: activeWorkspace,
         subTasks: [],
+        $createdAt: new Date().toISOString(),
+        $updatedAt: new Date().toISOString(),
       };
       startTransition(async () => {
-        addOptimistic({ type: 'add', task: tempTask });
-        try {
-          const { subTasks, ...newTaskData } = taskToSave;
-          const formattedSubTasks = subTasks?.map(st => ({
-            title: st.title,
-            completed: st.completed ?? false,
-            order: st.order ?? 0,
-          }));
-          await TaskService.createTask(userId, { ...newTaskData, workspace: activeWorkspace, subTasks: formattedSubTasks });
-          // Refresh from server to get the real ID and subtasks
-          TaskService.fetchTasks(userId, (newTasks) => {
-            startTransition(() => setTasks(newTasks));
-          });
-        } catch {
-          startTransition(() => {
-            setTasks(prev => prev.filter(t => t.id !== tempId));
-          });
-          toast({ variant: 'destructive', title: t('toast.createError'), description: t('toast.createErrorDesc') });
-        }
+        addOptimistic({ type: 'add', task: newTask });
+        await offlineDB.query(
+            `INSERT INTO tasks ($id, title, description, status, priority, dueDate, $createdAt, $updatedAt, subTasks) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)`,
+            [newTask.$id, newTask.title, newTask.description, newTask.status, newTask.priority, newTask.dueDate, newTask.$createdAt, newTask.$updatedAt, JSON.stringify(newTask.subTasks)]
+        );
+        await syncService.sync();
       });
     }
-  }, [userId, tasks, addOptimistic, toast, t]);
+  }, [userId, addOptimistic]);
 
   // Toggle task completion
   const toggleComplete = useCallback(async (taskId: string) => {
     if (!userId) return;
     const task = tasks.find(t => t.id === taskId);
     if (task) {
-      const original = [...tasks];
+      const patch = { completed: !task.completed, completedDate: !task.completed ? new Date() : undefined, $updatedAt: new Date().toISOString() };
       startTransition(async () => {
-        addOptimistic({
-          type: 'update',
-          id: taskId,
-          patch: { completed: !task.completed, completedDate: !task.completed ? new Date() : undefined },
-        });
-        try {
-          await TaskService.toggleTaskCompletion(userId, taskId, task.completed);
-          startTransition(() => {
-            setTasks(prev => prev.map(taskItem => (
-              taskItem.id === taskId
-                ? {
-                  ...taskItem,
-                  completed: !task.completed,
-                  completedDate: !task.completed ? new Date() : undefined,
-                }
-                : taskItem
-            )));
-          });
-        } catch {
-          startTransition(() => {
-            setTasks(original);
-          });
-          toast({ variant: 'destructive', title: t('toast.updateError'), description: t('toast.updateErrorDesc') });
-        }
+        addOptimistic({ type: 'update', id: taskId, patch });
+        await offlineDB.query(
+          `UPDATE tasks SET completed = $1, completedDate = $2, $updatedAt = $3 WHERE $id = $4`,
+          [patch.completed, patch.completedDate, patch.$updatedAt, taskId]
+        );
+        await syncService.sync();
       });
     }
-  }, [userId, tasks, addOptimistic, toast, t]);
+  }, [userId, tasks, addOptimistic]);
 
   // Delete task with undo
   const deleteTaskWithUndo = useCallback(async (taskId: string) => {
@@ -156,12 +127,8 @@ export function useTasks(userId: string | null) {
     const taskToDelete = tasks.find(t => t.id === taskId);
     if (!taskToDelete) return;
 
-    const originalTasks = [...tasks];
-
-    // Optimistic deletion
     startTransition(() => {
       addOptimistic({ type: 'delete', id: taskId });
-      setTasks(prevTasks => prevTasks.filter(task => task.id !== taskId));
     });
 
     toast({
@@ -170,19 +137,8 @@ export function useTasks(userId: string | null) {
     });
 
     startTransition(async () => {
-      try {
-        await TaskService.deleteTaskData(userId, taskId);
-      } catch (e) {
-        console.error("Failed to delete task: ", e);
-        startTransition(() => {
-          setTasks(originalTasks);
-        });
-        toast({
-          variant: "destructive",
-          title: t('toast.deleteError'),
-          description: t('toast.deleteErrorDesc'),
-        });
-      }
+        await offlineDB.query('UPDATE tasks SET isDeleted = TRUE, $updatedAt = $1 WHERE $id = $2', [new Date().toISOString(), taskId]);
+        await syncService.sync();
     });
   }, [userId, tasks, toast, t, addOptimistic, startTransition]);
 
@@ -191,8 +147,9 @@ export function useTasks(userId: string | null) {
     if (!userId) return;
     const task = tasks.find(t => t.id === taskId);
     if (task) {
-      const newCount = task.completedPomodoros + 1;
-      await TaskService.updatePomodoroCount(userId, taskId, newCount);
+        const newCount = task.completedPomodoros + 1;
+        await offlineDB.query('UPDATE tasks SET completedPomodoros = $1, $updatedAt = $2 WHERE $id = $3', [newCount, new Date().toISOString(), taskId]);
+        await syncService.sync();
     }
   }, [userId, tasks]);
 
@@ -201,7 +158,9 @@ export function useTasks(userId: string | null) {
     if (!userId) return;
     const task = tasks.find(t => t.id === taskId);
     if (task) {
-      await TaskService.logTimeSpent(userId, taskId, seconds, task.timeSpent);
+        const newTimeSpent = task.timeSpent + seconds;
+        await offlineDB.query('UPDATE tasks SET timeSpent = $1, $updatedAt = $2 WHERE $id = $3', [newTimeSpent, new Date().toISOString(), taskId]);
+        await syncService.sync();
     }
   }, [userId, tasks]);
 
@@ -209,22 +168,15 @@ export function useTasks(userId: string | null) {
   const toggleSubTask = useCallback(async (subTaskId: string) => {
     if (!userId) return;
 
-    // Find the subtask in the current tasks
-    let targetSubTask: { id: string; completed: boolean } | null = null;
-    for (const task of tasks) {
-      if (task.subTasks) {
-        const found = task.subTasks.find(st => st.id === subTaskId);
-        if (found) {
-          targetSubTask = found;
-          break;
+    const task = tasks.find(t => t.subTasks?.some(st => st.id === subTaskId));
+    if (task && task.subTasks) {
+        const subTask = task.subTasks.find(st => st.id === subTaskId);
+        if (subTask) {
+            const updatedSubTasks = task.subTasks.map(st => st.id === subTaskId ? { ...st, completed: !st.completed } : st);
+            await offlineDB.query('UPDATE tasks SET subTasks = $1, $updatedAt = $2 WHERE $id = $3', [JSON.stringify(updatedSubTasks), new Date().toISOString(), task.id]);
+            await syncService.sync();
+            fetchTasks();
         }
-      }
-    }
-
-    if (targetSubTask) {
-      await TaskService.toggleSubTaskCompletion(subTaskId, targetSubTask.completed);
-      // Refresh tasks to get updated subtasks
-      fetchTasks();
     }
   }, [userId, tasks, fetchTasks]);
 

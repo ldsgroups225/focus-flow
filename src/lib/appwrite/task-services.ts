@@ -8,12 +8,13 @@ type RawTask = Omit<Task, 'dueDate' | 'completedDate'> & {
 };
 
 const mapTaskFromAppwrite = (row: Models.Row): Task => {
-  const rowData = row as unknown as RawTask & { $id: string };
+  const rowData = row as unknown as RawTask & { $id: string, $createdAt: string, $updatedAt: string };
   const { dueDate, completedDate, $id: rowId, ...rest } = rowData;
 
   return {
     ...rest,
     id: rowId,
+    $id: rowId,
     dueDate: dueDate ? new Date(dueDate) : undefined,
     completedDate: completedDate ? new Date(completedDate) : undefined,
   };
