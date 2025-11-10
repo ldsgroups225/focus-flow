@@ -95,7 +95,7 @@ const TaskItem = memo(function TaskItem({ task, isDragging, isSelected, onDragSt
       className={cn(
         "group transition-all duration-200 hover:shadow-lg hover:border-primary/50",
         "data-[selected=true]:border-primary data-[selected=true]:shadow-[0_0_20px_4px_var(--border)]/80 data-[selected=true]:ring-1 data-[selected=true]:ring-primary/30",
-        isBlocked ? "bg-card/50 border-dashed" : "",
+        isBlocked ? "ml-4 bg-card/50 border-dashed" : "",
         isDragging ? 'opacity-30 shadow-2xl scale-105' : 'opacity-100',
         task.completed ? 'bg-card/60' : 'bg-card'
       )}

@@ -127,7 +127,7 @@ export class TaskService {
   }
 
   static addTaskBlockingStatus(tasks: TaskWithSubTasks[]): (TaskWithSubTasks & { isBlocked?: boolean; blockingTasks?: string[] })[] {
-    return tasks.map(task => {
+    const tasksWithStatus = tasks.map(task => {
       if (!task.dependsOn || task.dependsOn.length === 0) {
         return task;
       }
@@ -143,6 +143,48 @@ export class TaskService {
         blockingTasks,
       };
     });
+
+    // Sort to group blocked tasks near their dependencies
+    return this.sortTasksByDependencies(tasksWithStatus);
+  }
+
+  /**
+   * Sort tasks to place blocked tasks near their dependencies
+   * Strategy: Group dependency chains together while preserving priority/due date order
+   */
+  static sortTasksByDependencies(
+    tasks: (TaskWithSubTasks & { isBlocked?: boolean; blockingTasks?: string[] })[]
+  ): (TaskWithSubTasks & { isBlocked?: boolean; blockingTasks?: string[] })[] {
+    const processed = new Set<string>();
+    const result: (TaskWithSubTasks & { isBlocked?: boolean; blockingTasks?: string[] })[] = [];
+
+    // Helper to recursively add a task and its dependents
+    const addTaskWithDependents = (task: TaskWithSubTasks & { isBlocked?: boolean; blockingTasks?: string[] }) => {
+      if (processed.has(task.id)) return;
+      
+      processed.add(task.id);
+      result.push(task);
+
+      // Find tasks that depend on this one
+      const dependents = tasks.filter(t => 
+        t.dependsOn?.includes(task.id) && !processed.has(t.id)
+      );
+
+      // Add dependents immediately after (sorted by priority/dueDate)
+      dependents.forEach(dep => addTaskWithDependents(dep));
+    };
+
+    // First pass: add tasks without dependencies (or with completed dependencies)
+    tasks
+      .filter(t => !t.isBlocked)
+      .forEach(task => addTaskWithDependents(task));
+
+    // Second pass: add any remaining blocked tasks (circular dependencies or orphaned)
+    tasks
+      .filter(t => !processed.has(t.id))
+      .forEach(task => addTaskWithDependents(task));
+
+    return result;
   }
 
   static filterTasks(
