@@ -12,14 +12,14 @@ import { Button } from "@/components/ui/button";
 import { Languages } from 'lucide-react';
 
 export function LanguageSwitcher() {
-  const { setLocale, locale } = useI18n();
+  const { t, setLocale, locale } = useI18n();
 
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
         <Button variant="outline" size="icon">
           <Languages className="h-[1.2rem] w-[1.2rem]" />
-          <span className="sr-only">Change language</span>
+          <span className="sr-only">{t('theme.toggle')}</span>
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end">

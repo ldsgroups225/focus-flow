@@ -27,14 +27,14 @@ export default function LoginPage() {
       if (error === 'auth_failed') {
         toast({
           variant: 'destructive',
-          title: 'Authentication Failed',
-          description: 'Unable to sign in with Google. Please try again.',
+          title: t('login.authFailed'),
+          description: t('login.authFailedDesc'),
         });
         // Clean up URL
         window.history.replaceState({}, '', '/');
       }
     }
-  }, [toast]);
+  }, [toast, t]);
 
   const handleLogin = async () => {
     try {
@@ -49,8 +49,8 @@ export default function LoginPage() {
       console.error('Login error:', error);
       toast({
         variant: 'destructive',
-        title: 'Sign In Error',
-        description: 'Failed to send code. Verify your email and try again.',
+        title: t('login.signInError'),
+        description: t('login.sendCodeError'),
       });
       setIsLoading(false);
     }
@@ -71,8 +71,8 @@ export default function LoginPage() {
       console.error('Verify error:', error);
       toast({
         variant: 'destructive',
-        title: 'Invalid code',
-        description: 'Please check the 6-digit code and try again.',
+        title: t('login.invalidCode'),
+        description: t('login.invalidCodeDesc'),
       });
     } finally {
       // Ensure UI unlocks even if auth provider polling needs more time
@@ -84,16 +84,16 @@ export default function LoginPage() {
     <div className="flex flex-col items-center justify-center h-screen text-center w-full px-4">
       <Orbit className="w-16 h-16 text-primary mb-6" />
       <h1 className="text-4xl font-bold mb-2">{t('header.title')}</h1>
-      <p className="text-lg text-muted-foreground mb-8">Sign in with a one-time code sent to your email.</p>
+      <p className="text-lg text-muted-foreground mb-8">{t('login.tagline')}</p>
 
       {step === 'email' && (
         <div className="w-full max-w-sm space-y-4">
           <div className="text-left">
-            <Label htmlFor="email">Email</Label>
+            <Label htmlFor="email">{t('login.email')}</Label>
             <Input
               id="email"
               type="email"
-              placeholder="you@example.com"
+              placeholder={t('login.emailPlaceholder')}
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               disabled={isLoading}
@@ -110,7 +110,7 @@ export default function LoginPage() {
             ) : (
               <UserIcon className="mr-2 h-5 w-5" />
             )}
-            Send code
+            {t('login.sendCode')}
           </Button>
         </div>
       )}
@@ -123,13 +123,13 @@ export default function LoginPage() {
             </p>
           )}
           <div className="text-left">
-            <Label htmlFor="code">Enter 6-digit code</Label>
+            <Label htmlFor="code">{t('login.enterCode')}</Label>
             <Input
               id="code"
               inputMode="numeric"
               pattern="[0-9]*"
               maxLength={6}
-              placeholder="123456"
+              placeholder={t('login.codePlaceholder')}
               value={code}
               onChange={(e) =>
                 setCode(e.target.value.replace(/\D/g, '').slice(0, 6))
@@ -147,7 +147,7 @@ export default function LoginPage() {
               }}
               disabled={isLoading}
             >
-              Back
+              {t('login.back')}
             </Button>
             <Button
               onClick={handleVerify}
@@ -159,7 +159,7 @@ export default function LoginPage() {
               ) : (
                 <UserIcon className="mr-2 h-5 w-5" />
               )}
-              Verify & Sign in
+              {t('login.verifySignIn')}
             </Button>
           </div>
         </div>

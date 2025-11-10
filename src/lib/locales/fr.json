@@ -27,7 +27,9 @@
     "editTask": "Modifier la Tâche",
     "deleteTask": "Supprimer la Tâche",
     "blocked": "Bloquée",
-    "blockedBy": "Cette tâche est bloquée par : {tasks}"
+    "blockedBy": "Cette tâche est bloquée par : {tasks}",
+    "markComplete": "Marquer la tâche comme terminée : {taskTitle}",
+    "markIncomplete": "Marquer la tâche comme non terminée : {taskTitle}"
   },
   "taskForm": {
     "editTask": "Modifier la Tâche",
@@ -56,6 +58,10 @@
     "titleRequiredForAi": "Veuillez saisir un titre pour utiliser les suggestions de l'IA",
     "pomodorosPositive": "Doit être un nombre positif",
     "subTasks": "Sous-tâches",
+    "subTaskTitle": "Titre de la sous-tâche",
+    "addSubTask": "Ajouter une Sous-tâche",
+    "project": "Projet",
+    "selectProject": "Sélectionner un projet",
     "ai": {
       "tags": "Suggérer des Étiquettes avec l'IA",
       "dueDate": "Suggérer une Date d'Échéance avec l'IA",
@@ -97,7 +103,10 @@
     "weekly": "Hebdomadaire",
     "generate": "Générer",
     "generating": "Génération...",
-    "error": "Désolé, la revue n'a pas pu être générée. Veuillez réessayer."
+    "error": "Désolé, la revue n'a pas pu être générée. Veuillez réessayer.",
+    "noDailyTasks": "Aucune tâche terminée trouvée pour aujourd'hui.",
+    "noWeeklyTasks": "Aucune tâche terminée trouvée au cours des 7 derniers jours.",
+    "noTasksFallback": "Aucune tâche terminée disponible pour cette période."
   },
   "search": {
     "placeholder": "Rechercher par titre ou description...",
@@ -224,5 +233,30 @@
     "today": "Aujourd'hui",
     "tomorrow": "Demain",
     "yesterday": "Hier"
+  },
+  "projects": {
+    "title": "Gérer les Projets",
+    "back": "Retour",
+    "create": {
+      "title": "Créer un Projet",
+      "editTitle": "Modifier le Projet",
+      "name": "Nom du Projet",
+      "namePlaceholder": "Nom du projet",
+      "description": "Description",
+      "descriptionPlaceholder": "Description du projet",
+      "workspace": "Espace de Travail",
+      "workspacePlaceholder": "Sélectionner un espace de travail",
+      "personal": "Personnel",
+      "work": "Travail",
+      "sideProject": "Projet Annexe",
+      "button": "Créer le Projet",
+      "saveButton": "Sauvegarder",
+      "nameRequired": "Le nom du projet est requis"
+    },
+    "list": {
+      "title": "Projets Existants",
+      "edit": "Modifier",
+      "delete": "Supprimer"
+    }
   }
 }

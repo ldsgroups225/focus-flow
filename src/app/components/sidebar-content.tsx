@@ -5,6 +5,7 @@ import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/
 import type { Project, Priority } from '@/lib/types';
 import { Button } from '@/components/ui/button';
 import Link from 'next/link';
+import { useI18n } from './i18n-provider';
 
 interface SidebarContentProps {
   priorityFilter: Priority[];
@@ -25,10 +26,11 @@ export function SidebarContent({
   projects,
   setSelectedProjectId,
 }: SidebarContentProps) {
+  const { t } = useI18n();
   return (
     <div className="sticky top-8 space-y-8">
       <div>
-        <h2 className="text-lg font-semibold mb-4">Filters</h2>
+        <h2 className="text-lg font-semibold mb-4">{t('header.filters')}</h2>
         <Filters
           priorityFilter={priorityFilter}
           setPriorityFilter={setPriorityFilter}
@@ -39,9 +41,9 @@ export function SidebarContent({
       </div>
       <div>
         <div className="flex items-center justify-between">
-          <h2 className="text-lg font-semibold">Projects</h2>
+          <h2 className="text-lg font-semibold">{t('projects.title')}</h2>
           <Button variant="ghost" size="sm" onClick={() => setSelectedProjectId(undefined)}>
-            Clear
+            {t('taskForm.clear')}
           </Button>
         </div>
         <Accordion type="single" collapsible className="w-full">
@@ -55,7 +57,7 @@ export function SidebarContent({
           ))}
         </Accordion>
         <Button variant="outline" size="sm" className="mt-4 w-full" asChild>
-          <Link href="/projects">Manage Projects</Link>
+          <Link href="/projects">{t('projects.title')}</Link>
         </Button>
       </div>
     </div>

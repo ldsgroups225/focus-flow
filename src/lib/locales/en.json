@@ -27,7 +27,9 @@
     "editTask": "Edit Task",
     "deleteTask": "Delete Task",
     "blocked": "Blocked",
-    "blockedBy": "This task is blocked by: {tasks}"
+    "blockedBy": "This task is blocked by: {tasks}",
+    "markComplete": "Mark task complete: {taskTitle}",
+    "markIncomplete": "Mark task incomplete: {taskTitle}"
   },
   "taskForm": {
     "editTask": "Edit Task",
@@ -56,6 +58,10 @@
     "titleRequiredForAi": "Please enter a title to use AI suggestions",
     "pomodorosPositive": "Must be a positive number",
     "subTasks": "Sub-tasks",
+    "subTaskTitle": "Subtask title",
+    "addSubTask": "Add Sub-task",
+    "project": "Project",
+    "selectProject": "Select a project",
     "ai": {
       "tags": "Suggest Tags with AI",
       "dueDate": "Suggest Due Date with AI",
@@ -97,7 +103,10 @@
     "weekly": "Weekly",
     "generate": "Generate",
     "generating": "Generating...",
-    "error": "Sorry, the review could not be generated. Please try again."
+    "error": "Sorry, the review could not be generated. Please try again.",
+    "noDailyTasks": "No completed tasks found for today.",
+    "noWeeklyTasks": "No completed tasks found in the last 7 days.",
+    "noTasksFallback": "No completed tasks available for this period."
   },
   "search": {
     "placeholder": "Search tasks by title or description...",
@@ -224,5 +233,30 @@
     "today": "Today",
     "tomorrow": "Tomorrow",
     "yesterday": "Yesterday"
+  },
+  "projects": {
+    "title": "Manage Projects",
+    "back": "Back",
+    "create": {
+      "title": "Create Project",
+      "editTitle": "Edit Project",
+      "name": "Project Name",
+      "namePlaceholder": "Project name",
+      "description": "Description",
+      "descriptionPlaceholder": "Project description",
+      "workspace": "Workspace",
+      "workspacePlaceholder": "Select a workspace",
+      "personal": "Personal",
+      "work": "Work",
+      "sideProject": "Side Project",
+      "button": "Create Project",
+      "saveButton": "Save Changes",
+      "nameRequired": "Project name is required"
+    },
+    "list": {
+      "title": "Existing Projects",
+      "edit": "Edit",
+      "delete": "Delete"
+    }
   }
 }

@@ -175,7 +175,7 @@ export default function DashboardPage() {
               <div className="flex justify-center items-center h-80">
                 <div className="text-center">
                   <Orbit className="h-12 w-12 animate-spin text-primary mx-auto" />
-                  <p className="mt-4 text-muted-foreground">Loading tasks...</p>
+                  <p className="mt-4 text-muted-foreground">{t('loading.tasks')}</p>
                 </div>
               </div>
             ) : (

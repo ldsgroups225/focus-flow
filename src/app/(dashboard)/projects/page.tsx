@@ -27,11 +27,12 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { ArrowLeft } from 'lucide-react';
 import { useProjects } from '@/lib/hooks/use-projects';
 import { useAuth } from '@/components/providers/auth-provider';
+import { useI18n } from '@/app/components/i18n-provider';
 import type { Project } from '@/lib/types';
 
 const projectSchema = z.object({
   id: z.string().optional(),
-  name: z.string().min(1, 'Project name is required'),
+  name: z.string().min(1, 'projects.create.nameRequired'),
   description: z.string().optional(),
   workspace: z.enum(['personal', 'work', 'side-project']),
 });
@@ -40,6 +41,7 @@ type ProjectFormValues = z.infer<typeof projectSchema>;
 
 export default function ProjectsPage() {
   const { user } = useAuth();
+  const { t } = useI18n();
   const { projects, saveProject, deleteProject, updateProject } = useProjects(user?.uid ?? null);
   const [editingProject, setEditingProject] = useState<Project | null>(null);
 
@@ -75,14 +77,16 @@ export default function ProjectsPage() {
         className="inline-flex items-center justify-center rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 hover:bg-accent hover:text-accent-foreground h-10 px-4 py-2 mb-4"
       >
         <ArrowLeft className="mr-2 h-4 w-4" />
-        Back
+        {t('projects.back')}
       </Link>
-      <h1 className="text-2xl font-bold mb-6">Manage Projects</h1>
+      <h1 className="text-2xl font-bold mb-6">{t('projects.title')}</h1>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
         <div>
           <Card>
             <CardHeader>
-              <CardTitle>{editingProject ? 'Edit Project' : 'Create Project'}</CardTitle>
+              <CardTitle>
+                {editingProject ? t('projects.create.editTitle') : t('projects.create.title')}
+              </CardTitle>
             </CardHeader>
             <CardContent>
               <Form {...form}>
@@ -92,9 +96,9 @@ export default function ProjectsPage() {
                     name="name"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Project Name</FormLabel>
+                        <FormLabel>{t('projects.create.name')}</FormLabel>
                         <FormControl>
-                          <Input placeholder="Project name" {...field} />
+                          <Input placeholder={t('projects.create.namePlaceholder')} {...field} />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
@@ -105,9 +109,9 @@ export default function ProjectsPage() {
                     name="description"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Description</FormLabel>
+                        <FormLabel>{t('projects.create.description')}</FormLabel>
                         <FormControl>
-                          <Textarea placeholder="Project description" {...field} />
+                          <Textarea placeholder={t('projects.create.descriptionPlaceholder')} {...field} />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
@@ -118,24 +122,26 @@ export default function ProjectsPage() {
                     name="workspace"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Workspace</FormLabel>
+                        <FormLabel>{t('projects.create.workspace')}</FormLabel>
                         <Select onValueChange={field.onChange} defaultValue={field.value}>
                           <FormControl>
                             <SelectTrigger>
-                              <SelectValue placeholder="Select a workspace" />
+                              <SelectValue placeholder={t('projects.create.workspacePlaceholder')} />
                             </SelectTrigger>
                           </FormControl>
                           <SelectContent>
-                            <SelectItem value="personal">Personal</SelectItem>
-                            <SelectItem value="work">Work</SelectItem>
-                            <SelectItem value="side-project">Side Project</SelectItem>
+                            <SelectItem value="personal">{t('projects.create.personal')}</SelectItem>
+                            <SelectItem value="work">{t('projects.create.work')}</SelectItem>
+                            <SelectItem value="side-project">{t('projects.create.sideProject')}</SelectItem>
                           </SelectContent>
                         </Select>
                         <FormMessage />
                       </FormItem>
                     )}
                   />
-                  <Button type="submit">{editingProject ? 'Save Changes' : 'Create Project'}</Button>
+                  <Button type="submit">
+                    {editingProject ? t('projects.create.saveButton') : t('projects.create.button')}
+                  </Button>
                 </form>
               </Form>
             </CardContent>
@@ -144,7 +150,7 @@ export default function ProjectsPage() {
         <div>
           <Card>
             <CardHeader>
-              <CardTitle>Existing Projects</CardTitle>
+              <CardTitle>{t('projects.list.title')}</CardTitle>
             </CardHeader>
             <CardContent>
               <ul className="space-y-2">
@@ -156,10 +162,10 @@ export default function ProjectsPage() {
                     </div>
                     <div className="flex items-center gap-2">
                       <Button variant="outline" size="sm" onClick={() => handleEdit(project)}>
-                        Edit
+                        {t('projects.list.edit')}
                       </Button>
                       <Button variant="destructive" size="sm" onClick={() => deleteProject(project.id)}>
-                        Delete
+                        {t('projects.list.delete')}
                       </Button>
                     </div>
                   </li>

@@ -63,6 +63,7 @@ interface SubTaskInputProps {
 }
 
 const SubTaskInput = ({ control, register, level = 0 }: SubTaskInputProps) => {
+  const { t } = useI18n();
   const { fields, append, remove } = useFieldArray({
     control,
     name: 'subTasks',
@@ -72,14 +73,14 @@ const SubTaskInput = ({ control, register, level = 0 }: SubTaskInputProps) => {
     <div style={{ marginLeft: `${level * 20}px` }}>
       {fields.map((item, index) => (
         <div key={item.id} className="flex items-center gap-2 mt-2">
-          <Input {...register(`subTasks.${index}.title` as const)} className="h-8 text-sm" placeholder="Subtask title" />
+          <Input {...register(`subTasks.${index}.title` as const)} className="h-8 text-sm" placeholder={t('taskForm.subTaskTitle')} />
           <Button type="button" variant="ghost" size="icon" onClick={() => remove(index)}>
             <Trash2 className="h-4 w-4" />
           </Button>
         </div>
       ))}
       <Button type="button" variant="outline" size="sm" onClick={() => append({ title: '', completed: false, order: fields.length })}>
-        Add Sub-task
+        {t('taskForm.addSubTask')}
       </Button>
     </div>
   );
