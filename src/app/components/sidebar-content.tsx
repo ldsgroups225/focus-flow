@@ -4,6 +4,7 @@ import { Filters } from '@/app/components/filters';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 import type { Project, Priority } from '@/lib/types';
 import { Button } from '@/components/ui/button';
+import Link from 'next/link';
 
 interface SidebarContentProps {
   priorityFilter: Priority[];
@@ -54,7 +55,7 @@ export function SidebarContent({
           ))}
         </Accordion>
         <Button variant="outline" size="sm" className="mt-4 w-full" asChild>
-          <a href="/projects">Manage Projects</a>
+          <Link href="/projects">Manage Projects</Link>
         </Button>
       </div>
     </div>

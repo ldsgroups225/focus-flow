@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
+import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
@@ -23,6 +24,7 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { ArrowLeft } from 'lucide-react';
 import { useProjects } from '@/lib/hooks/use-projects';
 import { useAuth } from '@/components/providers/auth-provider';
 import type { Project } from '@/lib/types';
@@ -68,6 +70,13 @@ export default function ProjectsPage() {
 
   return (
     <div className="container mx-auto max-w-5xl p-4 sm:p-6 md:p-8">
+      <Link
+        href="/"
+        className="inline-flex items-center justify-center rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 hover:bg-accent hover:text-accent-foreground h-10 px-4 py-2 mb-4"
+      >
+        <ArrowLeft className="mr-2 h-4 w-4" />
+        Back
+      </Link>
       <h1 className="text-2xl font-bold mb-6">Manage Projects</h1>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
         <div>
