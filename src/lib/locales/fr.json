@@ -96,6 +96,14 @@
     "work": "Travail",
     "sideProject": "Projet Annexe"
   },
+  "aiFeatures": {
+    "title": "Fonctionnalités IA",
+    "description": "Choisissez une fonctionnalité IA pour vous aider à gérer vos tâches.",
+    "reviewGeneration": "Génération de Revue",
+    "reviewDescription": "Générez un résumé de vos tâches terminées pour une revue quotidienne ou hebdomadaire.",
+    "dependencyRefinement": "Raffinement des Dépendances",
+    "dependencyDescription": "Analysez et optimisez les dépendances, dates d'échéance, étiquettes et structure de projet."
+  },
   "aiReview": {
     "title": "Revue IA",
     "description": "Laissez l'IA générer un résumé de vos tâches terminées.",
@@ -107,6 +115,16 @@
     "noDailyTasks": "Aucune tâche terminée trouvée pour aujourd'hui.",
     "noWeeklyTasks": "Aucune tâche terminée trouvée au cours des 7 derniers jours.",
     "noTasksFallback": "Aucune tâche terminée disponible pour cette période."
+  },
+  "aiDependency": {
+    "title": "Raffinement des Dépendances",
+    "description": "L'IA analysera vos tâches et suggérera des améliorations pour les dépendances, dates d'échéance, étiquettes et structure de projet.",
+    "info": "L'IA examinera toutes vos tâches et fournira des recommandations pour optimiser votre flux de travail.",
+    "taskCount": "Analyse de {count} tâches",
+    "analyze": "Analyser les Tâches",
+    "analyzing": "Analyse en cours...",
+    "regenerate": "Régénérer",
+    "error": "Désolé, l'analyse n'a pas pu être complétée. Veuillez réessayer."
   },
   "search": {
     "placeholder": "Rechercher par titre ou description...",

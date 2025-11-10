@@ -15,7 +15,7 @@ type Locale = 'en' | 'fr';
 interface I18nContextType {
   locale: Locale;
   setLocale: (locale: Locale) => void;
-  t: (key: string) => string;
+  t: (key: string, params?: Record<string, string | number>) => string;
 }
 
 const I18nContext = createContext<I18nContextType | undefined>(undefined);
@@ -31,7 +31,7 @@ export function useI18n() {
 export function I18nProvider({ children }: { children: ReactNode }) {
   const [locale, setLocale] = useState<Locale>('fr');
 
-  const t = useCallback((key: string) => {
+  const t = useCallback((key: string, params?: Record<string, string | number>) => {
     const keys = key.split('.');
     let result: unknown = translations[locale];
     for (const k of keys) {
@@ -40,12 +40,23 @@ export function I18nProvider({ children }: { children: ReactNode }) {
         // Fallback to English if key not found in current locale
         let fallbackResult: unknown = translations.en;
         for (const fk of keys) {
-            fallbackResult = (fallbackResult as Record<string, unknown>)?.[fk];
+          fallbackResult = (fallbackResult as Record<string, unknown>)?.[fk];
         }
-        return (fallbackResult as string) || key;
+        result = fallbackResult;
+        break;
       }
     }
-    return (result as string) || key;
+
+    let translation = (result as string) || key;
+
+    // Replace parameters in the translation
+    if (params) {
+      Object.entries(params).forEach(([paramKey, paramValue]) => {
+        translation = translation.replace(`{${paramKey}}`, String(paramValue));
+      });
+    }
+
+    return translation;
   }, [locale]);
 
   return (

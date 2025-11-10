@@ -96,6 +96,14 @@
     "work": "Work",
     "sideProject": "Side Project"
   },
+  "aiFeatures": {
+    "title": "AI Features",
+    "description": "Choose an AI-powered feature to help you manage your tasks.",
+    "reviewGeneration": "Review Generation",
+    "reviewDescription": "Generate a summary of your completed tasks for daily or weekly review.",
+    "dependencyRefinement": "Task Dependency Refinement",
+    "dependencyDescription": "Analyze and optimize task dependencies, due dates, tags, and project structure."
+  },
   "aiReview": {
     "title": "AI Review",
     "description": "Let AI generate a summary of your completed tasks.",
@@ -107,6 +115,16 @@
     "noDailyTasks": "No completed tasks found for today.",
     "noWeeklyTasks": "No completed tasks found in the last 7 days.",
     "noTasksFallback": "No completed tasks available for this period."
+  },
+  "aiDependency": {
+    "title": "Task Dependency Refinement",
+    "description": "AI will analyze your tasks and suggest improvements to dependencies, due dates, tags, and project structure.",
+    "info": "The AI will review all your tasks and provide recommendations to optimize your project workflow.",
+    "taskCount": "Analyzing {count} tasks",
+    "analyze": "Analyze Tasks",
+    "analyzing": "Analyzing...",
+    "regenerate": "Regenerate",
+    "error": "Sorry, the analysis could not be completed. Please try again."
   },
   "search": {
     "placeholder": "Search tasks by title or description...",

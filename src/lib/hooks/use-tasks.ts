@@ -58,8 +58,9 @@ export function useTasks(userId: string | null) {
       // Update existing task
       const original = [...tasks];
       // Exclude subTasks from the patch as they're stored in a separate table
-      const { subTasks, ...taskDataWithoutSubTasks } = taskToSave;
-      const patch: Partial<Task> = { ...taskDataWithoutSubTasks, workspace: activeWorkspace };
+      delete taskToSave.subTasks
+
+      const patch: Partial<Task> = { ...taskToSave, workspace: activeWorkspace };
       startTransition(async () => {
         addOptimistic({ type: 'update', id: taskToSave.id!, patch });
         try {

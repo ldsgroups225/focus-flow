@@ -8,6 +8,8 @@ import { TaskForm } from '@/app/components/task-form';
 import { Filters } from '@/app/components/filters';
 import { FocusView } from '@/app/components/focus-view';
 import { AiReviewDialog } from '@/app/components/ai-review-dialog';
+import { AiFeatureSelector } from '@/app/components/ai-feature-selector';
+import { AiDependencyDialog } from '@/app/components/ai-dependency-dialog';
 import type { Task, Workspace, Project } from '@/lib/types';
 import {
   DropdownMenu,
@@ -45,7 +47,9 @@ export function ClientDashboard({ initialTasks }: ClientDashboardProps) {
   const [activeWorkspace, setActiveWorkspace] = useState<Workspace>('personal');
   const [editingTask, setEditingTask] = useState<Task | 'new' | null>(null);
   const [focusTask, setFocusTask] = useState<Task | null>(null);
+  const [isAiSelectorOpen, setIsAiSelectorOpen] = useState(false);
   const [isReviewOpen, setIsReviewOpen] = useState(false);
+  const [isDependencyOpen, setIsDependencyOpen] = useState(false);
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [isShortcutsOpen, setIsShortcutsOpen] = useState(false);
 
@@ -113,9 +117,9 @@ export function ClientDashboard({ initialTasks }: ClientDashboardProps) {
               <LanguageSwitcher />
               <ThemeToggle />
             </div>
-            <Button variant="outline" size="icon" onClick={() => setIsReviewOpen(true)}>
+            <Button variant="outline" size="icon" onClick={() => setIsAiSelectorOpen(true)}>
               <Sparkles className="h-4 w-4" />
-              <span className="sr-only">{t('aiReview.title')}</span>
+              <span className="sr-only">{t('aiFeatures.title')}</span>
             </Button>
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
@@ -236,10 +240,23 @@ export function ClientDashboard({ initialTasks }: ClientDashboardProps) {
             onLogTime={logTime}
           />
         )}
+        <AiFeatureSelector
+          isOpen={isAiSelectorOpen}
+          onClose={() => setIsAiSelectorOpen(false)}
+          onSelectReview={() => setIsReviewOpen(true)}
+          onSelectDependency={() => setIsDependencyOpen(true)}
+        />
         {isReviewOpen && (
           <AiReviewDialog
             isOpen={isReviewOpen}
             onClose={() => setIsReviewOpen(false)}
+            tasks={tasks}
+          />
+        )}
+        {isDependencyOpen && (
+          <AiDependencyDialog
+            isOpen={isDependencyOpen}
+            onClose={() => setIsDependencyOpen(false)}
             tasks={tasks}
           />
         )}
