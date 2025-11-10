@@ -200,13 +200,6 @@ export function useEnhancedTasks(tasksPromise: Promise<Task[]> | null) {
     }
   }, [tasks, userId]);
 
-  // Toggle subtask
-  const toggleSubTask = useCallback(async (taskId: string, subTaskIndex: number) => {
-    void taskId // just for ignore unused tasks
-    void subTaskIndex // just for ignore unused tasks
-    // TODO: Either implement or remove: implement in database
-  }, []);
-
   return {
     tasks: optimisticTasks,
     isLoading,
@@ -216,6 +209,5 @@ export function useEnhancedTasks(tasksPromise: Promise<Task[]> | null) {
     deleteTask,
     updatePomodoro,
     logTime,
-    toggleSubTask,
   };
 }

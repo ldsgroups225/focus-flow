@@ -1,26 +1,6 @@
 import type { Task } from '@/lib/types';
 
 /**
- * Server-side task utilities
- * These run on the server and can fetch data directly
- */
-
-export interface TaskListProps {
-  tasks: Task[];
-}
-
-/**
- * Server component for displaying a list of tasks
- * This is a presentational component that can run on the server
- */
-export function TaskListServer({ tasks }: TaskListProps) {
-  void tasks // just for ignore unused tasks
-  // TODO: Either implement or remove: This would render on the server
-  // In a real implementation, you might use this for SEO or initial HTML
-  return null; // Placeholder - actual rendering is done by client component
-}
-
-/**
  * Server-side data transformation utilities
  */
 export class TaskServerService {
