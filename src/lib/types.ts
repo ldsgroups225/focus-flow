@@ -3,11 +3,28 @@ import { z } from 'genkit';
 export type Priority = "low" | "medium" | "high";
 export type Workspace = "personal" | "work" | "side-project";
 
-export const subTaskSchema = z.object({
+type LazySubTask = {
+  title: string;
+  completed: boolean;
+  subTasks?: LazySubTask[];
+};
+
+export const subTaskSchema: z.ZodType<LazySubTask> = z.lazy(() => z.object({
   title: z.string(),
   completed: z.boolean(),
-});
+  subTasks: z.array(subTaskSchema).optional(),
+}));
+
 export type SubTask = z.infer<typeof subTaskSchema>;
+
+export const projectSchema = z.object({
+  id: z.string(),
+  name: z.string(),
+  description: z.string().optional(),
+  workspace: z.enum(['personal', 'work', 'side-project']),
+  userId: z.string(),
+});
+export type Project = z.infer<typeof projectSchema>;
 
 export const taskSchema = z.object({
   id: z.string(),
@@ -26,6 +43,7 @@ export const taskSchema = z.object({
   subTasks: z.array(subTaskSchema).optional(),
   startDate: z.coerce.date().optional(),
   duration: z.number().optional(), // Duration in days
+  projectId: z.string().optional(),
 }).describe('A task object');
 
 export type Task = z.infer<typeof taskSchema>;

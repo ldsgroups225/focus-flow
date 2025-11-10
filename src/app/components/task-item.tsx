@@ -13,6 +13,30 @@ import { cn } from '@/lib/utils';
 import { formatDistanceToNow } from 'date-fns';
 import { enUS, fr } from 'date-fns/locale';
 import { useI18n } from './i18n-provider';
+import type { SubTask } from '@/lib/types';
+
+const SubTaskItem = ({ subTask, level = 0, onSubTaskToggle, task, path }: { subTask: SubTask, level?: number, onSubTaskToggle: (taskId: string, path: number[]) => void, task: Task, path: number[] }) => {
+  return (
+    <div style={{ marginLeft: `${level * 20}px` }}>
+      <div className="flex items-center gap-2 group/subtask" onClick={(e) => {
+        e.stopPropagation();
+        if (!task.completed) onSubTaskToggle(task.id, path)
+      }}>
+        <div className={cn("flex items-center gap-2", task.completed ? "cursor-default" : "cursor-pointer")}>
+          {subTask.completed ? <CheckCircle2 className="w-4 h-4 text-green-500" /> : <Circle className="w-4 h-4 group-hover/subtask:text-primary" />}
+          <span className={cn(subTask.completed && "line-through")}>{subTask.title}</span>
+        </div>
+      </div>
+      {subTask.subTasks && subTask.subTasks.length > 0 && (
+        <div className="ml-4">
+          {subTask.subTasks.map((child, index) => (
+            <SubTaskItem key={index} subTask={child} level={level + 1} onSubTaskToggle={onSubTaskToggle} task={task} path={[...path, index]} />
+          ))}
+        </div>
+      )}
+    </div>
+  );
+};
 
 type ExtendedTask = Task & {
   isBlocked?: boolean;
@@ -31,7 +55,7 @@ type TaskItemProps = {
   onToggle: (taskId: string) => void;
   onFocus: (task: Task) => void;
   onSelect: (taskId: string) => void;
-  onSubTaskToggle: (taskId: string, subTaskIndex: number) => void;
+  onSubTaskToggle: (taskId: string, path: number[]) => void;
 };
 
 const PriorityIcon = ({ priority, t }: { priority: Priority, t: (key: string) => string }) => {
@@ -125,15 +149,7 @@ const TaskItem = memo(function TaskItem({ task, isDragging, isSelected, onDragSt
                 </div>
               <ul className="text-sm text-muted-foreground space-y-1.5">
                 {task.subTasks.map((sub, index) => (
-                  <li key={index} className="flex items-center gap-2 group/subtask" onClick={(e) => {
-                    e.stopPropagation();
-                    if (!task.completed) onSubTaskToggle(task.id, index)
-                  }}>
-                     <div className={cn("flex items-center gap-2", task.completed ? "cursor-default" : "cursor-pointer")}>
-                        {sub.completed ? <CheckCircle2 className="w-4 h-4 text-green-500" /> : <Circle className="w-4 h-4 group-hover/subtask:text-primary" />}
-                        <span className={cn(sub.completed && "line-through")}>{sub.title}</span>
-                    </div>
-                  </li>
+                  <SubTaskItem key={index} subTask={sub} onSubTaskToggle={onSubTaskToggle} task={task} path={[index]} />
                 ))}
               </ul>
             </div>

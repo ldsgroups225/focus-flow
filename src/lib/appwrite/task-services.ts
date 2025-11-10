@@ -9,23 +9,25 @@ type RawTask = Omit<Task, 'dueDate' | 'completedDate'> & {
 };
 
 const mapTaskFromAppwrite = (row: Models.Row): Task => {
-  const rowData = row as unknown as RawTask & { $id: string };
-  const { dueDate, completedDate, $id: rowId, id: _, ...rest } = rowData;
+  const rowData = row as unknown as RawTask & { $id: string, subTasks: string };
+  const { dueDate, completedDate, $id: rowId, id: _, subTasks, ...rest } = rowData;
 
   return {
     id: rowId,
     ...rest,
     dueDate: dueDate ? new Date(dueDate) : undefined,
     completedDate: completedDate ? new Date(completedDate) : undefined,
+    subTasks: subTasks ? JSON.parse(subTasks) : [],
   };
 };
 
 const mapTaskToAppwrite = (task: Partial<Task>): Partial<RawTask> => {
-  const { dueDate, completedDate, ...rest } = task;
+  const { dueDate, completedDate, subTasks, ...rest } = task;
   return {
     ...rest,
     dueDate: dueDate?.toISOString(),
     completedDate: completedDate?.toISOString(),
+    subTasks: subTasks ? JSON.stringify(subTasks) : undefined,
   };
 };
 
@@ -68,9 +70,6 @@ export const addTask = async (userId: string, taskData: Omit<Task, 'id' | 'compl
       completedDate: null,
     };
 
-    // TODO: remove subtasks from newTask because it is not available in db for now
-    delete newTask.subTasks;
-
     const response = await databases.createRow({
       databaseId: DATABASE_ID,
       tableId: TASKS_TABLE_ID,
@@ -89,9 +88,6 @@ export const updateTask = async (userId: string, taskId: string, taskData: Parti
   try {
     const updatedData = mapTaskToAppwrite(taskData);
     delete updatedData.id;
-
-    // TODO: remove subtasks from updatedData because it is not available in db for now
-    delete updatedData.subTasks;
 
     const response = await databases.updateRow({
       databaseId: DATABASE_ID,
