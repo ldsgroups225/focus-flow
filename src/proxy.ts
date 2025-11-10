@@ -1,19 +1,18 @@
 import { NextResponse } from 'next/server';
-import type { NextRequest } from 'next/server';
 
-export async function proxy(request: NextRequest) {
+export async function proxy() {
   // Note: Proxy cannot access localStorage (client-side only)
   // Authentication redirects are handled client-side in AuthProvider and layouts
-  
+
   // Add security headers to all responses
   const response = NextResponse.next();
-  
+
   // Security headers
   response.headers.set('X-Frame-Options', 'DENY');
   response.headers.set('X-Content-Type-Options', 'nosniff');
   response.headers.set('Referrer-Policy', 'strict-origin-when-cross-origin');
   response.headers.set('X-XSS-Protection', '1; mode=block');
-  
+
   // CSP header - adjust based on your needs
   response.headers.set(
     'Content-Security-Policy',
@@ -25,7 +24,7 @@ export async function proxy(request: NextRequest) {
     "connect-src 'self' https://*.appwrite.io https://fra.cloud.appwrite.io; " +
     "frame-ancestors 'none';"
   );
-  
+
   // Permissions Policy
   response.headers.set(
     'Permissions-Policy',

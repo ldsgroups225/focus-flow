@@ -68,8 +68,7 @@ export function useEnhancedTasks(tasksPromise: Promise<Task[]> | null) {
     if (taskToSave.id) {
       // Update existing task
       const original = [...tasks];
-      const { id: _ignoredId, ...taskPatch } = taskToSave;
-      const patch: Partial<Task> = { ...taskPatch, workspace: activeWorkspace };
+      const patch: Partial<Task> = { ...taskToSave, workspace: activeWorkspace };
       startTransition(async () => {
         addOptimistic({ type: 'update', id: taskToSave.id!, patch });
         try {
@@ -77,7 +76,7 @@ export function useEnhancedTasks(tasksPromise: Promise<Task[]> | null) {
           startTransition(() => {
             setTasks(prev => prev.map(task => (task.id === taskToSave.id ? { ...task, ...patch } : task)));
           });
-        } catch (e) {
+        } catch {
           startTransition(() => {
             setTasks(original);
           });
@@ -100,14 +99,12 @@ export function useEnhancedTasks(tasksPromise: Promise<Task[]> | null) {
         timeSpent: 0,
         dependsOn: taskToSave.dependsOn,
         workspace: activeWorkspace,
-        subTasks: taskToSave.subTasks,
       };
       startTransition(async () => {
         addOptimistic({ type: 'add', task: tempTask });
         try {
-          const { id: _ignoredId, ...newTaskData } = taskToSave;
-          await TaskService.createTask(userId, { ...newTaskData, workspace: activeWorkspace });
-        } catch (e) {
+          await TaskService.createTask(userId, { ...taskToSave, workspace: activeWorkspace });
+        } catch {
           startTransition(() => {
             setTasks(prev => prev.filter(task => task.id !== tempId));
           });
@@ -138,7 +135,7 @@ export function useEnhancedTasks(tasksPromise: Promise<Task[]> | null) {
                 : currentTask
             )));
           });
-        } catch (e) {
+        } catch {
           startTransition(() => {
             setTasks(original);
           });
@@ -205,7 +202,9 @@ export function useEnhancedTasks(tasksPromise: Promise<Task[]> | null) {
 
   // Toggle subtask
   const toggleSubTask = useCallback(async (taskId: string, subTaskIndex: number) => {
-    // TODO: implement in database
+    void taskId // just for ignore unused tasks
+    void subTaskIndex // just for ignore unused tasks
+    // TODO: Either implement or remove: implement in database
   }, []);
 
   return {

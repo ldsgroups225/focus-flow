@@ -16,8 +16,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const unsubscribe: (() => void) | null = null;
-
     const initializeAuth = async () => {
       try {
         const appwriteUser = await getCurrentUser();

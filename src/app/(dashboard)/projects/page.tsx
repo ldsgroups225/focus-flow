@@ -25,7 +25,7 @@ import {
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { useProjects } from '@/lib/hooks/use-projects';
 import { useAuth } from '@/components/providers/auth-provider';
-import type { Project, Workspace } from '@/lib/types';
+import type { Project } from '@/lib/types';
 
 const projectSchema = z.object({
   id: z.string().optional(),

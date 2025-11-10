@@ -16,5 +16,6 @@ const databases = new TablesDB(client);
 const DATABASE_ID = env.NEXT_PUBLIC_APPWRITE_DATABASE_ID!;
 const TASKS_TABLE_ID = 'tasks';
 const PROJECTS_TABLE_ID = 'projects';
+const SUBTASKS_TABLE_ID = 'subtasks';
 
-export { client, account, databases, DATABASE_ID, TASKS_TABLE_ID, PROJECTS_TABLE_ID };
+export { client, account, databases, DATABASE_ID, TASKS_TABLE_ID, PROJECTS_TABLE_ID, SUBTASKS_TABLE_ID };

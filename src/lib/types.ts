@@ -1,19 +1,17 @@
-import { z } from 'zod';
+import { z } from 'genkit';
 
 export type Priority = "low" | "medium" | "high";
 export type Workspace = "personal" | "work" | "side-project";
 
-type LazySubTask = {
-  title: string;
-  completed: boolean;
-  subTasks?: LazySubTask[];
-};
-
-export const subTaskSchema: z.ZodType<LazySubTask> = z.lazy(() => z.object({
+// SubTask now stored in separate table
+export const subTaskSchema = z.object({
+  id: z.string(),
+  taskId: z.string(),
   title: z.string(),
   completed: z.boolean(),
-  subTasks: z.array(subTaskSchema).optional(),
-}));
+  order: z.number(),
+  parentSubTaskId: z.string().optional(), // For nested subtasks
+});
 
 export type SubTask = z.infer<typeof subTaskSchema>;
 
@@ -40,13 +38,17 @@ export const taskSchema = z.object({
   dependsOn: z.array(z.string()).optional(),
   workspace: z.enum(['personal', 'work', 'side-project']),
   completedDate: z.coerce.date().optional(),
-  subTasks: z.array(subTaskSchema).optional(),
   startDate: z.coerce.date().optional(),
   duration: z.number().optional(), // Duration in days
   projectId: z.string().optional(),
 }).describe('A task object');
 
 export type Task = z.infer<typeof taskSchema>;
+
+// Extended Task type with subtasks (loaded from separate table)
+export type TaskWithSubTasks = Task & {
+  subTasks?: SubTask[];
+};
 
 // AI Flow Schemas
 
@@ -82,7 +84,10 @@ export const breakdownTaskInputSchema = z.object({
   description: z.string(),
 });
 export type BreakdownTaskInput = z.infer<typeof breakdownTaskInputSchema>;
-export const breakdownTaskOutputSchema = z.array(subTaskSchema);
+export const breakdownTaskOutputSchema = z.array(z.object({
+  title: z.string(),
+  completed: z.boolean(),
+}));
 export type BreakdownTaskOutput = z.infer<typeof breakdownTaskOutputSchema>;
 
 export const focusAssistantInputSchema = z.object({

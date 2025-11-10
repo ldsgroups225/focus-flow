@@ -2,18 +2,18 @@
 
 import { useState, useCallback, useTransition } from 'react';
 import { useOptimistic } from 'react';
-import type { Task } from '@/lib/types';
+import type { Task, TaskWithSubTasks } from '@/lib/types';
 import { TaskService } from '@/lib/services/task-service';
 import { useToast } from '@/hooks/use-toast';
 import { useI18n } from '@/app/components/i18n-provider';
 
 type OptimisticAction =
-  | { type: 'add'; task: Task }
-  | { type: 'update'; id: string; patch: Partial<Task> }
+  | { type: 'add'; task: TaskWithSubTasks }
+  | { type: 'update'; id: string; patch: Partial<TaskWithSubTasks> }
   | { type: 'delete'; id: string };
 
 export function useTasks(userId: string | null) {
-  const [tasks, setTasks] = useState<Task[]>([]);
+  const [tasks, setTasks] = useState<TaskWithSubTasks[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const { toast } = useToast();
   const { t } = useI18n();
@@ -49,7 +49,7 @@ export function useTasks(userId: string | null) {
 
   // Save task (create or update)
   const saveTask = useCallback(async (
-    taskToSave: Omit<Task, 'id' | 'completed' | 'completedPomodoros' | 'timeSpent' | 'completedDate'> & { id?: string },
+    taskToSave: Omit<Task, 'id' | 'completed' | 'completedPomodoros' | 'timeSpent' | 'completedDate'> & { id?: string; subTasks?: { title: string; completed?: boolean; order?: number }[] },
     activeWorkspace: 'personal' | 'work' | 'side-project'
   ) => {
     if (!userId) return;
@@ -57,8 +57,7 @@ export function useTasks(userId: string | null) {
     if (taskToSave.id) {
       // Update existing task
       const original = [...tasks];
-      const { id: _ignoredId, ...taskPatch } = taskToSave;
-      const patch: Partial<Task> = { ...taskPatch, workspace: activeWorkspace };
+      const patch: Partial<Task> = { ...taskToSave, workspace: activeWorkspace };
       startTransition(async () => {
         addOptimistic({ type: 'update', id: taskToSave.id!, patch });
         try {
@@ -76,7 +75,7 @@ export function useTasks(userId: string | null) {
     } else {
       // Create new task
       const tempId = `temp-${Date.now()}`;
-      const tempTask: Task = {
+      const tempTask: TaskWithSubTasks = {
         id: tempId,
         title: taskToSave.title,
         description: taskToSave.description,
@@ -89,14 +88,19 @@ export function useTasks(userId: string | null) {
         timeSpent: 0,
         dependsOn: taskToSave.dependsOn,
         workspace: activeWorkspace,
-        subTasks: taskToSave.subTasks,
+        subTasks: [],
       };
       startTransition(async () => {
         addOptimistic({ type: 'add', task: tempTask });
         try {
-          const { id: _ignoredId, ...newTaskData } = taskToSave;
-          await TaskService.createTask(userId, { ...newTaskData, workspace: activeWorkspace });
-          // Refresh from server to get the real ID
+          const { subTasks, ...newTaskData } = taskToSave;
+          const formattedSubTasks = subTasks?.map(st => ({
+            title: st.title,
+            completed: st.completed ?? false,
+            order: st.order ?? 0,
+          }));
+          await TaskService.createTask(userId, { ...newTaskData, workspace: activeWorkspace, subTasks: formattedSubTasks });
+          // Refresh from server to get the real ID and subtasks
           TaskService.fetchTasks(userId, (newTasks) => {
             startTransition(() => setTasks(newTasks));
           });
@@ -202,25 +206,27 @@ export function useTasks(userId: string | null) {
   }, [userId, tasks]);
 
   // Toggle subtask
-  const toggleSubTask = useCallback(async (taskId: string, subTaskPath: number[]) => {
+  const toggleSubTask = useCallback(async (subTaskId: string) => {
     if (!userId) return;
-    const task = tasks.find(t => t.id === taskId);
-    if (task && task.subTasks) {
-      const newSubTasks = JSON.parse(JSON.stringify(task.subTasks));
-      let current = newSubTasks;
-      for (let i = 0; i < subTaskPath.length - 1; i++) {
-        if (!current[subTaskPath[i]]?.subTasks) {
-          return;
+
+    // Find the subtask in the current tasks
+    let targetSubTask: { id: string; completed: boolean } | null = null;
+    for (const task of tasks) {
+      if (task.subTasks) {
+        const found = task.subTasks.find(st => st.id === subTaskId);
+        if (found) {
+          targetSubTask = found;
+          break;
         }
-        current = current[subTaskPath[i]].subTasks;
-      }
-      const subTask = current[subTaskPath[subTaskPath.length - 1]];
-      if (subTask) {
-        subTask.completed = !subTask.completed;
-        await TaskService.updateTaskData(userId, taskId, { subTasks: newSubTasks });
       }
     }
-  }, [userId, tasks]);
+
+    if (targetSubTask) {
+      await TaskService.toggleSubTaskCompletion(subTaskId, targetSubTask.completed);
+      // Refresh tasks to get updated subtasks
+      fetchTasks();
+    }
+  }, [userId, tasks, fetchTasks]);
 
   return {
     tasks: optimisticTasks,

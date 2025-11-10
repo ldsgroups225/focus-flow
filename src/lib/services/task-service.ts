@@ -1,217 +1,182 @@
-import type { Task } from '@/lib/types';
-import { addTask, deleteTask, getTasks, updateTask } from '@/lib/appwrite/task-services';
+import { getTasks, addTask, updateTask, deleteTask } from '@/lib/appwrite/task-services';
+import {
+  getSubTasksByTaskId,
+  addSubTask,
+  updateSubTask,
+  deleteSubTask,
+  deleteSubTasksByTaskId,
+  bulkUpdateSubTasks
+} from '@/lib/appwrite/subtask-services';
+import type { Task, SubTask } from '@/lib/types';
 
-/**
- * Task Service - Handles all task-related business logic
- * Separates business logic from state management and UI
- */
+// Extended Task type with subtasks loaded
+export type TaskWithSubTasks = Task & {
+  subTasks?: SubTask[];
+};
+
 export class TaskService {
-  /**
-   * Fetch all tasks for a user
-   */
-  static async fetchTasks(
-    userId: string,
-    callback: (tasks: Task[]) => void
-  ): Promise<void> {
-    try {
-      getTasks(userId, callback);
-    } catch (error) {
-      console.error('Error fetching tasks:', error);
-      callback([]);
-    }
-  }
-
-  /**
-   * Create a new task
-   */
-  static async createTask(
-    userId: string,
-    taskData: Omit<Task, 'id' | 'completed' | 'completedPomodoros' | 'timeSpent' | 'completedDate'>
-  ): Promise<void> {
-    try {
-      await addTask(userId, taskData);
-    } catch (error) {
-      console.error('Error creating task:', error);
-      throw error;
-    }
-  }
-
-  /**
-   * Update an existing task
-   */
-  static async updateTaskData(
-    userId: string,
-    taskId: string,
-    updates: Partial<Task>
-  ): Promise<void> {
-    try {
-      await updateTask(userId, taskId, updates);
-    } catch (error) {
-      console.error('Error updating task:', error);
-      throw error;
-    }
-  }
-
-  /**
-   * Delete a task
-   */
-  static async deleteTaskData(
-    userId: string,
-    taskId: string
-  ): Promise<void> {
-    try {
-      await deleteTask(userId, taskId);
-    } catch (error) {
-      console.error('Error deleting task:', error);
-      throw error;
-    }
-  }
-
-  /**
-   * Toggle task completion status
-   */
-  static async toggleTaskCompletion(
-    userId: string,
-    taskId: string,
-    currentStatus: boolean
-  ): Promise<void> {
-    try {
-      await updateTask(userId, taskId, {
-        completed: !currentStatus,
-        completedDate: !currentStatus ? new Date() : undefined
-      });
-    } catch (error) {
-      console.error('Error toggling task completion:', error);
-      throw error;
-    }
-  }
-
-  /**
-   * Update pomodoro count for a task
-   */
-  static async updatePomodoroCount(
-    userId: string,
-    taskId: string,
-    newCount: number
-  ): Promise<void> {
-    try {
-      await updateTask(userId, taskId, { completedPomodoros: newCount });
-    } catch (error) {
-      console.error('Error updating pomodoro count:', error);
-      throw error;
-    }
-  }
-
-  /**
-   * Log time spent on a task
-   */
-  static async logTimeSpent(
-    userId: string,
-    taskId: string,
-    additionalSeconds: number,
-    currentTimeSpent: number
-  ): Promise<void> {
-    try {
-      const newTime = currentTimeSpent + additionalSeconds;
-      await updateTask(userId, taskId, { timeSpent: newTime });
-    } catch (error) {
-      console.error('Error logging time:', error);
-      throw error;
-    }
-  }
-
-  /**
-   * Filter tasks by workspace
-   */
-  static filterTasksByWorkspace(
-    tasks: Task[],
-    workspace: 'personal' | 'work' | 'side-project'
-  ): Task[] {
-    return tasks.filter(task => task.workspace === workspace);
-  }
-
-  /**
-   * Filter tasks by project
-   */
-  static filterTasksByProject(
-    tasks: Task[],
-    projectId: string
-  ): Task[] {
-    return tasks.filter(task => task.projectId === projectId);
-  }
-
-  /**
-   * Get unique tags from tasks
-   */
-  static getUniqueTags(tasks: Task[]): string[] {
-    const allTags = tasks.flatMap(task => task.tags);
-    return [...new Set(allTags)];
-  }
-
-  /**
-   * Filter tasks based on criteria
-   */
-  static filterTasks(
-    tasks: Task[],
-    filters: {
-      priorityFilter?: string[];
-      tagFilter?: string[];
-      searchQuery?: string;
-    }
-  ): Task[] {
-    return tasks.filter(task => {
-      const { priorityFilter, tagFilter, searchQuery } = filters;
-
-      const priorityMatch = !priorityFilter?.length || priorityFilter.includes(task.priority);
-      const tagMatch = !tagFilter?.length || task.tags.some(tag => tagFilter.includes(tag));
-      const searchMatch = !searchQuery ||
-        task.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        task.description?.toLowerCase().includes(searchQuery.toLowerCase());
-
-      return priorityMatch && tagMatch && searchMatch;
+  // Fetch tasks with their subtasks
+  static fetchTasks(userId: string, callback: (tasks: TaskWithSubTasks[]) => void) {
+    getTasks(userId, async (tasks) => {
+      // Load subtasks for each task
+      const tasksWithSubTasks = await Promise.all(
+        tasks.map(async (task) => {
+          const subTasks = await getSubTasksByTaskId(task.id);
+          return { ...task, subTasks };
+        })
+      );
+      callback(tasksWithSubTasks);
     });
   }
 
-  /**
-   * Calculate task blocking status
-   */
-  static addTaskBlockingStatus(tasks: Task[]): (Task & { isBlocked: boolean; blockingTasks: string[] })[] {
-    const taskMap = new Map(tasks.map(t => [t.id, t]));
+  // Create a new task
+  static async createTask(
+    userId: string,
+    taskData: Omit<Task, 'id' | 'completed' | 'completedPomodoros' | 'timeSpent' | 'completedDate'> & { subTasks?: Omit<SubTask, 'id' | 'taskId'>[] }
+  ) {
+    const { subTasks, ...taskFields } = taskData;
+    const newTask = await addTask(userId, taskFields);
 
+    // Create subtasks if provided
+    if (subTasks && subTasks.length > 0) {
+      await Promise.all(
+        subTasks.map((st, index) =>
+          addSubTask({
+            taskId: newTask.$id,
+            title: st.title,
+            completed: st.completed || false,
+            order: st.order ?? index,
+            parentSubTaskId: st.parentSubTaskId,
+          })
+        )
+      );
+    }
+
+    return newTask;
+  }
+
+  // Update task data
+  static async updateTaskData(userId: string, taskId: string, taskData: Partial<Task>) {
+    return updateTask(userId, taskId, taskData);
+  }
+
+  // Toggle task completion
+  static async toggleTaskCompletion(userId: string, taskId: string, currentCompleted: boolean) {
+    return updateTask(userId, taskId, {
+      completed: !currentCompleted,
+      completedDate: !currentCompleted ? new Date() : undefined,
+    });
+  }
+
+  // Delete task and its subtasks
+  static async deleteTaskData(userId: string, taskId: string) {
+    await deleteSubTasksByTaskId(taskId);
+    return deleteTask(userId, taskId);
+  }
+
+  // Update pomodoro count
+  static async updatePomodoroCount(userId: string, taskId: string, newCount: number) {
+    return updateTask(userId, taskId, { completedPomodoros: newCount });
+  }
+
+  // Log time spent
+  static async logTimeSpent(userId: string, taskId: string, additionalSeconds: number, currentTimeSpent: number) {
+    return updateTask(userId, taskId, { timeSpent: currentTimeSpent + additionalSeconds });
+  }
+
+  // SubTask operations
+  static async addSubTaskToTask(taskId: string, subTaskData: Omit<SubTask, 'id' | 'taskId'>) {
+    return addSubTask({ ...subTaskData, taskId });
+  }
+
+  static async updateSubTaskData(subTaskId: string, subTaskData: Partial<SubTask>) {
+    return updateSubTask(subTaskId, subTaskData);
+  }
+
+  static async toggleSubTaskCompletion(subTaskId: string, currentCompleted: boolean) {
+    return updateSubTask(subTaskId, { completed: !currentCompleted });
+  }
+
+  static async deleteSubTaskData(subTaskId: string) {
+    return deleteSubTask(subTaskId);
+  }
+
+  static async getSubTasksForTask(taskId: string) {
+    return getSubTasksByTaskId(taskId);
+  }
+
+  static async reorderSubTasks(subTasks: SubTask[]) {
+    return bulkUpdateSubTasks(subTasks);
+  }
+
+  // Filter and utility methods
+  static filterTasksByWorkspace(tasks: TaskWithSubTasks[], workspace: string): TaskWithSubTasks[] {
+    return tasks.filter(task => task.workspace === workspace);
+  }
+
+  static filterTasksByProject(tasks: TaskWithSubTasks[], projectId: string): TaskWithSubTasks[] {
+    return tasks.filter(task => task.projectId === projectId);
+  }
+
+  static getUniqueTags(tasks: TaskWithSubTasks[]): string[] {
+    const tagSet = new Set<string>();
+    tasks.forEach(task => {
+      task.tags.forEach(tag => tagSet.add(tag));
+    });
+    return Array.from(tagSet).sort();
+  }
+
+  static addTaskBlockingStatus(tasks: TaskWithSubTasks[]): (TaskWithSubTasks & { isBlocked?: boolean; blockingTasks?: string[] })[] {
     return tasks.map(task => {
-      const blockingTasks = (task.dependsOn ?? [])
-        .map(depId => taskMap.get(depId))
-        .filter((dep): dep is Task => !!dep && !dep.completed);
+      if (!task.dependsOn || task.dependsOn.length === 0) {
+        return task;
+      }
+
+      const blockingTasks = task.dependsOn
+        .map(depId => tasks.find(t => t.id === depId))
+        .filter((t): t is TaskWithSubTasks => t !== undefined && !t.completed)
+        .map(t => t.title);
 
       return {
         ...task,
         isBlocked: blockingTasks.length > 0,
-        blockingTasks: blockingTasks.map(t => t.title),
+        blockingTasks,
       };
     });
   }
 
-  /**
-   * Restore a deleted task (for undo functionality)
-   */
-  static async restoreTask(
-    userId: string,
-    taskData: {
-      title: string;
-      description?: string;
-      priority: 'low' | 'medium' | 'high';
-      tags: string[];
-      dueDate?: Date;
-      pomodoros: number;
-      dependsOn?: string[];
-      workspace: 'personal' | 'work' | 'side-project';
+  static filterTasks(
+    tasks: (TaskWithSubTasks & { isBlocked?: boolean; blockingTasks?: string[] })[],
+    filters: {
+      priorityFilter: string[];
+      tagFilter: string[];
+      searchQuery: string;
     }
-  ): Promise<void> {
-    try {
-      await this.createTask(userId, taskData);
-    } catch (error) {
-      console.error('Error restoring task:', error);
-      throw error;
-    }
+  ): (TaskWithSubTasks & { isBlocked?: boolean; blockingTasks?: string[] })[] {
+    return tasks.filter(task => {
+      // Priority filter
+      if (filters.priorityFilter.length > 0 && !filters.priorityFilter.includes(task.priority)) {
+        return false;
+      }
+
+      // Tag filter
+      if (filters.tagFilter.length > 0 && !filters.tagFilter.some(tag => task.tags.includes(tag))) {
+        return false;
+      }
+
+      // Search query
+      if (filters.searchQuery) {
+        const query = filters.searchQuery.toLowerCase();
+        const matchesTitle = task.title.toLowerCase().includes(query);
+        const matchesDescription = task.description?.toLowerCase().includes(query);
+        const matchesTags = task.tags.some(tag => tag.toLowerCase().includes(query));
+
+        if (!matchesTitle && !matchesDescription && !matchesTags) {
+          return false;
+        }
+      }
+
+      return true;
+    });
   }
 }

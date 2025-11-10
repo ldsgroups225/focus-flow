@@ -11,7 +11,6 @@ interface TaskStatsProps {
 
 export function TaskStats({ tasks }: TaskStatsProps) {
   const stats = TaskServerService.getTaskStats(tasks);
-  const processedTasks = TaskServerService.processTasksForSSR(tasks);
 
   return (
     <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">

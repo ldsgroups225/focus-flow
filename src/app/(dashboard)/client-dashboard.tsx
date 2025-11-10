@@ -8,7 +8,7 @@ import { TaskForm } from '@/app/components/task-form';
 import { Filters } from '@/app/components/filters';
 import { FocusView } from '@/app/components/focus-view';
 import { AiReviewDialog } from '@/app/components/ai-review-dialog';
-import type { Task, Workspace } from '@/lib/types';
+import type { Task, Workspace, Project } from '@/lib/types';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -41,7 +41,7 @@ interface ClientDashboardProps {
 export function ClientDashboard({ initialTasks }: ClientDashboardProps) {
   const router = useRouter();
   const { user } = useAuth();
-  
+
   const [activeWorkspace, setActiveWorkspace] = useState<Workspace>('personal');
   const [editingTask, setEditingTask] = useState<Task | 'new' | null>(null);
   const [focusTask, setFocusTask] = useState<Task | null>(null);
@@ -53,8 +53,11 @@ export function ClientDashboard({ initialTasks }: ClientDashboardProps) {
 
   // Custom hooks
   const { tasks, isLoading, saveTask, toggleComplete, deleteTask, updatePomodoro, logTime, toggleSubTask, fetchTasks, setTasks } = useTasks(user?.uid ?? null);
-  const { priorityFilter, setPriorityFilter, tagFilter, setTagFilter, searchQuery, setSearchQuery, uniqueTags, filteredTasks, clearFilters } = useFilters(tasks, activeWorkspace);
+  const { priorityFilter, setPriorityFilter, tagFilter, setTagFilter, setSearchQuery, uniqueTags, filteredTasks, clearFilters } = useFilters(tasks, activeWorkspace);
   const { selectedTaskIds, selectTask, deselectAll, setSelectedTaskIds } = useTaskSelection();
+
+  // Empty projects array for now (can be added later)
+  const projects: Project[] = [];
 
   const handleSignOut = async () => {
     try {
@@ -188,7 +191,7 @@ export function ClientDashboard({ initialTasks }: ClientDashboardProps) {
             ) : (
               <TaskList
                 tasks={filteredTasks}
-                setTasks={() => {}}
+                setTasks={() => { }}
                 onEdit={handleSetEditingTask}
                 onDelete={deleteTask}
                 onToggle={toggleComplete}
@@ -222,6 +225,7 @@ export function ClientDashboard({ initialTasks }: ClientDashboardProps) {
             task={editingTask === 'new' ? undefined : activeEditingTask ?? undefined}
             allTasks={tasks}
             activeWorkspace={activeWorkspace}
+            projects={projects}
           />
         )}
         {focusTask && (

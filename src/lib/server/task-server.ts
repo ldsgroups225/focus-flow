@@ -14,7 +14,8 @@ export interface TaskListProps {
  * This is a presentational component that can run on the server
  */
 export function TaskListServer({ tasks }: TaskListProps) {
-  // This would render on the server
+  void tasks // just for ignore unused tasks
+  // TODO: Either implement or remove: This would render on the server
   // In a real implementation, you might use this for SEO or initial HTML
   return null; // Placeholder - actual rendering is done by client component
 }

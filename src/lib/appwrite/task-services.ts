@@ -1,33 +1,30 @@
-import { databases, DATABASE_ID, TASKS_TABLE_ID, client } from './config';
+import { databases, DATABASE_ID, TASKS_TABLE_ID } from './config';
 import type { Task } from '@/lib/types';
 import { ID, Models, Query } from 'appwrite';
 
 type RawTask = Omit<Task, 'dueDate' | 'completedDate'> & {
   dueDate?: string;
   completedDate?: string;
-  createdAt: string;
 };
 
 const mapTaskFromAppwrite = (row: Models.Row): Task => {
-  const rowData = row as unknown as RawTask & { $id: string, subTasks: string };
-  const { dueDate, completedDate, $id: rowId, id: _, subTasks, ...rest } = rowData;
+  const rowData = row as unknown as RawTask & { $id: string };
+  const { dueDate, completedDate, $id: rowId, id, ...rest } = rowData;
 
   return {
     id: rowId,
     ...rest,
     dueDate: dueDate ? new Date(dueDate) : undefined,
     completedDate: completedDate ? new Date(completedDate) : undefined,
-    subTasks: subTasks ? JSON.parse(subTasks) : [],
   };
 };
 
 const mapTaskToAppwrite = (task: Partial<Task>): Partial<RawTask> => {
-  const { dueDate, completedDate, subTasks, ...rest } = task;
+  const { dueDate, completedDate, ...rest } = task;
   return {
     ...rest,
     dueDate: dueDate?.toISOString(),
     completedDate: completedDate?.toISOString(),
-    subTasks: subTasks ? JSON.stringify(subTasks) : undefined,
   };
 };
 

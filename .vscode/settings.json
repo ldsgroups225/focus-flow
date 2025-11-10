@@ -6,5 +6,6 @@
     "Pomodoros",
     "undos",
     "unsub"
-  ]
+  ],
+  "typescript.autoClosingTags": false
 }

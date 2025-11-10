@@ -2,47 +2,47 @@
 
 import React, { useState, memo } from 'react';
 import { TaskItem } from './task-item';
-import type { Task } from '@/lib/types';
+import type { TaskWithSubTasks } from '@/lib/types';
 import { AnimatePresence, motion } from 'framer-motion';
 import { ListX } from 'lucide-react';
 import { useI18n } from './i18n-provider';
 
-type ExtendedTask = Task & {
+type ExtendedTask = TaskWithSubTasks & {
   isBlocked?: boolean;
   blockingTasks?: string[];
 };
 
 type TaskListProps = {
   tasks: ExtendedTask[];
-  setTasks: React.Dispatch<React.SetStateAction<Task[]>>;
-  onEdit: (task: Task) => void;
+  setTasks: React.Dispatch<React.SetStateAction<TaskWithSubTasks[]>>;
+  onEdit: (task: TaskWithSubTasks) => void;
   onDelete: (taskId: string) => void;
   onToggle: (taskId: string) => void;
-  onFocus: (task: Task) => void;
+  onFocus: (task: TaskWithSubTasks) => void;
   selectedTaskIds: Set<string>;
   onSelectTask: (taskId: string) => void;
-  onSubTaskToggle: (taskId: string, subTaskIndex: number) => void;
+  onSubTaskToggle: (subTaskId: string) => void;
 };
 
 const TaskList = memo(function TaskList({ tasks, setTasks, onEdit, onDelete, onToggle, onFocus, selectedTaskIds, onSelectTask, onSubTaskToggle }: TaskListProps) {
   const [draggedItemId, setDraggedItemId] = useState<string | null>(null);
   const { t } = useI18n();
 
-  const handleDragStart = (e: React.DragEvent<HTMLDivElement>, task: Task) => {
+  const handleDragStart = (e: React.DragEvent<HTMLDivElement>, task: TaskWithSubTasks) => {
     // Only allow dragging if not clicking on an interactive element
     if ((e.target as HTMLElement).closest('button, a, input, [role=checkbox]')) {
-        e.preventDefault();
-        return;
+      e.preventDefault();
+      return;
     }
     setDraggedItemId(task.id);
     e.dataTransfer.effectAllowed = 'move';
     e.dataTransfer.setData('text/plain', task.id);
   };
 
-  const handleDragOver = (e: React.DragEvent<HTMLDivElement>, targetTask: Task) => {
+  const handleDragOver = (e: React.DragEvent<HTMLDivElement>, targetTask: TaskWithSubTasks) => {
     e.preventDefault();
     if (!draggedItemId || draggedItemId === targetTask.id) return;
-    
+
     setTasks(currentTasks => {
       const draggedIndex = currentTasks.findIndex(t => t.id === draggedItemId);
       const targetIndex = currentTasks.findIndex(t => t.id === targetTask.id);
@@ -53,22 +53,22 @@ const TaskList = memo(function TaskList({ tasks, setTasks, onEdit, onDelete, onT
       const fullTasks = [...currentTasks];
       const draggedTask = fullTasks.find(t => t.id === draggedItemId);
       if (!draggedTask) return currentTasks;
-      
+
       const tasksWithoutDragged = fullTasks.filter(t => t.id !== draggedItemId);
       const newTargetIndex = tasksWithoutDragged.findIndex(t => t.id === targetTask.id);
 
       if (newTargetIndex === -1) return currentTasks;
-      
+
       tasksWithoutDragged.splice(newTargetIndex, 0, draggedTask);
-      
+
       return tasksWithoutDragged;
     });
   };
-  
+
   const handleDragEnd = () => {
     setDraggedItemId(null);
   };
-  
+
   if (tasks.length === 0) {
     return (
       <div className="flex flex-col items-center justify-center rounded-lg border-2 border-dashed border-border p-12 text-center h-80">
@@ -83,14 +83,14 @@ const TaskList = memo(function TaskList({ tasks, setTasks, onEdit, onDelete, onT
     <div className="space-y-3">
       <AnimatePresence>
         {tasks.map(task => (
-           <motion.div
+          <motion.div
             key={task.id}
             layout
             initial={{ opacity: 0, y: 20, scale: 0.98 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, scale: 0.95, transition: { duration: 0.2 } }}
             transition={{ duration: 0.3, ease: [0.4, 0, 0.2, 1] }}
-           >
+          >
             <TaskItem
               task={task}
               isDragging={draggedItemId === task.id}

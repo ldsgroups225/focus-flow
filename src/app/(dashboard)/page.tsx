@@ -5,7 +5,7 @@ import { Plus, SlidersHorizontal, Orbit, Search, Sparkles, User2 } from 'lucide-
 import { Button } from '@/components/ui/button';
 import { TaskList } from '@/app/components/task-list';
 import { Filters } from '@/app/components/filters';
-import type { Workspace, Task } from '@/lib/types';
+import type { Workspace, TaskWithSubTasks } from '@/lib/types';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -36,10 +36,10 @@ import { getAvatarInitial } from '@/lib/utils/get-avatar-initial';
 export default function DashboardPage() {
   const router = useRouter();
   const { user } = useAuth();
-  
+
   const [activeWorkspace, setActiveWorkspace] = useState<Workspace>('personal');
-  const [editingTask, setEditingTask] = useState<Task | 'new' | null>(null);
-  const [focusTask, setFocusTask] = useState<Task | null>(null);
+  const [editingTask, setEditingTask] = useState<TaskWithSubTasks | 'new' | null>(null);
+  const [focusTask, setFocusTask] = useState<TaskWithSubTasks | null>(null);
   const [isReviewOpen, setIsReviewOpen] = useState(false);
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [isShortcutsOpen, setIsShortcutsOpen] = useState(false);
@@ -77,7 +77,7 @@ export default function DashboardPage() {
     }
   };
 
-  const handleSetEditingTask = (task: Task | 'new' | null) => {
+  const handleSetEditingTask = (task: TaskWithSubTasks | 'new' | null) => {
     if (task === 'new') {
       clearFilters();
     }
@@ -181,7 +181,7 @@ export default function DashboardPage() {
             ) : (
               <TaskList
                 tasks={filteredTasks}
-                setTasks={() => {}}
+                setTasks={() => { }}
                 onEdit={handleSetEditingTask}
                 onDelete={deleteTask}
                 onToggle={toggleComplete}
@@ -222,8 +222,8 @@ export default function DashboardPage() {
         <Suspense fallback={null}>
           <LazyBulkActionsToolbar.LazyComponent
             selectedTaskIds={selectedTaskIds}
-            setSelectedTaskIds={() => {}}
-            setTasks={() => {}}
+            setSelectedTaskIds={() => { }}
+            setTasks={() => { }}
           />
         </Suspense>
 
