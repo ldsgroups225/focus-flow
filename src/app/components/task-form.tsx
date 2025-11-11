@@ -171,6 +171,7 @@ export function TaskForm({ isOpen, onClose, onSave, task, allTasks, activeWorksp
           dependsOn: task.dependsOn || [],
           workspace: task.workspace,
           subTasks: task.subTasks || [],
+          projectId: task.projectId || '',
         });
         // Set date input mode based on existing data
         if (task.duration && task.duration > 0 && task.startDate) {
