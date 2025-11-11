@@ -8,7 +8,7 @@ import { ListX } from 'lucide-react';
 import { useI18n } from './i18n-provider';
 
 type ExtendedTask = TaskWithSubTasks & {
-  isBlocked?: boolean;
+  isBlocked?: number;
   blockingTasks?: string[];
 };
 

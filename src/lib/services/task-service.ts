@@ -126,21 +126,44 @@ export class TaskService {
     return Array.from(tagSet).sort();
   }
 
-  static addTaskBlockingStatus(tasks: TaskWithSubTasks[]): (TaskWithSubTasks & { isBlocked?: boolean; blockingTasks?: string[] })[] {
+  static addTaskBlockingStatus(tasks: TaskWithSubTasks[]): (TaskWithSubTasks & { isBlocked?: number; blockingTasks?: string[] })[] {
+    // Helper function to calculate blocking depth - recursively count uncompleted dependencies
+    const calculateBlockingDepth = (taskId: string, visited: Set<string> = new Set()): number => {
+      if (visited.has(taskId)) return 0; // Prevent circular dependencies
+      visited.add(taskId);
+
+      const task = tasks.find(t => t.id === taskId);
+      if (!task || !task.dependsOn || task.dependsOn.length === 0) return 0;
+
+      let maxDepth = 0;
+      for (const depId of task.dependsOn) {
+        const depTask = tasks.find(t => t.id === depId);
+        if (depTask && !depTask.completed) {
+          const newVisited = new Set(visited);
+          const depth = 1 + calculateBlockingDepth(depId, newVisited);
+          maxDepth = Math.max(maxDepth, depth);
+        }
+      }
+
+      return maxDepth;
+    };
+
     const tasksWithStatus = tasks.map(task => {
       if (!task.dependsOn || task.dependsOn.length === 0) {
         return task;
       }
 
-      const blockingTasks = task.dependsOn
+      const blockingTasksTitles = task.dependsOn
         .map(depId => tasks.find(t => t.id === depId))
         .filter((t): t is TaskWithSubTasks => t !== undefined && !t.completed)
         .map(t => t.title);
 
+      const blockingDepth = calculateBlockingDepth(task.id);
+
       return {
         ...task,
-        isBlocked: blockingTasks.length > 0,
-        blockingTasks,
+        isBlocked: blockingDepth,
+        blockingTasks: blockingTasksTitles,
       };
     });
 
@@ -153,13 +176,13 @@ export class TaskService {
    * Strategy: Group dependency chains together while preserving priority/due date order
    */
   static sortTasksByDependencies(
-    tasks: (TaskWithSubTasks & { isBlocked?: boolean; blockingTasks?: string[] })[]
-  ): (TaskWithSubTasks & { isBlocked?: boolean; blockingTasks?: string[] })[] {
+    tasks: (TaskWithSubTasks & { isBlocked?: number; blockingTasks?: string[] })[]
+  ): (TaskWithSubTasks & { isBlocked?: number; blockingTasks?: string[] })[] {
     const processed = new Set<string>();
-    const result: (TaskWithSubTasks & { isBlocked?: boolean; blockingTasks?: string[] })[] = [];
+    const result: (TaskWithSubTasks & { isBlocked?: number; blockingTasks?: string[] })[] = [];
 
     // Helper to recursively add a task and its dependents
-    const addTaskWithDependents = (task: TaskWithSubTasks & { isBlocked?: boolean; blockingTasks?: string[] }) => {
+    const addTaskWithDependents = (task: TaskWithSubTasks & { isBlocked?: number; blockingTasks?: string[] }) => {
       if (processed.has(task.id)) return;
 
       processed.add(task.id);
@@ -176,7 +199,7 @@ export class TaskService {
 
     // First pass: add tasks without dependencies (or with completed dependencies)
     tasks
-      .filter(t => !t.isBlocked)
+      .filter(t => !t.isBlocked || t.isBlocked === 0)
       .forEach(task => addTaskWithDependents(task));
 
     // Second pass: add any remaining blocked tasks (circular dependencies or orphaned)
@@ -188,14 +211,14 @@ export class TaskService {
   }
 
   static filterTasks(
-    tasks: (TaskWithSubTasks & { isBlocked?: boolean; blockingTasks?: string[] })[],
+    tasks: (TaskWithSubTasks & { isBlocked?: number; blockingTasks?: string[] })[],
     filters: {
       priorityFilter: string[];
       tagFilter: string[];
       searchQuery: string;
       typeFilter?: string[];
     }
-  ): (TaskWithSubTasks & { isBlocked?: boolean; blockingTasks?: string[] })[] {
+  ): (TaskWithSubTasks & { isBlocked?: number; blockingTasks?: string[] })[] {
     return tasks.filter(task => {
       // Priority filter
       if (filters.priorityFilter.length > 0 && !filters.priorityFilter.includes(task.priority)) {
