@@ -1,7 +1,7 @@
 
 'use client';
 
-import { memo } from 'react';
+import { memo, useState } from 'react';
 import {
   DropdownMenu,
   DropdownMenuCheckboxItem,
@@ -12,10 +12,13 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import { Button } from "@/components/ui/button";
-import type { Priority } from "@/lib/types";
+import type { Priority, Project } from "@/lib/types";
 import { useI18n } from "./i18n-provider";
+import { Select, SelectContent, SelectGroup, SelectItem, SelectSeparator, SelectTrigger, SelectValue } from '@/components/ui/select';
 
 type FiltersProps = {
+  projectFilter: Project[];
+  setProjectFilter: (selectedProjectId: string | undefined) => void;
   priorityFilter: Priority[];
   setPriorityFilter: (priorities: Priority[]) => void;
   tagFilter: string[];
@@ -23,8 +26,11 @@ type FiltersProps = {
   uniqueTags: string[];
 };
 
-const Filters = memo(function Filters({ priorityFilter, setPriorityFilter, tagFilter, setTagFilter, uniqueTags }: FiltersProps) {
+const Filters = memo(function Filters({ projectFilter, setProjectFilter, priorityFilter, setPriorityFilter, tagFilter, setTagFilter, uniqueTags }: FiltersProps) {
   const { t } = useI18n();
+
+  const [selectedProjectId, setSelectedProjectId] = useState<string | undefined>(undefined);
+
   return (
     <div className="space-y-6">
       <div>
@@ -75,6 +81,45 @@ const Filters = memo(function Filters({ priorityFilter, setPriorityFilter, tagFi
              )}
           </DropdownMenuContent>
         </DropdownMenu>
+      </div>
+
+      <div>
+        <h3 className="text-sm font-medium mb-2">{t('filters.byProject')}</h3>
+        <Select value={selectedProjectId} onValueChange={(value) => {
+          setSelectedProjectId(value);
+          setProjectFilter(value);
+        }}>
+          <SelectTrigger className="w-full">
+            <SelectValue placeholder={t('filters.selectProject')} />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectGroup>
+              {projectFilter.map(project => (
+                <SelectItem
+                  key={project.id}
+                  value={project.id}
+                >
+                  {project.name}
+                </SelectItem>
+              ))}
+            </SelectGroup>
+            {selectedProjectId && (
+              <>
+                <SelectSeparator />
+                <Button 
+                  variant="ghost" 
+                  className="w-full text-sm" 
+                  onClick={() => {
+                    setSelectedProjectId(undefined);
+                    setProjectFilter(undefined);
+                  }}
+                >
+                  {t('filters.clearFilters')}
+                </Button>
+              </>
+            )}
+          </SelectContent>
+        </Select>
       </div>
     </div>
   );

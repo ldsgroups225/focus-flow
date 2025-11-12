@@ -14,7 +14,7 @@ interface SidebarContentProps {
   setTagFilter: (tags: string[]) => void;
   uniqueTags: string[];
   projects: Project[];
-  setSelectedProjectId: (projectId: string | undefined) => void;
+  setProjectFilter: (selectedProjectId: string | undefined) => void;
 }
 
 export function SidebarContent({
@@ -24,7 +24,7 @@ export function SidebarContent({
   setTagFilter,
   uniqueTags,
   projects,
-  setSelectedProjectId,
+  setProjectFilter,
 }: SidebarContentProps) {
   const { t } = useI18n();
   return (
@@ -32,6 +32,8 @@ export function SidebarContent({
       <div>
         <h2 className="text-lg font-semibold mb-4">{t('header.filters')}</h2>
         <Filters
+          projectFilter={projects}
+          setProjectFilter={setProjectFilter}
           priorityFilter={priorityFilter}
           setPriorityFilter={setPriorityFilter}
           tagFilter={tagFilter}
@@ -42,14 +44,14 @@ export function SidebarContent({
       <div>
         <div className="flex items-center justify-between">
           <h2 className="text-lg font-semibold">{t('projects.title')}</h2>
-          <Button variant="ghost" size="sm" onClick={() => setSelectedProjectId(undefined)}>
+          <Button variant="ghost" size="sm" onClick={() => setProjectFilter(undefined)}>
             {t('taskForm.clear')}
           </Button>
         </div>
         <Accordion type="single" collapsible className="w-full">
           {projects.map((project) => (
             <AccordionItem value={project.id} key={project.id}>
-              <AccordionTrigger onClick={() => setSelectedProjectId(project.id)}>{project.name}</AccordionTrigger>
+              <AccordionTrigger onClick={() => setProjectFilter(project.id)}>{project.name}</AccordionTrigger>
               <AccordionContent>
                 {project.description}
               </AccordionContent>

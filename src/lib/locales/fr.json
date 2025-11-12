@@ -16,11 +16,14 @@
     "byType": "Par Type",
     "tasks": "Tâches",
     "milestones": "Jalons",
-    "subtasks": "Sous-tâches"
+    "subtasks": "Sous-tâches",
+    "byProject": "Par Projet",
+    "selectProject": "Sélectionner un projet"
   },
   "taskList": {
     "allClear": "Tout est net !",
-    "noTasks": "Aucune tâche ne correspond à vos filtres actuels. Ou peut-être que vous êtes juste si bon."
+    "noTasks": "Aucune tâche ne correspond à vos filtres actuels. Ou peut-être que vous êtes juste si bon.",
+    "searchPlaceholder": "Rechercher par titre ou description..."
   },
   "taskItem": {
     "priority": "Priorité : {priority}",
@@ -303,7 +306,12 @@
   },
   "navigation": {
     "back": "Retour",
-    "views": "Vues"
+    "views": "Vues",
+    "tasks": "Tâches",
+    "calendar": "Calendrier",
+    "timeline": "Chronologie",
+    "analytics": "Analytique",
+    "templates": "Modèles"
   },
   "settings": {
     "title": "Paramètres",

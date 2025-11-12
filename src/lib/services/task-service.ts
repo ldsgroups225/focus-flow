@@ -217,6 +217,7 @@ export class TaskService {
       tagFilter: string[];
       searchQuery: string;
       typeFilter?: string[];
+      selectedProjectId?: string;
     }
   ): (TaskWithSubTasks & { isBlocked?: number; blockingTasks?: string[] })[] {
     return tasks.filter(task => {
@@ -245,6 +246,11 @@ export class TaskService {
         if (!matchesTitle && !matchesDescription && !matchesTags) {
           return false;
         }
+      }
+
+      // Project filter
+      if (filters.selectedProjectId && task.projectId !== filters.selectedProjectId) {
+        return false;
       }
 
       return true;

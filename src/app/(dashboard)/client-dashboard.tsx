@@ -57,7 +57,7 @@ export function ClientDashboard({ initialTasks }: ClientDashboardProps) {
 
   // Custom hooks
   const { tasks, isLoading, saveTask, toggleComplete, deleteTask, updatePomodoro, logTime, toggleSubTask, fetchTasks, setTasks } = useTasks(user?.uid ?? null);
-  const { priorityFilter, setPriorityFilter, tagFilter, setTagFilter, setSearchQuery, uniqueTags, filteredTasks, clearFilters } = useFilters(tasks, activeWorkspace);
+  const { priorityFilter, setPriorityFilter, tagFilter, setTagFilter, setSearchQuery, uniqueTags, filteredTasks, clearFilters, setSelectedProjectId } = useFilters(tasks, activeWorkspace);
   const { selectedTaskIds, selectTask, deselectAll, setSelectedTaskIds } = useTaskSelection();
 
   // Empty projects array for now (can be added later)
@@ -134,6 +134,8 @@ export function ClientDashboard({ initialTasks }: ClientDashboardProps) {
                   tagFilter={tagFilter}
                   setTagFilter={setTagFilter}
                   uniqueTags={uniqueTags}
+                  projectFilter={projects}
+                  setSelectedProjectId={setSelectedProjectId}
                 />
               </DropdownMenuContent>
             </DropdownMenu>
@@ -179,6 +181,8 @@ export function ClientDashboard({ initialTasks }: ClientDashboardProps) {
                   tagFilter={tagFilter}
                   setTagFilter={setTagFilter}
                   uniqueTags={uniqueTags}
+                  projectFilter={projects}
+                  setSelectedProjectId={setSelectedProjectId}
                 />
               </div>
             </div>

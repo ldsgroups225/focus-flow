@@ -1,7 +1,7 @@
 'use client';
 
-import { useState, useEffect, Suspense } from 'react';
-import { Plus, SlidersHorizontal, Orbit, Search, Sparkles, User2, Settings, BarChart3, FileText } from 'lucide-react';
+import { useState, useEffect, Suspense, lazy } from 'react';
+import { Plus, SlidersHorizontal, Orbit, Search, Sparkles, User2, Settings, BarChart3, FileText, List, CalendarIcon, Clock } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { TaskList } from '@/app/components/task-list';
 import { Filters } from '@/app/components/filters';
@@ -34,6 +34,15 @@ import { DashboardSheet } from '@/components/ui/dashboard-sheet';
 import { SidebarContent } from '@/app/components/sidebar-content';
 import { getNameFromEmail } from '@/lib/utils/get-name-from-email';
 import { getAvatarInitial } from '@/lib/utils/get-avatar-initial';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { DashboardProvider } from '@/contexts/dashboard-context';
+
+// Lazy load tab content components
+const TasksTabContent = lazy(() => import('@/components/dashboard/tabs/tasks-tab-content').then(m => ({ default: m.TasksTabContent })));
+const CalendarTabContent = lazy(() => import('@/components/dashboard/tabs/calendar-tab-content').then(m => ({ default: m.CalendarTabContent })));
+const TimelineTabContent = lazy(() => import('@/components/dashboard/tabs/timeline-tab-content').then(m => ({ default: m.TimelineTabContent })));
+const AnalyticsTabContent = lazy(() => import('@/components/dashboard/tabs/analytics-tab-content').then(m => ({ default: m.AnalyticsTabContent })));
+const TemplatesTabContent = lazy(() => import('@/components/dashboard/tabs/templates-tab-content').then(m => ({ default: m.TemplatesTabContent })));
 
 export default function DashboardPage() {
   const router = useRouter();
@@ -89,232 +98,335 @@ export default function DashboardPage() {
   };
 
   return (
-    <div className="min-h-screen bg-background text-foreground">
-      <main className="container mx-auto max-w-5xl p-4 sm:p-6 md:p-8">
-        <header className="flex items-center justify-between mb-6 md:mb-8">
-          <div className="flex items-center gap-4">
-            <Orbit className="w-7 h-7 md:w-8 md:h-8 text-primary" />
-            <WorkspaceSwitcher activeWorkspace={activeWorkspace} setActiveWorkspace={setActiveWorkspace} />
-          </div>
+    <DashboardProvider>
+      <div className="min-h-screen bg-background text-foreground">
+        <main className="container mx-auto max-w-5xl p-4 sm:p-6 md:p-8">
+          <header className="mb-6 md:mb-8">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-4">
+                <Orbit className="w-7 h-7 md:w-8 md:h-8 text-primary" />
+                <WorkspaceSwitcher activeWorkspace={activeWorkspace} setActiveWorkspace={setActiveWorkspace} />
+              </div>
 
-          <div className="flex items-center gap-2">
-            <Button variant="outline" size="icon" onClick={() => setIsSearchOpen(true)} className="hidden md:flex">
-              <Search className="h-4 w-4" />
-            </Button>
-            <div className="hidden md:flex items-center gap-2">
-              <LanguageSwitcher />
-              <ThemeToggle />
-            </div>
-            <Button variant="outline" size="icon" onClick={() => setIsAiSelectorOpen(true)}>
-              <Sparkles className="h-4 w-4" />
-              <span className="sr-only">{t('aiFeatures.title')}</span>
-            </Button>
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button variant="outline" size="icon" className="md:hidden">
-                  <SlidersHorizontal className="h-4 w-4" />
+              <div className="flex items-center gap-2">
+                <Button variant="outline" size="icon" onClick={() => setIsSearchOpen(true)} className="hidden md:flex">
+                  <Search className="size-4" />
                 </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent className="w-64 p-4">
-                <Filters
-                  priorityFilter={priorityFilter}
-                  setPriorityFilter={setPriorityFilter}
-                  tagFilter={tagFilter}
-                  setTagFilter={setTagFilter}
-                  uniqueTags={uniqueTags}
-                />
-              </DropdownMenuContent>
-            </DropdownMenu>
-
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button variant="ghost" className="relative h-8 w-8 rounded-full">
-                  <Avatar className="h-8 w-8">
-                    <AvatarImage src={user?.photoURL || undefined} alt={getAvatarInitial(user?.displayName || getNameFromEmail(user?.email))} />
-                    <AvatarFallback>{getAvatarInitial(user?.displayName || getNameFromEmail(user?.email))}</AvatarFallback>
-                  </Avatar>
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent className="w-56" align="end" forceMount>
-                <div className="md:hidden flex items-center justify-between px-2 py-2 gap-2">
+                <div className="hidden md:flex items-center gap-2">
                   <LanguageSwitcher />
                   <ThemeToggle />
                 </div>
-                <DropdownMenuSeparator className="md:hidden" />
+                <Button variant="outline" size="icon" onClick={() => setIsAiSelectorOpen(true)}>
+                  <Sparkles className="size-4" />
+                  <span className="sr-only">{t('aiFeatures.title')}</span>
+                </Button>
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button variant="outline" size="icon" className="md:hidden">
+                      <SlidersHorizontal className="size-4" />
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent className="w-64 p-4">
+                    <Filters
+                      priorityFilter={priorityFilter}
+                      setPriorityFilter={setPriorityFilter}
+                      tagFilter={tagFilter}
+                      setTagFilter={setTagFilter}
+                      uniqueTags={uniqueTags}
+                      projectFilter={projects}
+                      setProjectFilter={(project) => setSelectedProjectId(project)}
+                    />
+                  </DropdownMenuContent>
+                </DropdownMenu>
 
-                <DropdownMenuItem disabled>
-                  <User2 className="mr-2 h-4 w-4" />
-                  {user?.displayName || getNameFromEmail(user?.email)}
-                </DropdownMenuItem>
-                <DropdownMenuSeparator />
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button variant="ghost" className="relative h-8 w-8 rounded-full">
+                      <Avatar className="h-8 w-8">
+                        <AvatarImage src={user?.photoURL || undefined} alt={getAvatarInitial(user?.displayName || getNameFromEmail(user?.email))} />
+                        <AvatarFallback>{getAvatarInitial(user?.displayName || getNameFromEmail(user?.email))}</AvatarFallback>
+                      </Avatar>
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent className="w-56" align="end" forceMount>
+                    <div className="md:hidden flex items-center justify-between px-2 py-2 gap-2">
+                      <LanguageSwitcher />
+                      <ThemeToggle />
+                    </div>
+                    <DropdownMenuSeparator className="md:hidden" />
 
-                <DropdownMenuItem onClick={() => setIsDashboardOpen(true)}>
-                  <BarChart3 className="mr-2 h-4 w-4" />
-                  {t('dashboard.title')}
-                </DropdownMenuItem>
-                <DropdownMenuSeparator />
-                <DropdownMenuItem asChild>
-                  <Link href="/settings">
-                    <Settings className="mr-2 h-4 w-4" />
-                    {t('settings.title')}
-                  </Link>
-                </DropdownMenuItem>
-                <DropdownMenuSeparator />
-                <DropdownMenuItem onClick={handleSignOut}>
-                  {t('login.signOut')}
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
-          </div>
-        </header>
+                    <DropdownMenuItem disabled>
+                      <User2 className="mr-2 size-4" />
+                      {user?.displayName || getNameFromEmail(user?.email)}
+                    </DropdownMenuItem>
+                    <DropdownMenuSeparator />
 
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
-          <aside className="hidden md:block md:col-span-1">
-            <SidebarContent
-              priorityFilter={priorityFilter}
-              setPriorityFilter={setPriorityFilter}
-              tagFilter={tagFilter}
-              setTagFilter={setTagFilter}
-              uniqueTags={uniqueTags}
-              projects={projects}
-              setSelectedProjectId={setSelectedProjectId}
-            />
-            <div className="mt-8 space-y-2">
-              <h2 className="text-lg font-semibold mb-4">{t('navigation.views')}</h2>
-              <Button variant="outline" size="sm" className="w-full" asChild>
-                <Link href="/calendar">{t('dashboard.calendar')}</Link>
-              </Button>
-              <Button variant="outline" size="sm" className="w-full" asChild>
-                <Link href="/timeline">{t('dashboard.timeline')}</Link>
-              </Button>
-              <Button variant="outline" size="sm" className="w-full" asChild>
-                <Link href="/analytics">
-                  <BarChart3 className="mr-2 h-4 w-4" />
-                  {t('analytics.title')}
-                </Link>
-              </Button>
-              <Button variant="outline" size="sm" className="w-full" asChild>
-                <Link href="/templates">
-                  <FileText className="mr-2 h-4 w-4" />
-                  {t('templates.title')}
-                </Link>
-              </Button>
-            </div>
-          </aside>
-
-          <div className="md:col-span-3">
-            {isLoading ? (
-              <div className="flex justify-center items-center h-80">
-                <div className="text-center">
-                  <Orbit className="h-12 w-12 animate-spin text-primary mx-auto" />
-                  <p className="mt-4 text-muted-foreground">{t('loading.tasks')}</p>
-                </div>
+                    <DropdownMenuItem onClick={() => setIsDashboardOpen(true)}>
+                      <BarChart3 className="mr-2 size-4" />
+                      {t('dashboard.title')}
+                    </DropdownMenuItem>
+                    <DropdownMenuSeparator />
+                    <DropdownMenuItem asChild>
+                      <Link href="/settings">
+                        <Settings className="mr-2 size-4" />
+                        {t('settings.title')}
+                      </Link>
+                    </DropdownMenuItem>
+                    <DropdownMenuSeparator />
+                    <DropdownMenuItem onClick={handleSignOut}>
+                      {t('login.signOut')}
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
               </div>
-            ) : (
-              <TaskList
-                tasks={filteredTasks}
-                setTasks={() => { }}
-                onEdit={handleSetEditingTask}
-                onDelete={deleteTask}
-                onToggle={toggleComplete}
-                onFocus={setFocusTask}
-                onSubTaskToggle={toggleSubTask}
-                selectedTaskIds={selectedTaskIds}
-                onSelectTask={selectTask}
+            </div>
+
+            {/* Mobile Tabs Navigation */}
+            <Tabs defaultValue="tasks" className="w-full md:hidden mt-4">
+              <TabsList className="w-full">
+                <TabsTrigger value="tasks" className="flex-1">
+                  <div className='flex flex-col items-center'>
+                    <List className="size-4" />
+                    <span className="text-xs">{t('navigation.tasks')}</span>
+                  </div>
+                </TabsTrigger>
+                <TabsTrigger value="calendar" className="flex-1">
+                  <div className='flex flex-col items-center'>
+                    <CalendarIcon className="size-4" />
+                    <span className="text-xs">{t('navigation.calendar')}</span>
+                  </div>
+                </TabsTrigger>
+                <TabsTrigger value="timeline" className="flex-1">
+                  <div className='flex flex-col items-center'>
+                    <Clock className="size-4" />
+                    <span className="text-xs">{t('navigation.timeline')}</span>
+                  </div>
+                </TabsTrigger>
+                <TabsTrigger value="analytics" className="flex-1">
+                  <div className='flex flex-col items-center'>
+                    <BarChart3 className="size-4" />
+                    <span className="text-xs">{t('navigation.analytics')}</span>
+                  </div>
+                </TabsTrigger>
+                <TabsTrigger value="templates" className="flex-1">
+                  <div className='flex flex-col items-center'>
+                    <FileText className="size-4" />
+                    <span className="text-xs">{t('navigation.templates')}</span>
+                  </div>
+                </TabsTrigger>
+              </TabsList>
+              <TabsContent value="tasks" className="mt-4">
+                <Suspense fallback={
+                  <div className="flex justify-center items-center h-96">
+                    <div className="text-center">
+                      <Orbit className="h-12 w-12 animate-spin text-primary mx-auto" />
+                      <p className="mt-4 text-muted-foreground">Loading...</p>
+                    </div>
+                  </div>
+                }>
+                  <TasksTabContent />
+                </Suspense>
+              </TabsContent>
+              <TabsContent value="calendar" className="mt-4">
+                <Suspense fallback={
+                  <div className="flex justify-center items-center h-96">
+                    <div className="text-center">
+                      <Orbit className="h-12 w-12 animate-spin text-primary mx-auto" />
+                      <p className="mt-4 text-muted-foreground">Loading...</p>
+                    </div>
+                  </div>
+                }>
+                  <CalendarTabContent />
+                </Suspense>
+              </TabsContent>
+              <TabsContent value="timeline" className="mt-4">
+                <Suspense fallback={
+                  <div className="flex justify-center items-center h-96">
+                    <div className="text-center">
+                      <Orbit className="h-12 w-12 animate-spin text-primary mx-auto" />
+                      <p className="mt-4 text-muted-foreground">Loading...</p>
+                    </div>
+                  </div>
+                }>
+                  <TimelineTabContent />
+                </Suspense>
+              </TabsContent>
+              <TabsContent value="analytics" className="mt-4">
+                <Suspense fallback={
+                  <div className="flex justify-center items-center h-96">
+                    <div className="text-center">
+                      <Orbit className="h-12 w-12 animate-spin text-primary mx-auto" />
+                      <p className="mt-4 text-muted-foreground">Loading...</p>
+                    </div>
+                  </div>
+                }>
+                  <AnalyticsTabContent />
+                </Suspense>
+              </TabsContent>
+              <TabsContent value="templates" className="mt-4">
+                <Suspense fallback={
+                  <div className="flex justify-center items-center h-96">
+                    <div className="text-center">
+                      <Orbit className="h-12 w-12 animate-spin text-primary mx-auto" />
+                      <p className="mt-4 text-muted-foreground">Loading...</p>
+                    </div>
+                  </div>
+                }>
+                  <TemplatesTabContent />
+                </Suspense>
+              </TabsContent>
+            </Tabs>
+          </header>
+
+          {/* Desktop Layout with Sidebar */}
+          <div className="hidden md:grid grid-cols-1 md:grid-cols-4 gap-8">
+            <aside className="md:col-span-1">
+              <SidebarContent
+                priorityFilter={priorityFilter}
+                setPriorityFilter={setPriorityFilter}
+                tagFilter={tagFilter}
+                setTagFilter={setTagFilter}
+                uniqueTags={uniqueTags}
+                projects={projects}
+                setProjectFilter={setSelectedProjectId}
+              />
+              <div className="mt-8 space-y-2">
+                <h2 className="text-lg font-semibold mb-4">{t('navigation.views')}</h2>
+                <Button variant="outline" size="sm" className="w-full" asChild>
+                  <Link href="/calendar">{t('dashboard.calendar')}</Link>
+                </Button>
+                <Button variant="outline" size="sm" className="w-full" asChild>
+                  <Link href="/timeline">{t('dashboard.timeline')}</Link>
+                </Button>
+                <Button variant="outline" size="sm" className="w-full" asChild>
+                  <Link href="/analytics">
+                    <BarChart3 className="mr-2 size-4" />
+                    {t('analytics.title')}
+                  </Link>
+                </Button>
+                <Button variant="outline" size="sm" className="w-full" asChild>
+                  <Link href="/templates">
+                    <FileText className="mr-2 size-4" />
+                    {t('templates.title')}
+                  </Link>
+                </Button>
+              </div>
+            </aside>
+
+            <div className="md:col-span-3">
+              {isLoading ? (
+                <div className="flex justify-center items-center h-80">
+                  <div className="text-center">
+                    <Orbit className="h-12 w-12 animate-spin text-primary mx-auto" />
+                    <p className="mt-4 text-muted-foreground">{t('loading.tasks')}</p>
+                  </div>
+                </div>
+              ) : (
+                <TaskList
+                  tasks={filteredTasks}
+                  setTasks={() => { }}
+                  onEdit={handleSetEditingTask}
+                  onDelete={deleteTask}
+                  onToggle={toggleComplete}
+                  onFocus={setFocusTask}
+                  onSubTaskToggle={toggleSubTask}
+                  selectedTaskIds={selectedTaskIds}
+                  onSelectTask={selectTask}
+                />
+              )}
+            </div>
+          </div>
+
+          {/* Floating Action Button for Quick Capture */}
+          <Button onClick={() => handleSetEditingTask('new')} className="fixed bottom-6 right-6 h-14 w-14 rounded-full shadow-lg z-30" title={t('header.addTask')}>
+            <Plus className="h-6 w-6" />
+          </Button>
+
+          {/* Modals and Other Global UI - Lazy Loaded */}
+          <Suspense fallback={null}>
+            {isSearchOpen && (
+              <LazyCommandSearch.LazyComponent
+                isOpen={isSearchOpen}
+                setIsOpen={setIsSearchOpen}
+                setSearchQuery={setSearchQuery}
               />
             )}
-          </div>
-        </div>
+          </Suspense>
 
-        {/* Floating Action Button for Quick Capture */}
-        <Button onClick={() => handleSetEditingTask('new')} className="fixed bottom-6 right-6 h-14 w-14 rounded-full shadow-lg z-30" title={t('header.addTask')}>
-          <Plus className="h-6 w-6" />
-        </Button>
+          <Suspense fallback={null}>
+            {isShortcutsOpen && (
+              <LazyShortcutsHelp.LazyComponent
+                isOpen={isShortcutsOpen}
+                setIsOpen={setIsShortcutsOpen}
+              />
+            )}
+          </Suspense>
 
-        {/* Modals and Other Global UI - Lazy Loaded */}
-        <Suspense fallback={null}>
-          {isSearchOpen && (
-            <LazyCommandSearch.LazyComponent
-              isOpen={isSearchOpen}
-              setIsOpen={setIsSearchOpen}
-              setSearchQuery={setSearchQuery}
+          <Suspense fallback={null}>
+            <LazyBulkActionsToolbar.LazyComponent
+              selectedTaskIds={selectedTaskIds}
+              setSelectedTaskIds={() => { }}
+              setTasks={() => { }}
             />
-          )}
-        </Suspense>
+          </Suspense>
 
-        <Suspense fallback={null}>
-          {isShortcutsOpen && (
-            <LazyShortcutsHelp.LazyComponent
-              isOpen={isShortcutsOpen}
-              setIsOpen={setIsShortcutsOpen}
-            />
-          )}
-        </Suspense>
+          <Suspense fallback={null}>
+            {editingTask && (
+              <LazyTaskForm.LazyComponent
+                isOpen={!!editingTask}
+                onClose={() => setEditingTask(null)}
+                onSave={(task: Parameters<typeof saveTask>[0]) => saveTask(task, activeWorkspace)}
+                task={editingTask === 'new' ? undefined : tasks.find(t => t.id === (typeof editingTask === 'object' ? editingTask.id : undefined))}
+                allTasks={tasks}
+                activeWorkspace={activeWorkspace}
+                projects={projects}
+              />
+            )}
+          </Suspense>
 
-        <Suspense fallback={null}>
-          <LazyBulkActionsToolbar.LazyComponent
-            selectedTaskIds={selectedTaskIds}
-            setSelectedTaskIds={() => { }}
-            setTasks={() => { }}
+          <Suspense fallback={null}>
+            {focusTask && (
+              <LazyFocusView.LazyComponent
+                task={focusTask}
+                onExit={() => setFocusTask(null)}
+                onPomodoroComplete={updatePomodoro}
+                onLogTime={logTime}
+              />
+            )}
+          </Suspense>
+
+          <AiFeatureSelector
+            isOpen={isAiSelectorOpen}
+            onClose={() => setIsAiSelectorOpen(false)}
+            onSelectReview={() => setIsReviewOpen(true)}
+            onSelectDependency={() => setIsDependencyOpen(true)}
           />
-        </Suspense>
 
-        <Suspense fallback={null}>
-          {editingTask && (
-            <LazyTaskForm.LazyComponent
-              isOpen={!!editingTask}
-              onClose={() => setEditingTask(null)}
-              onSave={(task: Parameters<typeof saveTask>[0]) => saveTask(task, activeWorkspace)}
-              task={editingTask === 'new' ? undefined : tasks.find(t => t.id === (typeof editingTask === 'object' ? editingTask.id : undefined))}
-              allTasks={tasks}
-              activeWorkspace={activeWorkspace}
-              projects={projects}
-            />
-          )}
-        </Suspense>
+          <Suspense fallback={null}>
+            {isReviewOpen && (
+              <LazyAiReviewDialog.LazyComponent
+                isOpen={isReviewOpen}
+                onClose={() => setIsReviewOpen(false)}
+                tasks={tasks}
+              />
+            )}
+          </Suspense>
 
-        <Suspense fallback={null}>
-          {focusTask && (
-            <LazyFocusView.LazyComponent
-              task={focusTask}
-              onExit={() => setFocusTask(null)}
-              onPomodoroComplete={updatePomodoro}
-              onLogTime={logTime}
-            />
-          )}
-        </Suspense>
-
-        <AiFeatureSelector
-          isOpen={isAiSelectorOpen}
-          onClose={() => setIsAiSelectorOpen(false)}
-          onSelectReview={() => setIsReviewOpen(true)}
-          onSelectDependency={() => setIsDependencyOpen(true)}
-        />
-
-        <Suspense fallback={null}>
-          {isReviewOpen && (
-            <LazyAiReviewDialog.LazyComponent
-              isOpen={isReviewOpen}
-              onClose={() => setIsReviewOpen(false)}
+          {isDependencyOpen && (
+            <AiDependencyDialog
+              isOpen={isDependencyOpen}
+              onClose={() => setIsDependencyOpen(false)}
               tasks={tasks}
             />
           )}
-        </Suspense>
 
-        {isDependencyOpen && (
-          <AiDependencyDialog
-            isOpen={isDependencyOpen}
-            onClose={() => setIsDependencyOpen(false)}
+          <DashboardSheet
+            isOpen={isDashboardOpen}
+            onClose={() => setIsDashboardOpen(false)}
             tasks={tasks}
           />
-        )}
-
-        <DashboardSheet
-          isOpen={isDashboardOpen}
-          onClose={() => setIsDashboardOpen(false)}
-          tasks={tasks}
-        />
-      </main>
-    </div>
+        </main>
+      </div>
+    </DashboardProvider>
   );
 }

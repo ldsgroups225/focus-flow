@@ -8,6 +8,7 @@ export function useFilters(tasks: Task[], activeWorkspace: Workspace, projectId?
   const [priorityFilter, setPriorityFilter] = useState<Priority[]>([]);
   const [tagFilter, setTagFilter] = useState<string[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
+  const [selectedProjectId, setSelectedProjectId] = useState<string | undefined>(projectId);
 
   // Get tasks for the active workspace
   const workspaceTasks = useMemo(() => {
@@ -34,8 +35,9 @@ export function useFilters(tasks: Task[], activeWorkspace: Workspace, projectId?
       priorityFilter,
       tagFilter,
       searchQuery,
+      selectedProjectId,
     });
-  }, [tasksWithStatus, priorityFilter, tagFilter, searchQuery]);
+  }, [tasksWithStatus, priorityFilter, tagFilter, searchQuery, selectedProjectId]);
 
   // Helper functions
   const clearFilters = useCallback(() => {
@@ -72,5 +74,7 @@ export function useFilters(tasks: Task[], activeWorkspace: Workspace, projectId?
     clearFilters,
     togglePriorityFilter,
     toggleTagFilter,
+    selectedProjectId,
+    setSelectedProjectId,
   };
 }

@@ -16,11 +16,14 @@
     "byType": "By Type",
     "tasks": "Tasks",
     "milestones": "Milestones",
-    "subtasks": "Subtasks"
+    "subtasks": "Subtasks",
+    "byProject": "By Project",
+    "selectProject": "Select a project"
   },
   "taskList": {
     "allClear": "All Clear!",
-    "noTasks": "No tasks match your current filters. Or maybe you're just that good."
+    "noTasks": "No tasks match your current filters. Or maybe you're just that good.",
+    "searchPlaceholder": "Search tasks by title or description..."
   },
   "taskItem": {
     "priority": "Priority: {priority}",
@@ -303,7 +306,12 @@
   },
   "navigation": {
     "back": "Back",
-    "views": "Views"
+    "views": "Views",
+    "tasks": "Tasks",
+    "calendar": "Calendar",
+    "timeline": "Timeline",
+    "analytics": "Analytics",
+    "templates": "Templates"
   },
   "settings": {
     "title": "Settings",
