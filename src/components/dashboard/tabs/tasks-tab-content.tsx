@@ -1,21 +1,30 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, Suspense, lazy } from 'react';
 import { TaskList } from '@/app/components/task-list';
 import { useDashboard } from '@/contexts/dashboard-context';
 import { useI18n } from '@/app/components/i18n-provider';
 import { Input } from '@/components/ui/input';
 import { Search, FolderOpen, Tag } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
+import type { TaskWithSubTasks } from '@/lib/types';
+
+const LazyTaskForm = lazy(() => import('@/app/components/task-form').then(m => ({ default: m.TaskForm })));
+const LazyFocusView = lazy(() => import('@/app/components/focus-view').then(m => ({ default: m.FocusView })));
 
 export function TasksTabContent() {
   const { t } = useI18n();
   const {
+    tasks,
     filteredTasks,
     isLoadingTasks,
     toggleComplete,
     deleteTask,
     toggleSubTask,
+    saveTask,
+    updatePomodoro,
+    logTime,
+    activeWorkspace,
     priorityFilter,
     setPriorityFilter,
     tagFilter,
@@ -27,20 +36,17 @@ export function TasksTabContent() {
     selectedProjectId,
   } = useDashboard();
 
-  // const [editingTask, setEditingTask] = useState<TaskWithSubTasks | null>(null);
-  // const [isTaskFormOpen, setIsTaskFormOpen] = useState(false);
-  // const [isFilterSheetOpen, setIsFilterSheetOpen] = useState(false);
+  const [editingTask, setEditingTask] = useState<TaskWithSubTasks | 'new' | null>(null);
+  const [focusTask, setFocusTask] = useState<TaskWithSubTasks | null>(null);
   const [selectedTaskIds, setSelectedTaskIds] = useState<Set<string>>(new Set());
 
-  // const handleEdit = (task: TaskWithSubTasks) => {
-  //   setEditingTask(task);
-  //   setIsTaskFormOpen(true);
-  // };
+  const handleEdit = (task: TaskWithSubTasks | 'new') => {
+    setEditingTask(task);
+  };
 
-  // const handleTaskFormClose = () => {
-  //   setIsTaskFormOpen(false);
-  //   setEditingTask(null);
-  // };
+  const handleFocus = (task: TaskWithSubTasks) => {
+    setFocusTask(task);
+  };
 
   const handleSelectTask = (taskId: string) => {
     const newSelected = new Set(selectedTaskIds);
@@ -160,17 +166,43 @@ export function TasksTabContent() {
           <TaskList
             tasks={filteredTasks}
             setTasks={() => {}}
-            onEdit={() => {}}
-            // onEdit={handleEdit}
+            onEdit={handleEdit}
             onDelete={deleteTask}
             onToggle={toggleComplete}
-            onFocus={() => {}}
+            onFocus={handleFocus}
             selectedTaskIds={selectedTaskIds}
             onSelectTask={handleSelectTask}
             onSubTaskToggle={toggleSubTask}
           />
         </div>
       )}
+
+      {/* Task Form Modal */}
+      <Suspense fallback={null}>
+        {editingTask && (
+          <LazyTaskForm
+            isOpen={!!editingTask}
+            onClose={() => setEditingTask(null)}
+            onSave={(task) => saveTask(task as TaskWithSubTasks, activeWorkspace)}
+            task={editingTask === 'new' ? undefined : tasks.find(t => t.id === (typeof editingTask === 'object' ? editingTask.id : undefined))}
+            allTasks={tasks}
+            activeWorkspace={activeWorkspace}
+            projects={projects}
+          />
+        )}
+      </Suspense>
+
+      {/* Focus View Modal */}
+      <Suspense fallback={null}>
+        {focusTask && (
+          <LazyFocusView
+            task={focusTask}
+            onExit={() => setFocusTask(null)}
+            onPomodoroComplete={updatePomodoro}
+            onLogTime={logTime}
+          />
+        )}
+      </Suspense>
     </div>
   );
 }

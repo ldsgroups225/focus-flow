@@ -83,6 +83,7 @@ export function useTasks(userId: string | null) {
         title: taskToSave.title,
         description: taskToSave.description,
         completed: false,
+        type: 'task',
         priority: taskToSave.priority,
         tags: taskToSave.tags ?? [],
         dueDate: taskToSave.dueDate,

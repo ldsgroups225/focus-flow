@@ -135,7 +135,7 @@ export function ClientDashboard({ initialTasks }: ClientDashboardProps) {
                   setTagFilter={setTagFilter}
                   uniqueTags={uniqueTags}
                   projectFilter={projects}
-                  setSelectedProjectId={setSelectedProjectId}
+                  setProjectFilter={setSelectedProjectId}
                 />
               </DropdownMenuContent>
             </DropdownMenu>
@@ -182,7 +182,7 @@ export function ClientDashboard({ initialTasks }: ClientDashboardProps) {
                   setTagFilter={setTagFilter}
                   uniqueTags={uniqueTags}
                   projectFilter={projects}
-                  setSelectedProjectId={setSelectedProjectId}
+                  setProjectFilter={setSelectedProjectId}
                 />
               </div>
             </div>

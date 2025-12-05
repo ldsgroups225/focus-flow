@@ -37,12 +37,12 @@ import { getAvatarInitial } from '@/lib/utils/get-avatar-initial';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { DashboardProvider } from '@/contexts/dashboard-context';
 
-// Lazy load tab content components
-const TasksTabContent = lazy(() => import('@/components/dashboard/tabs/tasks-tab-content').then(m => ({ default: m.TasksTabContent })));
-const CalendarTabContent = lazy(() => import('@/components/dashboard/tabs/calendar-tab-content').then(m => ({ default: m.CalendarTabContent })));
-const TimelineTabContent = lazy(() => import('@/components/dashboard/tabs/timeline-tab-content').then(m => ({ default: m.TimelineTabContent })));
-const AnalyticsTabContent = lazy(() => import('@/components/dashboard/tabs/analytics-tab-content').then(m => ({ default: m.AnalyticsTabContent })));
-const TemplatesTabContent = lazy(() => import('@/components/dashboard/tabs/templates-tab-content').then(m => ({ default: m.TemplatesTabContent })));
+// Import tab content components directly (not lazy loaded to avoid context issues)
+import { TasksTabContent } from '@/components/dashboard/tabs/tasks-tab-content';
+import { CalendarTabContent } from '@/components/dashboard/tabs/calendar-tab-content';
+import { TimelineTabContent } from '@/components/dashboard/tabs/timeline-tab-content';
+import { AnalyticsTabContent } from '@/components/dashboard/tabs/analytics-tab-content';
+import { TemplatesTabContent } from '@/components/dashboard/tabs/templates-tab-content';
 
 export default function DashboardPage() {
   const router = useRouter();
@@ -216,64 +216,19 @@ export default function DashboardPage() {
                 </TabsTrigger>
               </TabsList>
               <TabsContent value="tasks" className="mt-4">
-                <Suspense fallback={
-                  <div className="flex justify-center items-center h-96">
-                    <div className="text-center">
-                      <Orbit className="h-12 w-12 animate-spin text-primary mx-auto" />
-                      <p className="mt-4 text-muted-foreground">Loading...</p>
-                    </div>
-                  </div>
-                }>
-                  <TasksTabContent />
-                </Suspense>
+                <TasksTabContent />
               </TabsContent>
               <TabsContent value="calendar" className="mt-4">
-                <Suspense fallback={
-                  <div className="flex justify-center items-center h-96">
-                    <div className="text-center">
-                      <Orbit className="h-12 w-12 animate-spin text-primary mx-auto" />
-                      <p className="mt-4 text-muted-foreground">Loading...</p>
-                    </div>
-                  </div>
-                }>
-                  <CalendarTabContent />
-                </Suspense>
+                <CalendarTabContent />
               </TabsContent>
               <TabsContent value="timeline" className="mt-4">
-                <Suspense fallback={
-                  <div className="flex justify-center items-center h-96">
-                    <div className="text-center">
-                      <Orbit className="h-12 w-12 animate-spin text-primary mx-auto" />
-                      <p className="mt-4 text-muted-foreground">Loading...</p>
-                    </div>
-                  </div>
-                }>
-                  <TimelineTabContent />
-                </Suspense>
+                <TimelineTabContent />
               </TabsContent>
               <TabsContent value="analytics" className="mt-4">
-                <Suspense fallback={
-                  <div className="flex justify-center items-center h-96">
-                    <div className="text-center">
-                      <Orbit className="h-12 w-12 animate-spin text-primary mx-auto" />
-                      <p className="mt-4 text-muted-foreground">Loading...</p>
-                    </div>
-                  </div>
-                }>
-                  <AnalyticsTabContent />
-                </Suspense>
+                <AnalyticsTabContent />
               </TabsContent>
               <TabsContent value="templates" className="mt-4">
-                <Suspense fallback={
-                  <div className="flex justify-center items-center h-96">
-                    <div className="text-center">
-                      <Orbit className="h-12 w-12 animate-spin text-primary mx-auto" />
-                      <p className="mt-4 text-muted-foreground">Loading...</p>
-                    </div>
-                  </div>
-                }>
-                  <TemplatesTabContent />
-                </Suspense>
+                <TemplatesTabContent />
               </TabsContent>
             </Tabs>
           </header>

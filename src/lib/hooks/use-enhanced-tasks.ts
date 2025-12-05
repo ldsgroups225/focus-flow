@@ -91,6 +91,7 @@ export function useEnhancedTasks(tasksPromise: Promise<Task[]> | null) {
         title: taskToSave.title,
         description: taskToSave.description,
         completed: false,
+        type: 'task',
         priority: taskToSave.priority,
         tags: taskToSave.tags ?? [],
         dueDate: taskToSave.dueDate,
