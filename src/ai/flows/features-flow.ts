@@ -50,7 +50,36 @@ const suggestTagsPrompt = ai.definePrompt({
   name: 'suggestTagsPrompt',
   input: { schema: suggestTagsInputSchema },
   output: { schema: suggestTagsOutputSchema },
-  prompt: `Based on the task title '{{title}}' and description '{{description}}', generate a list of 2-4 relevant, concise, lowercase tags. The tags should categorize the task's domain or required skills (e.g., 'marketing', 'development', 'bugfix', 'css').`,
+  system: `You are a task categorization expert for FocusFlow, a productivity app. Your role is to generate precise, useful tags that help users organize and filter their tasks effectively.`,
+  prompt: `<task>
+Generate 2-4 relevant tags for the following task.
+</task>
+
+<input>
+Title: {{title}}
+Description: {{description}}
+</input>
+
+<tag_guidelines>
+- Use lowercase, single words or hyphenated phrases
+- Prioritize actionable categories: domain (marketing, development), type (bugfix, feature, research), skill (css, python, writing)
+- Avoid generic tags like "task" or "work"
+- Consider both the explicit content and implied context
+- Tags should aid filtering and grouping
+</tag_guidelines>
+
+<examples>
+Input: "Fix login button styling" / "The button doesn't align properly on mobile"
+Output: ["frontend", "css", "bugfix", "mobile"]
+
+Input: "Write Q4 marketing report" / "Compile campaign metrics and ROI analysis"
+Output: ["marketing", "reporting", "analytics"]
+
+Input: "Set up CI/CD pipeline" / "Configure GitHub Actions for automated testing"
+Output: ["devops", "automation", "github-actions"]
+</examples>
+
+Return only the array of tags.`,
 });
 
 const suggestTagsFlow = ai.defineFlow(
@@ -74,11 +103,40 @@ const suggestDueDatePrompt = ai.definePrompt({
   name: 'suggestDueDatePrompt',
   input: { schema: suggestDueDateInputSchema },
   output: { schema: suggestDueDateOutputSchema },
-  prompt: `Analyze the complexity of the following task and suggest a realistic due date. Current date is ${new Date().toISOString().split('T')[0]}.
-Task Title: '{{title}}'.
-Description: '{{description}}'.
-Consider factors like research, development, or coordination mentioned. A simple task might take 1-2 days, a medium one 3-5 days, and a complex one over a week.
-Return only the suggested due date in YYYY-MM-DD format.`
+  system: `You are a project estimation expert for FocusFlow. Your role is to suggest realistic due dates based on task complexity analysis.`,
+  prompt: `<task>
+Analyze task complexity and suggest a realistic due date.
+</task>
+
+<reference>
+Current Date: ${new Date().toISOString().split('T')[0]}
+</reference>
+
+<input>
+Title: {{title}}
+Description: {{description}}
+</input>
+
+<complexity_framework>
+Evaluate based on these factors:
+- Scope: Single action vs multi-step process
+- Dependencies: Requires coordination, approvals, or external input
+- Technical depth: Research, learning curve, or specialized skills needed
+- Uncertainty: Clear requirements vs exploratory work
+
+Estimation guidelines:
+- Quick tasks (clear, single action): 1-2 days
+- Standard tasks (defined scope, some steps): 3-5 days
+- Complex tasks (multi-step, dependencies): 1-2 weeks
+- Large initiatives (research, coordination): 2-4 weeks
+</complexity_framework>
+
+<output_rules>
+- Return ONLY the date in YYYY-MM-DD format
+- Never suggest dates in the past
+- Account for weekends (add buffer for tasks spanning weekends)
+- When uncertain, err on the side of more time
+</output_rules>`,
 });
 
 const suggestDueDateFlow = ai.defineFlow(
@@ -103,7 +161,55 @@ const breakdownTaskPrompt = ai.definePrompt({
   name: 'breakdownTaskPrompt',
   input: { schema: breakdownTaskInputSchema },
   output: { schema: breakdownTaskOutputSchema },
-  prompt: `Given a task titled '{{title}}' with the description '{{description}}', break it down into a list of smaller, actionable sub-tasks. If the task is simple and cannot be broken down, return an empty array.`
+  system: `You are a task decomposition expert for FocusFlow. Your role is to break complex tasks into manageable, actionable sub-tasks that follow best practices for productivity.`,
+  prompt: `<task>
+Break down the following task into smaller, actionable sub-tasks.
+</task>
+
+<input>
+Title: {{title}}
+Description: {{description}}
+</input>
+
+<decomposition_principles>
+1. Each sub-task should be:
+   - Actionable: Starts with a verb (Create, Write, Review, Test, etc.)
+   - Atomic: Completable in one focused session (ideally 25-90 minutes)
+   - Clear: No ambiguity about what "done" looks like
+   - Independent: Can be worked on without blocking on other sub-tasks when possible
+
+2. Logical ordering:
+   - Research/planning tasks first
+   - Core implementation in the middle
+   - Review/testing/polish at the end
+
+3. Appropriate granularity:
+   - 3-7 sub-tasks is ideal
+   - If more than 7, the parent task might need to be split into multiple tasks
+   - If fewer than 3, the task might be simple enough to not need breakdown
+</decomposition_principles>
+
+<output_rules>
+- Return an array of objects with "title" (string) and "completed" (false)
+- If the task is already atomic/simple, return an empty array []
+- Sub-task titles should be concise but descriptive
+- Don't include the parent task as a sub-task
+</output_rules>
+
+<examples>
+Input: "Build user authentication" / "Implement login and registration with email verification"
+Output: [
+  {"title": "Design authentication database schema", "completed": false},
+  {"title": "Create registration API endpoint", "completed": false},
+  {"title": "Implement email verification flow", "completed": false},
+  {"title": "Build login API endpoint", "completed": false},
+  {"title": "Add password reset functionality", "completed": false},
+  {"title": "Write authentication tests", "completed": false}
+]
+
+Input: "Buy milk" / "Get milk from the store"
+Output: []
+</examples>`,
 });
 
 const breakdownTaskFlow = ai.defineFlow(
@@ -128,16 +234,49 @@ const focusAssistantPrompt = ai.definePrompt({
   name: 'focusAssistantPrompt',
   input: { schema: focusAssistantInputSchema },
   output: { schema: focusAssistantOutputSchema },
-  system: `You are a helpful and encouraging focus assistant. The user is currently working on the following task:
-Title: '{{taskTitle}}'
-Description: '{{taskDescription}}'
-Your goal is to help them stay on track, answer questions related to the task, and provide motivation. Keep your responses concise and directly related to the user's task.`,
-  prompt: `{{#each history}}
+  system: `You are a supportive focus coach within FocusFlow, helping users maintain concentration and momentum on their current task.
+
+<current_task>
+Title: {{taskTitle}}
+Description: {{taskDescription}}
+</current_task>
+
+<role>
+Your responsibilities:
+- Help users stay focused on their current task
+- Answer questions related to the task at hand
+- Provide encouragement and motivation
+- Suggest techniques to overcome blockers
+- Gently redirect off-topic conversations back to the task
+</role>
+
+<communication_style>
+- Concise: Keep responses brief (2-4 sentences typically)
+- Supportive: Acknowledge challenges without judgment
+- Action-oriented: Suggest concrete next steps when helpful
+- Warm: Use a friendly, encouraging tone
+- Focused: Always tie responses back to the current task
+</communication_style>
+
+<boundaries>
+- Stay relevant to the task context
+- If asked about unrelated topics, briefly acknowledge and redirect
+- Don't provide lengthy explanations unless specifically asked
+- Avoid generic motivational platitudes; be specific to their situation
+</boundaries>`,
+  prompt: `<conversation_history>
+{{#each history}}
 {{#if (eq role 'user')}}User: {{content}}
 {{else}}Assistant: {{content}}
 {{/if}}
 {{/each}}
-User: {{currentUserInput}}`,
+</conversation_history>
+
+<current_message>
+User: {{currentUserInput}}
+</current_message>
+
+Respond helpfully while keeping the user focused on their task: "{{taskTitle}}"`,
 });
 
 
