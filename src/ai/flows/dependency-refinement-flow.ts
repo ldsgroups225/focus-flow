@@ -68,7 +68,6 @@ Analyze the provided task list and generate a comprehensive optimization report.
 <context>
 - Application: FocusFlow (productivity-focused task manager)
 - Output Language: {{locale}}
-- Total Tasks: {{tasks.length}}
 </context>
 
 <analysis_framework>
@@ -81,61 +80,16 @@ Evaluate each task considering:
 </analysis_framework>
 
 <output_format>
-Generate a Markdown report with these sections (use {{locale}} language for headers and content):
+Generate a Markdown report with these 6 sections. ALL content must be in {{locale}} language:
 
-{{#if (eq locale 'fr')}}
-## 🔗 Analyse des Dépendances
-- Dépendances manquantes entre tâches liées
-- Conflits ou dépendances circulaires détectés
-- Ordre d'exécution recommandé
+1. 🔗 Dependency Analysis - Missing dependencies, circular conflicts, recommended execution order
+2. 📅 Due Date Optimization - Unrealistic dates, missing dates, timeline adjustments
+3. 🏷️ Tag Recommendations - Inconsistent patterns, missing tags, consolidation opportunities
+4. 📁 Project Structure - Grouping opportunities, hierarchy improvements
+5. ⚡ Priority Alignment - Priority/deadline mismatches, recommended adjustments
+6. ✅ Quick Wins - 3-5 specific, actionable changes to make right now
 
-## 📅 Optimisation des Échéances
-- Dates irréalistes par rapport aux dépendances
-- Tâches sans date qui en nécessitent une
-- Ajustements de timeline suggérés
-
-## 🏷️ Recommandations de Tags
-- Patterns de tags incohérents
-- Tags manquants pour une meilleure organisation
-- Consolidation des tags redondants
-
-## 📁 Structure de Projet
-- Tâches à regrouper par projet
-- Améliorations de la hiérarchie
-
-## ⚡ Alignement des Priorités
-- Incohérences priorité/échéance
-- Ajustements recommandés
-
-## ✅ Actions Immédiates
-Liste de 3-5 changements concrets à effectuer maintenant.
-{{else}}
-## 🔗 Dependency Analysis
-- Missing dependencies between related tasks
-- Circular dependencies or conflicts detected
-- Recommended execution order
-
-## 📅 Due Date Optimization
-- Unrealistic dates given dependencies
-- Tasks needing due dates
-- Suggested timeline adjustments
-
-## 🏷️ Tag Recommendations
-- Inconsistent tagging patterns
-- Missing tags for better organization
-- Redundant tag consolidation
-
-## 📁 Project Structure
-- Tasks to group by project
-- Hierarchy improvements
-
-## ⚡ Priority Alignment
-- Priority/deadline mismatches
-- Recommended adjustments
-
-## ✅ Quick Wins
-List 3-5 specific, actionable changes to make right now.
-{{/if}}
+Use French section headers if locale is "fr", English if locale is "en".
 </output_format>
 
 <guidelines>

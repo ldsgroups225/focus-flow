@@ -70,7 +70,6 @@ Generate a {{period}} productivity review based on completed tasks.
 <context>
 - Review Period: {{period}}
 - Output Language: {{locale}}
-- Tasks Completed: {{tasks.length}}
 </context>
 
 <analysis_dimensions>
@@ -83,54 +82,20 @@ When tasks exist, analyze:
 </analysis_dimensions>
 
 <output_format>
-Generate a Markdown review following this structure:
+Generate a Markdown review with this structure. ALL content must be in {{locale}} language:
 
-{{#if (eq locale 'fr')}}
-{{#if (eq period 'Daily')}}
-# 📊 Revue Quotidienne
-{{else}}
-# 📊 Revue Hebdomadaire
-{{/if}}
+1. Title: "📊 Daily Review" or "📊 Weekly Review" (use French equivalent if locale is "fr")
+2. 🎯 Summary: Positive, personalized overview of accomplishments (2-3 sentences)
+3. 💡 Key Insights: 3 bullet points about patterns, achievements, and strengths
+4. 🚀 For Tomorrow: One concrete, actionable suggestion
 
-## 🎯 Résumé
-Aperçu positif et personnalisé des accomplissements (2-3 phrases).
-
-## 💡 Points Clés
-- Insight 1: Pattern ou accomplissement notable
-- Insight 2: Observation sur la répartition du travail
-- Insight 3: Point fort à maintenir
-
-## 🚀 Pour Demain
-Une suggestion concrète et actionnable pour continuer sur cette lancée.
-
-{{else}}
-{{#if (eq period 'Daily')}}
-# 📊 Daily Review
-{{else}}
-# 📊 Weekly Review
-{{/if}}
-
-## 🎯 Summary
-Positive, personalized overview of accomplishments (2-3 sentences).
-
-## 💡 Key Insights
-- Insight 1: Notable pattern or achievement
-- Insight 2: Observation about work distribution
-- Insight 3: Strength to maintain
-
-## 🚀 For Tomorrow
-One concrete, actionable suggestion to keep the momentum going.
-
-{{/if}}
+Use French section headers and content if locale is "fr", English if locale is "en".
 </output_format>
 
 <empty_state>
-If no tasks were completed:
-{{#if (eq locale 'fr')}}
-Return: "Pas de tâches complétées aujourd'hui. Demain est une nouvelle opportunité ! 🌟"
-{{else}}
-Return: "No tasks completed today. Tomorrow is a fresh opportunity! 🌟"
-{{/if}}
+If no tasks were completed, return a short encouraging message in {{locale}} language like:
+- English: "No tasks completed today. Tomorrow is a fresh opportunity! 🌟"
+- French: "Pas de tâches complétées aujourd'hui. Demain est une nouvelle opportunité ! 🌟"
 </empty_state>
 
 <guidelines>

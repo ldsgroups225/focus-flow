@@ -266,14 +266,12 @@ Your responsibilities:
 </boundaries>`,
   prompt: `<conversation_history>
 {{#each history}}
-{{#if (eq role 'user')}}User: {{content}}
-{{else}}Assistant: {{content}}
-{{/if}}
+[{{role}}]: {{content}}
 {{/each}}
 </conversation_history>
 
 <current_message>
-User: {{currentUserInput}}
+[user]: {{currentUserInput}}
 </current_message>
 
 Respond helpfully while keeping the user focused on their task: "{{taskTitle}}"`,
