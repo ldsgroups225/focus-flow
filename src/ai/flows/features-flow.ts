@@ -1,24 +1,49 @@
 'use server';
 
 import { ai } from '@/ai/genkit';
-import {
-  suggestTagsInputSchema,
-  suggestTagsOutputSchema,
-  suggestDueDateInputSchema,
-  suggestDueDateOutputSchema,
-  breakdownTaskInputSchema,
-  breakdownTaskOutputSchema,
-  focusAssistantInputSchema,
-  focusAssistantOutputSchema,
-  SuggestTagsInput,
-  SuggestDueDateInput,
-  BreakdownTaskInput,
-  FocusAssistantInput,
-  SuggestTagsOutput,
-  SuggestDueDateOutput,
-  BreakdownTaskOutput,
-  FocusAssistantOutput,
-} from '@/lib/types';
+import { z } from 'genkit';
+
+// Define schemas using genkit's z for compatibility
+const suggestTagsInputSchema = z.object({
+  title: z.string(),
+  description: z.string(),
+});
+type SuggestTagsInput = z.infer<typeof suggestTagsInputSchema>;
+
+const suggestTagsOutputSchema = z.array(z.string());
+type SuggestTagsOutput = z.infer<typeof suggestTagsOutputSchema>;
+
+const suggestDueDateInputSchema = z.object({
+  title: z.string(),
+  description: z.string(),
+});
+type SuggestDueDateInput = z.infer<typeof suggestDueDateInputSchema>;
+
+const suggestDueDateOutputSchema = z.string().optional();
+type SuggestDueDateOutput = z.infer<typeof suggestDueDateOutputSchema>;
+
+const breakdownTaskInputSchema = z.object({
+  title: z.string(),
+  description: z.string(),
+});
+type BreakdownTaskInput = z.infer<typeof breakdownTaskInputSchema>;
+
+const breakdownTaskOutputSchema = z.array(z.object({
+  title: z.string(),
+  completed: z.boolean(),
+}));
+type BreakdownTaskOutput = z.infer<typeof breakdownTaskOutputSchema>;
+
+const focusAssistantInputSchema = z.object({
+  taskTitle: z.string(),
+  taskDescription: z.string(),
+  history: z.array(z.object({ role: z.enum(['user', 'model']), content: z.string() })),
+  currentUserInput: z.string(),
+});
+type FocusAssistantInput = z.infer<typeof focusAssistantInputSchema>;
+
+const focusAssistantOutputSchema = z.string();
+type FocusAssistantOutput = z.infer<typeof focusAssistantOutputSchema>;
 
 // 1. AI Flow for Auto-Tag Generation
 const suggestTagsPrompt = ai.definePrompt({

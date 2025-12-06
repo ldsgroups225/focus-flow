@@ -4,10 +4,30 @@
  */
 import { ai } from '@/ai/genkit';
 import { z } from 'genkit';
-import { taskSchema } from '@/lib/types';
+
+// Define schemas using genkit's z for compatibility
+const genkitTaskSchema = z.object({
+  id: z.string(),
+  title: z.string(),
+  description: z.string().optional(),
+  completed: z.boolean(),
+  priority: z.enum(['low', 'medium', 'high']),
+  type: z.enum(['task', 'milestone', 'subtask']),
+  tags: z.array(z.string()),
+  dueDate: z.string().optional(),
+  pomodoros: z.number(),
+  completedPomodoros: z.number(),
+  timeSpent: z.number(),
+  dependsOn: z.array(z.string()).optional(),
+  workspace: z.enum(['personal', 'work', 'side-project']),
+  completedDate: z.string().optional(),
+  startDate: z.string().optional(),
+  duration: z.number().optional(),
+  projectId: z.string().optional(),
+});
 
 const dependencyRefinementInputSchema = z.object({
-  tasks: z.array(taskSchema).describe('The list of all tasks to analyze.'),
+  tasks: z.array(genkitTaskSchema).describe('The list of all tasks to analyze.'),
   locale: z.enum(['en', 'fr']).describe('The language for the generated suggestions.'),
 });
 
