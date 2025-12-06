@@ -1,8 +1,6 @@
-'use server';
-
 import { NextResponse } from 'next/server';
 import { generateDependencyRefinement } from '@/ai/flows/dependency-refinement-flow';
-import { z } from 'genkit';
+import { z } from 'zod';
 import { taskSchema } from '@/lib/types';
 
 const dependencyRefinementInputSchema = z.object({

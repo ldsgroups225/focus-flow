@@ -1,5 +1,3 @@
-'use server';
-
 import { NextResponse } from 'next/server';
 import { generateReview } from '@/ai/flows/review-flow';
 import { reviewFlowInputSchema } from '@/lib/types';
