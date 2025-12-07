@@ -235,36 +235,38 @@ export default function DashboardPage() {
 
           {/* Desktop Layout with Sidebar */}
           <div className="hidden md:grid grid-cols-1 md:grid-cols-4 gap-8">
-            <aside className="md:col-span-1">
-              <SidebarContent
-                priorityFilter={priorityFilter}
-                setPriorityFilter={setPriorityFilter}
-                tagFilter={tagFilter}
-                setTagFilter={setTagFilter}
-                uniqueTags={uniqueTags}
-                projects={projects}
-                setProjectFilter={setSelectedProjectId}
-              />
-              <div className="mt-8 space-y-2">
-                <h2 className="text-lg font-semibold mb-4">{t('navigation.views')}</h2>
-                <Button variant="outline" size="sm" className="w-full" asChild>
-                  <Link href="/calendar">{t('dashboard.calendar')}</Link>
-                </Button>
-                <Button variant="outline" size="sm" className="w-full" asChild>
-                  <Link href="/timeline">{t('dashboard.timeline')}</Link>
-                </Button>
-                <Button variant="outline" size="sm" className="w-full" asChild>
-                  <Link href="/analytics">
-                    <BarChart3 className="mr-2 size-4" />
-                    {t('analytics.title')}
-                  </Link>
-                </Button>
-                <Button variant="outline" size="sm" className="w-full" asChild>
-                  <Link href="/templates">
-                    <FileText className="mr-2 size-4" />
-                    {t('templates.title')}
-                  </Link>
-                </Button>
+            <aside className="md:col-span-1 space-y-8">
+              <div className="sticky top-8">
+                <SidebarContent
+                  priorityFilter={priorityFilter}
+                  setPriorityFilter={setPriorityFilter}
+                  tagFilter={tagFilter}
+                  setTagFilter={setTagFilter}
+                  uniqueTags={uniqueTags}
+                  projects={projects}
+                  setProjectFilter={setSelectedProjectId}
+                />
+                <div className="mt-8 space-y-2">
+                  <h2 className="text-lg font-semibold mb-4">{t('navigation.views')}</h2>
+                  <Button variant="outline" size="sm" className="w-full" asChild>
+                    <Link href="/calendar">{t('dashboard.calendar')}</Link>
+                  </Button>
+                  <Button variant="outline" size="sm" className="w-full" asChild>
+                    <Link href="/timeline">{t('dashboard.timeline')}</Link>
+                  </Button>
+                  <Button variant="outline" size="sm" className="w-full" asChild>
+                    <Link href="/analytics">
+                      <BarChart3 className="mr-2 size-4" />
+                      {t('analytics.title')}
+                    </Link>
+                  </Button>
+                  <Button variant="outline" size="sm" className="w-full" asChild>
+                    <Link href="/templates">
+                      <FileText className="mr-2 size-4" />
+                      {t('templates.title')}
+                    </Link>
+                  </Button>
+                </div>
               </div>
             </aside>
 
