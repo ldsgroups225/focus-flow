@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect, Suspense } from 'react';
-import { Plus, SlidersHorizontal, Orbit, Search, Sparkles, User2, Settings, BarChart3, FileText, List, CalendarIcon, Clock } from 'lucide-react';
+import { Plus, SlidersHorizontal, Orbit, Search, Sparkles, User2, Settings, BarChart3, FileText, List, CalendarIcon, Clock, Menu } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Filters } from '@/app/components/filters';
 import type { Workspace, TaskWithSubTasks } from '@/lib/types';
@@ -32,6 +32,7 @@ import { AiDependencyDialog } from '@/app/components/ai-dependency-dialog';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { DashboardSheet } from '@/components/ui/dashboard-sheet';
+import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sheet';
 import { SidebarContent } from '@/app/components/sidebar-content';
 import { getNameFromEmail } from '@/lib/utils/get-name-from-email';
 import { getAvatarInitial } from '@/lib/utils/get-avatar-initial';
@@ -79,6 +80,7 @@ function DashboardContent() {
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [isShortcutsOpen, setIsShortcutsOpen] = useState(false);
   const [isDashboardOpen, setIsDashboardOpen] = useState(false);
+  const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
 
   const { t } = useI18n();
   const { selectedTaskIds, deselectAll } = useTaskSelection();
@@ -125,24 +127,10 @@ function DashboardContent() {
                 <Sparkles className="size-4" />
                 <span className="sr-only">{t('aiFeatures.title')}</span>
               </Button>
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <Button variant="outline" size="icon" className="md:hidden">
-                    <SlidersHorizontal className="size-4" />
-                  </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent className="w-64 p-4">
-                  <Filters
-                    priorityFilter={priorityFilter}
-                    setPriorityFilter={setPriorityFilter}
-                    tagFilter={tagFilter}
-                    setTagFilter={setTagFilter}
-                    uniqueTags={uniqueTags}
-                    projectFilter={projects}
-                    setProjectFilter={(id) => setSelectedProjectId(id)}
-                  />
-                </DropdownMenuContent>
-              </DropdownMenu>
+              <Button variant="outline" size="icon" onClick={() => setIsMobileSidebarOpen(true)} className="md:hidden">
+                <SlidersHorizontal className="size-4" />
+                <span className="sr-only">{t('header.filters')}</span>
+              </Button>
 
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
@@ -188,54 +176,54 @@ function DashboardContent() {
 
           {/* Mobile Tabs Navigation */}
           <Tabs defaultValue="tasks" className="w-full md:hidden mt-4">
-              <TabsList className="w-full">
-                <TabsTrigger value="tasks" className="flex-1">
-                  <div className='flex flex-col items-center'>
-                    <List className="size-4" />
-                    <span className="text-xs">{t('navigation.tasks')}</span>
-                  </div>
-                </TabsTrigger>
-                <TabsTrigger value="calendar" className="flex-1">
-                  <div className='flex flex-col items-center'>
-                    <CalendarIcon className="size-4" />
-                    <span className="text-xs">{t('navigation.calendar')}</span>
-                  </div>
-                </TabsTrigger>
-                <TabsTrigger value="timeline" className="flex-1">
-                  <div className='flex flex-col items-center'>
-                    <Clock className="size-4" />
-                    <span className="text-xs">{t('navigation.timeline')}</span>
-                  </div>
-                </TabsTrigger>
-                <TabsTrigger value="analytics" className="flex-1">
-                  <div className='flex flex-col items-center'>
-                    <BarChart3 className="size-4" />
-                    <span className="text-xs">{t('navigation.analytics')}</span>
-                  </div>
-                </TabsTrigger>
-                <TabsTrigger value="templates" className="flex-1">
-                  <div className='flex flex-col items-center'>
-                    <FileText className="size-4" />
-                    <span className="text-xs">{t('navigation.templates')}</span>
-                  </div>
-                </TabsTrigger>
-              </TabsList>
-              <TabsContent value="tasks" className="mt-4">
-                <TasksTabContent />
-              </TabsContent>
-              <TabsContent value="calendar" className="mt-4">
-                <CalendarTabContent />
-              </TabsContent>
-              <TabsContent value="timeline" className="mt-4">
-                <TimelineTabContent />
-              </TabsContent>
-              <TabsContent value="analytics" className="mt-4">
-                <AnalyticsTabContent />
-              </TabsContent>
-              <TabsContent value="templates" className="mt-4">
-                <TemplatesTabContent />
-              </TabsContent>
-            </Tabs>
+            <TabsList className="w-full">
+              <TabsTrigger value="tasks" className="flex-1">
+                <div className='flex flex-col items-center'>
+                  <List className="size-4" />
+                  <span className="text-xs">{t('navigation.tasks')}</span>
+                </div>
+              </TabsTrigger>
+              <TabsTrigger value="calendar" className="flex-1">
+                <div className='flex flex-col items-center'>
+                  <CalendarIcon className="size-4" />
+                  <span className="text-xs">{t('navigation.calendar')}</span>
+                </div>
+              </TabsTrigger>
+              <TabsTrigger value="timeline" className="flex-1">
+                <div className='flex flex-col items-center'>
+                  <Clock className="size-4" />
+                  <span className="text-xs">{t('navigation.timeline')}</span>
+                </div>
+              </TabsTrigger>
+              <TabsTrigger value="analytics" className="flex-1">
+                <div className='flex flex-col items-center'>
+                  <BarChart3 className="size-4" />
+                  <span className="text-xs">{t('navigation.analytics')}</span>
+                </div>
+              </TabsTrigger>
+              <TabsTrigger value="templates" className="flex-1">
+                <div className='flex flex-col items-center'>
+                  <FileText className="size-4" />
+                  <span className="text-xs">{t('navigation.templates')}</span>
+                </div>
+              </TabsTrigger>
+            </TabsList>
+            <TabsContent value="tasks" className="mt-4">
+              <TasksTabContent />
+            </TabsContent>
+            <TabsContent value="calendar" className="mt-4">
+              <CalendarTabContent />
+            </TabsContent>
+            <TabsContent value="timeline" className="mt-4">
+              <TimelineTabContent />
+            </TabsContent>
+            <TabsContent value="analytics" className="mt-4">
+              <AnalyticsTabContent />
+            </TabsContent>
+            <TabsContent value="templates" className="mt-4">
+              <TemplatesTabContent />
+            </TabsContent>
+          </Tabs>
         </header>
 
         {/* Desktop Layout with Sidebar */}
@@ -378,6 +366,50 @@ function DashboardContent() {
           onClose={() => setIsDashboardOpen(false)}
           tasks={tasks}
         />
+
+        {/* Mobile Sidebar Sheet */}
+        <Sheet open={isMobileSidebarOpen} onOpenChange={setIsMobileSidebarOpen}>
+          <SheetContent side="left" className="w-[300px] overflow-y-auto">
+            <SheetHeader>
+              <SheetTitle>{t('dashboard.title')}</SheetTitle>
+            </SheetHeader>
+            <div className="px-4 pb-4">
+              <SidebarContent
+                priorityFilter={priorityFilter}
+                setPriorityFilter={setPriorityFilter}
+                tagFilter={tagFilter}
+                setTagFilter={setTagFilter}
+                uniqueTags={uniqueTags}
+                projects={projects}
+                setProjectFilter={(id) => {
+                  setSelectedProjectId(id);
+                  setIsMobileSidebarOpen(false);
+                }}
+              />
+              <div className="mt-8 space-y-2">
+                <h2 className="text-lg font-semibold mb-4">{t('navigation.views')}</h2>
+                <Button variant="outline" size="sm" className="w-full" asChild onClick={() => setIsMobileSidebarOpen(false)}>
+                  <Link href="/calendar">{t('dashboard.calendar')}</Link>
+                </Button>
+                <Button variant="outline" size="sm" className="w-full" asChild onClick={() => setIsMobileSidebarOpen(false)}>
+                  <Link href="/timeline">{t('dashboard.timeline')}</Link>
+                </Button>
+                <Button variant="outline" size="sm" className="w-full" asChild onClick={() => setIsMobileSidebarOpen(false)}>
+                  <Link href="/analytics">
+                    <BarChart3 className="mr-2 size-4" />
+                    {t('analytics.title')}
+                  </Link>
+                </Button>
+                <Button variant="outline" size="sm" className="w-full" asChild onClick={() => setIsMobileSidebarOpen(false)}>
+                  <Link href="/templates">
+                    <FileText className="mr-2 size-4" />
+                    {t('templates.title')}
+                  </Link>
+                </Button>
+              </div>
+            </div>
+          </SheetContent>
+        </Sheet>
       </main>
     </div>
   );
