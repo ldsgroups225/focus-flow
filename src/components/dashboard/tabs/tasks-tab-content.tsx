@@ -9,8 +9,19 @@ import { Search, FolderOpen, Tag } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import type { TaskWithSubTasks } from '@/lib/types';
 
-const LazyTaskForm = lazy(() => import('@/app/components/task-form').then(m => ({ default: m.TaskForm })));
-const LazyFocusView = lazy(() => import('@/app/components/focus-view').then(m => ({ default: m.FocusView })));
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from '@/components/ui/accordion';
+
+const LazyTaskForm = lazy(() =>
+  import('@/app/components/task-form').then(m => ({ default: m.TaskForm })),
+);
+const LazyFocusView = lazy(() =>
+  import('@/app/components/focus-view').then(m => ({ default: m.FocusView })),
+);
 
 export function TasksTabContent() {
   const { t } = useI18n();
@@ -36,9 +47,13 @@ export function TasksTabContent() {
     selectedProjectId,
   } = useDashboard();
 
-  const [editingTask, setEditingTask] = useState<TaskWithSubTasks | 'new' | null>(null);
+  const [editingTask, setEditingTask] = useState<TaskWithSubTasks | 'new' | null>(
+    null,
+  );
   const [focusTask, setFocusTask] = useState<TaskWithSubTasks | null>(null);
-  const [selectedTaskIds, setSelectedTaskIds] = useState<Set<string>>(new Set());
+  const [selectedTaskIds, setSelectedTaskIds] = useState<Set<string>>(
+    new Set(),
+  );
 
   const handleEdit = (task: TaskWithSubTasks | 'new') => {
     setEditingTask(task);
@@ -57,6 +72,9 @@ export function TasksTabContent() {
     }
     setSelectedTaskIds(newSelected);
   };
+
+  const activeTasks = filteredTasks.filter(task => !task.completed);
+  const completedTasks = filteredTasks.filter(task => task.completed);
 
   if (isLoadingTasks) {
     return (
@@ -78,7 +96,7 @@ export function TasksTabContent() {
           <Input
             placeholder={t('taskList.searchPlaceholder')}
             value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
+            onChange={e => setSearchQuery(e.target.value)}
             className="pl-10"
           />
         </div>
@@ -108,7 +126,9 @@ export function TasksTabContent() {
       </div>
 
       {/* Active Filters Display */}
-      {(priorityFilter.length > 0 || tagFilter.length > 0 || selectedProjectId) && (
+      {(priorityFilter.length > 0 ||
+        tagFilter.length > 0 ||
+        selectedProjectId) && (
         <div className="flex flex-wrap gap-2">
           {selectedProjectId && (
             <Badge variant="secondary" className="flex items-center gap-1">
@@ -126,7 +146,9 @@ export function TasksTabContent() {
             <Badge key={priority} variant="outline" className="capitalize">
               {priority}
               <button
-                onClick={() => setPriorityFilter(priorityFilter.filter(p => p !== priority))}
+                onClick={() =>
+                  setPriorityFilter(priorityFilter.filter(p => p !== priority))
+                }
                 className="ml-1 hover:text-destructive"
               >
                 ×
@@ -164,7 +186,7 @@ export function TasksTabContent() {
       ) : (
         <div className="space-y-2">
           <TaskList
-            tasks={filteredTasks}
+            tasks={activeTasks}
             setTasks={() => {}}
             onEdit={handleEdit}
             onDelete={deleteTask}
@@ -177,14 +199,47 @@ export function TasksTabContent() {
         </div>
       )}
 
+      {completedTasks.length > 0 && (
+        <Accordion type="single" collapsible defaultValue="completed-tasks" className="w-full">
+          <AccordionItem value="completed-tasks">
+            <AccordionTrigger className="text-sm font-medium text-muted-foreground hover:no-underline">
+              {t('taskList.completed', { count: completedTasks.length })}
+            </AccordionTrigger>
+            <AccordionContent>
+              <div className="space-y-2 pt-2">
+                <TaskList
+                  tasks={completedTasks}
+                  setTasks={() => {}}
+                  onEdit={handleEdit}
+                  onDelete={deleteTask}
+                  onToggle={toggleComplete}
+                  onFocus={handleFocus}
+                  selectedTaskIds={selectedTaskIds}
+                  onSelectTask={handleSelectTask}
+                  onSubTaskToggle={toggleSubTask}
+                />
+              </div>
+            </AccordionContent>
+          </AccordionItem>
+        </Accordion>
+      )}
+
       {/* Task Form Modal */}
       <Suspense fallback={null}>
         {editingTask && (
           <LazyTaskForm
             isOpen={!!editingTask}
             onClose={() => setEditingTask(null)}
-            onSave={(task) => saveTask(task as TaskWithSubTasks, activeWorkspace)}
-            task={editingTask === 'new' ? undefined : tasks.find(t => t.id === (typeof editingTask === 'object' ? editingTask.id : undefined))}
+            onSave={task => saveTask(task as TaskWithSubTasks, activeWorkspace)}
+            task={
+              editingTask === 'new'
+                ? undefined
+                : tasks.find(
+                    t =>
+                      t.id ===
+                      (typeof editingTask === 'object' ? editingTask.id : undefined),
+                  )
+            }
             allTasks={tasks}
             activeWorkspace={activeWorkspace}
             projects={projects}

@@ -277,17 +277,7 @@ export default function DashboardPage() {
                   </div>
                 </div>
               ) : (
-                <TaskList
-                  tasks={filteredTasks}
-                  setTasks={() => { }}
-                  onEdit={handleSetEditingTask}
-                  onDelete={deleteTask}
-                  onToggle={toggleComplete}
-                  onFocus={setFocusTask}
-                  onSubTaskToggle={toggleSubTask}
-                  selectedTaskIds={selectedTaskIds}
-                  onSelectTask={selectTask}
-                />
+                <TasksTabContent />
               )}
             </div>
           </div>

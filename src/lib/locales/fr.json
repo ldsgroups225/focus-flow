@@ -23,7 +23,8 @@
   "taskList": {
     "allClear": "Tout est net !",
     "noTasks": "Aucune tâche ne correspond à vos filtres actuels. Ou peut-être que vous êtes juste si bon.",
-    "searchPlaceholder": "Rechercher par titre ou description..."
+    "searchPlaceholder": "Rechercher par titre ou description...",
+    "completed": "Terminées ({count})"
   },
   "taskItem": {
     "priority": "Priorité : {priority}",
