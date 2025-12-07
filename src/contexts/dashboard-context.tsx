@@ -5,8 +5,10 @@ import type { Task, TaskWithSubTasks, Priority, Workspace, Project } from '@/lib
 import { useTasks } from '@/lib/hooks/use-tasks';
 import { useFilters } from '@/lib/hooks/use-filters';
 import { useProjects } from '@/lib/hooks/use-projects';
+import { useTemplates } from '@/lib/hooks/use-templates';
 import { useAuth } from '@/components/providers/auth-provider';
 import { User } from '@/lib/appwrite/auth-services';
+import { Template } from '@/lib/services/template-service';
 
 type DashboardContextType = {
   // Tasks data
@@ -41,6 +43,14 @@ type DashboardContextType = {
   deleteProject: (projectId: string) => Promise<void>;
   updateProject: (projectId: string, projectData: Partial<Project>) => Promise<void>;
   fetchProjects: () => void;
+
+  // Templates
+  templates: Template[];
+  isLoadingTemplates: boolean;
+  fetchTemplates: () => void;
+  saveTemplate: (templateData: Omit<Template, 'id' | 'createdAt' | 'updatedAt'>) => void;
+  updateTemplate: (templateId: string, updates: Partial<Omit<Template, 'id' | 'userId' | 'createdAt'>>) => void;
+  deleteTemplate: (templateId: string) => void;
 
   // UI State
   activeWorkspace: Workspace;
@@ -100,13 +110,24 @@ export function DashboardProvider({ children }: { children: ReactNode }) {
     fetchProjects,
   } = useProjects(user?.uid ?? null);
 
+  // Templates
+  const {
+    templates,
+    isLoadingTemplates,
+    fetchTemplates,
+    saveTemplate,
+    updateTemplate,
+    deleteTemplate,
+  } = useTemplates(user?.uid ?? null);
+
   // Fetch data when user changes
   useEffect(() => {
     if (user?.uid) {
       fetchTasks();
       fetchProjects();
+      fetchTemplates();
     }
-  }, [user?.uid, fetchTasks, fetchProjects]);
+  }, [user?.uid, fetchTasks, fetchProjects, fetchTemplates]);
 
   const value: DashboardContextType = {
     // Tasks
@@ -141,6 +162,14 @@ export function DashboardProvider({ children }: { children: ReactNode }) {
     deleteProject,
     updateProject,
     fetchProjects,
+
+    // Templates
+    templates,
+    isLoadingTemplates,
+    fetchTemplates,
+    saveTemplate,
+    updateTemplate,
+    deleteTemplate,
 
     // UI State
     activeWorkspace,

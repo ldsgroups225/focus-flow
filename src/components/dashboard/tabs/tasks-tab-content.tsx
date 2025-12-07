@@ -45,6 +45,7 @@ export function TasksTabContent() {
     projects,
     setSelectedProjectId,
     selectedProjectId,
+    templates,
   } = useDashboard();
 
   const [editingTask, setEditingTask] = useState<TaskWithSubTasks | 'new' | null>(
@@ -243,6 +244,7 @@ export function TasksTabContent() {
             allTasks={tasks}
             activeWorkspace={activeWorkspace}
             projects={projects}
+            templates={templates}
           />
         )}
       </Suspense>

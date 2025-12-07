@@ -48,7 +48,7 @@ import type { Task, Workspace } from '@/lib/types';
 import { useI18n } from './i18n-provider';
 import { suggestTags, suggestDueDate, breakdownTask } from '@/ai/flows/features-flow';
 import { TemplateService } from '@/lib/services/template-service';
-import { useAuth } from './auth-provider';
+import { useAuth } from '@/components/providers/auth-provider';
 
 // Simple subtask for form (before saving to DB)
 const formSubTaskSchema = z.object({
@@ -110,7 +110,8 @@ type TaskFormValues = z.infer<ReturnType<typeof taskSchema>>;
 
 import { Project } from '@/lib/types';
 
-import type { TaskWithSubTasks } from '@/lib/types';
+import { Template } from '@/lib/services/template-service';
+import { TaskWithSubTasks } from '@/lib/types';
 import { Label } from '@/components/ui/label';
 
 type TaskFormProps = {
@@ -121,9 +122,10 @@ type TaskFormProps = {
   allTasks: TaskWithSubTasks[];
   activeWorkspace: Workspace;
   projects: Project[];
+  templates: Template[];
 };
 
-export function TaskForm({ isOpen, onClose, onSave, task, allTasks, activeWorkspace, projects }: TaskFormProps) {
+export function TaskForm({ isOpen, onClose, onSave, task, allTasks, activeWorkspace, projects, templates }: TaskFormProps) {
   const { t } = useI18n();
   const { user } = useAuth();
   const currentTaskSchema = taskSchema(t);
@@ -228,6 +230,22 @@ export function TaskForm({ isOpen, onClose, onSave, task, allTasks, activeWorksp
     }
   };
 
+  const handleTemplateSelect = (templateId: string) => {
+    if (!user?.uid || !templateId) return;
+    const template = TemplateService.getById(templateId, user.uid);
+    if (template) {
+      form.reset({
+        ...form.getValues(),
+        title: template.title,
+        description: template.description || '',
+        priority: template.priority,
+        tags: template.tags.join(', '),
+        pomodoros: template.pomodoros,
+        subTasks: template.subTasks || [],
+      });
+    }
+  };
+
   // Watch for changes and auto-calculate duration/dueDate
   const taskType = form.watch('type');
   const startDate = form.watch('startDate');
@@ -327,6 +345,23 @@ export function TaskForm({ isOpen, onClose, onSave, task, allTasks, activeWorksp
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="flex flex-col flex-1 min-h-0">
             <div className="space-y-3 py-3 overflow-y-auto flex-1 scrollbar-hide px-1">
+              {!task && templates.length > 0 && (
+                <FormItem>
+                  <FormLabel>{t('templates.title')}</FormLabel>
+                  <Select onValueChange={handleTemplateSelect}>
+                    <FormControl>
+                      <SelectTrigger>
+                        <SelectValue placeholder={t('templates.select.title')} />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      {templates.map(template => (
+                        <SelectItem key={template.id} value={template.id}>{template.name}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </FormItem>
+              )}
               <FormField
                 control={form.control}
                 name="title"
@@ -360,7 +395,7 @@ export function TaskForm({ isOpen, onClose, onSave, task, allTasks, activeWorksp
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>{t('taskForm.priority')}</FormLabel>
-                      <Select onValueChange={field.onChange} defaultValue={field.value}>
+                      <Select onValueChange={field.onChange} defaultValue={field.value} value={field.value}>
                         <FormControl>
                           <SelectTrigger>
                             <SelectValue placeholder={t('taskForm.selectPriority')} />
@@ -382,7 +417,7 @@ export function TaskForm({ isOpen, onClose, onSave, task, allTasks, activeWorksp
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>{t('taskForm.type')}</FormLabel>
-                      <Select onValueChange={field.onChange} defaultValue={field.value}>
+                      <Select onValueChange={field.onChange} defaultValue={field.value} value={field.value}>
                         <FormControl>
                           <SelectTrigger>
                             <SelectValue />
@@ -611,7 +646,7 @@ export function TaskForm({ isOpen, onClose, onSave, task, allTasks, activeWorksp
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>{t('taskForm.project')}</FormLabel>
-                    <Select onValueChange={field.onChange} defaultValue={field.value}>
+                    <Select onValueChange={field.onChange} defaultValue={field.value} value={field.value}>
                       <FormControl>
                         <SelectTrigger>
                           <SelectValue placeholder={t('taskForm.selectProject')} />
