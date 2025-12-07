@@ -42,8 +42,8 @@ const focusAssistantInputSchema = z.object({
 });
 type FocusAssistantInput = z.infer<typeof focusAssistantInputSchema>;
 
-const focusAssistantOutputSchema = z.string();
-type FocusAssistantOutput = z.infer<typeof focusAssistantOutputSchema>;
+const focusAssistantOutputSchema = z.string().nullable();
+type FocusAssistantOutput = string;
 
 // 1. AI Flow for Auto-Tag Generation
 const suggestTagsPrompt = ai.definePrompt({
@@ -233,13 +233,8 @@ export async function breakdownTask(input: BreakdownTaskInput): Promise<Breakdow
 const focusAssistantPrompt = ai.definePrompt({
   name: 'focusAssistantPrompt',
   input: { schema: focusAssistantInputSchema },
-  output: { schema: focusAssistantOutputSchema },
+  output: { format: 'text' },
   system: `You are a supportive focus coach within FocusFlow, helping users maintain concentration and momentum on their current task.
-
-<current_task>
-Title: {{taskTitle}}
-Description: {{taskDescription}}
-</current_task>
 
 <role>
 Your responsibilities:
@@ -263,8 +258,14 @@ Your responsibilities:
 - If asked about unrelated topics, briefly acknowledge and redirect
 - Don't provide lengthy explanations unless specifically asked
 - Avoid generic motivational platitudes; be specific to their situation
+- ALWAYS respond with a helpful message, never return empty or null
 </boundaries>`,
-  prompt: `<conversation_history>
+  prompt: `<current_task>
+Title: {{taskTitle}}
+Description: {{taskDescription}}
+</current_task>
+
+<conversation_history>
 {{#each history}}
 [{{role}}]: {{content}}
 {{/each}}
@@ -282,11 +283,16 @@ const focusAssistantFlow = ai.defineFlow(
   {
     name: 'focusAssistantFlow',
     inputSchema: focusAssistantInputSchema,
-    outputSchema: focusAssistantOutputSchema,
+    outputSchema: z.string(),
   },
   async (input) => {
-    const { output } = await focusAssistantPrompt(input);
-    return output || "Sorry, I'm having trouble connecting right now.";
+    try {
+      const { text } = await focusAssistantPrompt(input);
+      return text || "Sorry, I'm having trouble connecting right now.";
+    } catch (error) {
+      console.error('Focus assistant error:', error);
+      return "Sorry, I'm having trouble connecting right now.";
+    }
   }
 );
 

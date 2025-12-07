@@ -10,7 +10,6 @@ import { useI18n } from './i18n-provider';
 import { useState, useRef, useCallback, useEffect } from 'react';
 import { cn } from '@/lib/utils';
 import { Input } from '@/components/ui/input';
-import { getFocusAssistantResponse } from '@/ai/flows/features-flow';
 import { ScrollArea } from '@/components/ui/scroll-area';
 
 type FocusViewProps = {
@@ -21,14 +20,14 @@ type FocusViewProps = {
 };
 
 type Message = {
-    role: 'user' | 'model';
-    content: string;
+  role: 'user' | 'model';
+  content: string;
 };
 
 export function FocusView({ task, onExit, onPomodoroComplete, onLogTime }: FocusViewProps) {
   const { t } = useI18n();
   const timerRef = useRef<PomodoroTimerHandles>(null);
-  const [timerState, setTimerState] = useState<{mode: 'work' | 'break', isActive: boolean}>({mode: 'work', isActive: false});
+  const [timerState, setTimerState] = useState<{ mode: 'work' | 'break', isActive: boolean }>({ mode: 'work', isActive: false });
   const [isIdle, setIsIdle] = useState(false);
   const idleTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const sessionStartTimeRef = useRef<number | null>(null);
@@ -37,7 +36,7 @@ export function FocusView({ task, onExit, onPomodoroComplete, onLogTime }: Focus
   const [messages, setMessages] = useState<Message[]>([]);
   const [userInput, setUserInput] = useState('');
   const [isAssistantLoading, setIsAssistantLoading] = useState(false);
-  const chatScrollAreaRef = useRef<HTMLDivElement>(null);
+  const messagesEndRef = useRef<HTMLDivElement>(null);
 
   const logTimeSpent = useCallback(() => {
     if (sessionStartTimeRef.current && timerState.mode === 'work') {
@@ -48,7 +47,7 @@ export function FocusView({ task, onExit, onPomodoroComplete, onLogTime }: Focus
     }
     sessionStartTimeRef.current = null;
   }, [onLogTime, task.id, timerState.mode]);
-  
+
   const handleExit = () => {
     logTimeSpent();
     onExit();
@@ -62,20 +61,20 @@ export function FocusView({ task, onExit, onPomodoroComplete, onLogTime }: Focus
     if (timerState.isActive) {
       idleTimeoutRef.current = setTimeout(() => {
         setIsIdle(true);
-      }, 5000); 
+      }, 5000);
     }
   }, [timerState.isActive]);
-  
+
   const handleTimerUpdate = useCallback((mode: 'work' | 'break', isActive: boolean) => {
-    setTimerState({mode, isActive});
+    setTimerState({ mode, isActive });
     if (isActive) {
       resetIdleTimeout();
-       // Start tracking time if it's a work session and timer just started
+      // Start tracking time if it's a work session and timer just started
       if (mode === 'work' && !sessionStartTimeRef.current) {
         sessionStartTimeRef.current = Date.now();
       }
     } else {
-       // Stop tracking time and log if it's a work session and timer is paused
+      // Stop tracking time and log if it's a work session and timer is paused
       logTimeSpent();
       if (idleTimeoutRef.current) {
         clearTimeout(idleTimeoutRef.current);
@@ -92,7 +91,7 @@ export function FocusView({ task, onExit, onPomodoroComplete, onLogTime }: Focus
     activityEvents.forEach(event => window.addEventListener(event, resetIdleTimeout));
 
     const handleBeforeUnload = () => {
-        logTimeSpent();
+      logTimeSpent();
     };
     window.addEventListener('beforeunload', handleBeforeUnload);
 
@@ -116,31 +115,74 @@ export function FocusView({ task, onExit, onPomodoroComplete, onLogTime }: Focus
     if (!userInput.trim()) return;
 
     const newMessages: Message[] = [...messages, { role: 'user', content: userInput }];
-    setMessages(newMessages);
     const currentUserInput = userInput;
     setUserInput('');
     setIsAssistantLoading(true);
 
+    // Add user message and empty model message for streaming
+    setMessages([...newMessages, { role: 'model', content: '' }]);
+
     try {
-        const assistantResponse = await getFocusAssistantResponse({
-            taskTitle: task.title,
-            taskDescription: task.description || '',
-            history: messages,
-            currentUserInput: currentUserInput
+      const response = await fetch('/api/ai/focus-assistant', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          taskTitle: task.title,
+          taskDescription: task.description || '',
+          history: messages,
+          currentUserInput: currentUserInput,
+        }),
+      });
+
+      if (!response.ok) throw new Error('Failed to get response');
+
+      const reader = response.body?.getReader();
+      if (!reader) throw new Error('No reader available');
+
+      const decoder = new TextDecoder();
+      let accumulatedContent = '';
+
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+
+        const chunk = decoder.decode(value, { stream: true });
+        accumulatedContent += chunk;
+
+        setMessages(prev => {
+          const updated = [...prev];
+          updated[updated.length - 1] = { role: 'model', content: accumulatedContent };
+          return updated;
         });
-        setMessages([...newMessages, { role: 'model', content: assistantResponse }]);
+      }
+
+      if (!accumulatedContent) {
+        setMessages(prev => {
+          const updated = [...prev];
+          updated[updated.length - 1] = { role: 'model', content: t('focusView.assistantError') };
+          return updated;
+        });
+      }
     } catch (error) {
-        console.error("Focus assistant failed:", error);
-        setMessages([...newMessages, { role: 'model', content: t('focusView.assistantError') }]);
+      console.error('Focus assistant failed:', error);
+      setMessages(prev => {
+        const updated = [...prev];
+        if (updated.length > 0 && updated[updated.length - 1].role === 'model') {
+          updated[updated.length - 1] = { role: 'model', content: t('focusView.assistantError') };
+        } else {
+          updated.push({ role: 'model', content: t('focusView.assistantError') });
+        }
+        return updated;
+      });
     } finally {
-        setIsAssistantLoading(false);
+      setIsAssistantLoading(false);
     }
   };
 
+  // Smooth scroll to bottom when messages change (including during streaming)
   useEffect(() => {
-    // Scroll to bottom of chat when new messages are added
-    if (chatScrollAreaRef.current) {
-        chatScrollAreaRef.current.scrollTo({ top: chatScrollAreaRef.current.scrollHeight, behavior: 'smooth' });
+    if (messagesEndRef.current) {
+      messagesEndRef.current.scrollIntoView({ behavior: 'smooth' });
     }
   }, [messages]);
 
@@ -149,7 +191,7 @@ export function FocusView({ task, onExit, onPomodoroComplete, onLogTime }: Focus
     <AnimatePresence>
       <motion.div
         initial={{ opacity: 0 }}
-        animate={{ 
+        animate={{
           opacity: 1,
           backgroundColor: timerState.mode === 'break' ? 'hsl(var(--chart-2) / 0.2)' : 'hsl(var(--background) / 0.95)'
         }}
@@ -157,101 +199,104 @@ export function FocusView({ task, onExit, onPomodoroComplete, onLogTime }: Focus
         transition={{ duration: 0.5 }}
         className="fixed inset-0 z-50 backdrop-blur-lg flex flex-col p-4 sm:p-8"
       >
-        <motion.header 
+        <motion.header
           animate={{ opacity: isIdle ? 0.33 : 1, filter: isIdle ? 'blur(4px)' : 'blur(0px)' }}
           transition={{ duration: 0.5 }}
           className="w-full flex justify-end relative z-10"
         >
-             <Button onClick={handleExit} variant="ghost" size="icon" className="text-muted-foreground" aria-label={t('focusView.endSession')}>
-              <X className="h-6 w-6" />
-            </Button>
+          <Button onClick={handleExit} variant="ghost" size="icon" className="text-muted-foreground" aria-label={t('focusView.endSession')}>
+            <X className="h-6 w-6" />
+          </Button>
         </motion.header>
 
-        <main 
-            className="flex-1 flex flex-col items-center justify-center text-center -mt-16"
+        <main
+          className="flex-1 flex flex-col items-center justify-center text-center -mt-16"
         >
-            <motion.p 
-                animate={{ opacity: isIdle ? 0 : 1, y: isIdle ? -20 : 0 }}
-                transition={{ duration: 0.5 }}
-                className="text-lg text-muted-foreground mb-4">{t('focusView.focusingOn')}
+          <motion.p
+            animate={{ opacity: isIdle ? 0 : 1, y: isIdle ? -20 : 0 }}
+            transition={{ duration: 0.5 }}
+            className="text-lg text-muted-foreground mb-4">{t('focusView.focusingOn')}
+          </motion.p>
+          <motion.h1
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5, delay: 0.2 }}
+            className="text-4xl md:text-6xl font-bold mb-6">{task.title}
+          </motion.h1>
+          {task.description && (
+            <motion.p
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5, delay: 0.3 }}
+              className="text-xl text-muted-foreground max-w-2xl mx-auto">{task.description}
             </motion.p>
-            <motion.h1 
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.5, delay: 0.2 }}
-                className="text-4xl md:text-6xl font-bold mb-6">{task.title}
-            </motion.h1>
-            {task.description && (
-                <motion.p 
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 0.5, delay: 0.3 }}
-                    className="text-xl text-muted-foreground max-w-2xl mx-auto">{task.description}
-                </motion.p>
-            )}
+          )}
         </main>
-        
+
         {/* Chat Assistant */}
         <motion.div
           animate={{ opacity: isIdle ? 0 : 1, y: isIdle ? 20 : 0 }}
           transition={{ duration: 0.5 }}
           className="absolute bottom-28 left-1/2 -translate-x-1/2 w-full max-w-2xl px-4"
         >
-            <div className="bg-background/50 border rounded-lg p-3 shadow-lg">
-                <ScrollArea className="h-48 mb-2">
-                    <div ref={chatScrollAreaRef} className="space-y-4 text-left px-2">
-                        {messages.map((msg, index) => (
-                            <div key={index} className={cn("flex items-start gap-3", msg.role === 'user' ? "justify-end" : "")}>
-                                {msg.role === 'model' && <Bot className="w-5 h-5 text-primary shrink-0 mt-1" />}
-                                <p className={cn("text-sm rounded-lg px-3 py-2 max-w-md", msg.role === 'model' ? "bg-muted" : "bg-primary text-primary-foreground")}>
-                                    {msg.content}
-                                </p>
-                            </div>
-                        ))}
-                         {isAssistantLoading && (
-                            <div className="flex items-start gap-3">
-                                <Bot className="w-5 h-5 text-primary shrink-0 mt-1" />
-                                <p className="text-sm rounded-lg px-3 py-2 max-w-md bg-muted flex items-center">
-                                    <LoaderCircle className="w-4 h-4 animate-spin" />
-                                </p>
-                            </div>
-                        )}
+          <div className="bg-background/50 border rounded-lg p-3 shadow-lg">
+            <ScrollArea className="h-48 mb-2">
+              <div className="space-y-4 text-left px-2">
+                {messages.map((msg, index) => (
+                  msg.content && (
+                    <div key={index} className={cn("flex items-start gap-3", msg.role === 'user' ? "justify-end" : "")}>
+                      {msg.role === 'model' && <Bot className="w-5 h-5 text-primary shrink-0 mt-1" />}
+                      <p className={cn("text-sm rounded-lg px-3 py-2 max-w-md whitespace-pre-wrap", msg.role === 'model' ? "bg-muted" : "bg-primary text-primary-foreground")}>
+                        {msg.content}
+                      </p>
                     </div>
-                </ScrollArea>
-                <form onSubmit={handleSendMessage} className="flex items-center gap-2">
-                    <Input 
-                        value={userInput}
-                        onChange={(e) => setUserInput(e.target.value)}
-                        placeholder={t('focusView.askAssistant')}
-                        disabled={isAssistantLoading}
-                    />
-                    <Button type="submit" size="icon" disabled={isAssistantLoading || !userInput.trim()}>
-                        <Send className="w-4 h-4" />
-                    </Button>
-                </form>
-            </div>
+                  )
+                ))}
+                {isAssistantLoading && messages.length > 0 && messages[messages.length - 1].content === '' && (
+                  <div className="flex items-start gap-3">
+                    <Bot className="w-5 h-5 text-primary shrink-0 mt-1" />
+                    <p className="text-sm rounded-lg px-3 py-2 max-w-md bg-muted flex items-center">
+                      <LoaderCircle className="w-4 h-4 animate-spin" />
+                    </p>
+                  </div>
+                )}
+                <div ref={messagesEndRef} />
+              </div>
+            </ScrollArea>
+            <form onSubmit={handleSendMessage} className="flex items-center gap-2">
+              <Input
+                value={userInput}
+                onChange={(e) => setUserInput(e.target.value)}
+                placeholder={t('focusView.askAssistant')}
+                disabled={isAssistantLoading}
+              />
+              <Button type="submit" size="icon" disabled={isAssistantLoading || !userInput.trim()}>
+                <Send className="w-4 h-4" />
+              </Button>
+            </form>
+          </div>
         </motion.div>
 
-        <motion.footer 
-            animate={{ opacity: isIdle ? 0.33 : 1, filter: isIdle ? 'blur(4px)' : 'blur(0px)' }}
-            transition={{ duration: 0.5 }}
-            className="w-full flex items-end justify-between"
+        <motion.footer
+          animate={{ opacity: isIdle ? 0.33 : 1, filter: isIdle ? 'blur(4px)' : 'blur(0px)' }}
+          transition={{ duration: 0.5 }}
+          className="w-full flex items-end justify-between"
         >
-          <PomodoroTimer 
+          <PomodoroTimer
             ref={timerRef}
             onPomodoroComplete={handlePomodoroCycleComplete}
             onTimerUpdate={handleTimerUpdate}
           />
-           <div className="flex items-center gap-2">
-              <Button variant="ghost" size="icon" onClick={() => timerRef.current?.reset()} aria-label={t('pomodoro.resetTimer')}>
-                  <RefreshCw className="w-5 h-5" />
-              </Button>
-              <Button size="icon" className="w-12 h-12 rounded-full" onClick={() => timerRef.current?.toggle()} aria-label={timerState.isActive ? t('pomodoro.pauseTimer') : t('pomodoro.startTimer')}>
-                  {timerState.isActive ? <Pause className="w-6 h-6" /> : <Play className="w-6 h-6" />}
-              </Button>
-              <Button variant="ghost" size="icon" onClick={() => timerRef.current?.next()} aria-label={timerState.mode === 'work' ? t('pomodoro.startBreak') : t('pomodoro.startWork')}>
-                  <Coffee className="w-5 h-5" />
-              </Button>
+          <div className="flex items-center gap-2">
+            <Button variant="ghost" size="icon" onClick={() => timerRef.current?.reset()} aria-label={t('pomodoro.resetTimer')}>
+              <RefreshCw className="w-5 h-5" />
+            </Button>
+            <Button size="icon" className="w-12 h-12 rounded-full" onClick={() => timerRef.current?.toggle()} aria-label={timerState.isActive ? t('pomodoro.pauseTimer') : t('pomodoro.startTimer')}>
+              {timerState.isActive ? <Pause className="w-6 h-6" /> : <Play className="w-6 h-6" />}
+            </Button>
+            <Button variant="ghost" size="icon" onClick={() => timerRef.current?.next()} aria-label={timerState.mode === 'work' ? t('pomodoro.startBreak') : t('pomodoro.startWork')}>
+              <Coffee className="w-5 h-5" />
+            </Button>
           </div>
         </motion.footer>
       </motion.div>
@@ -259,4 +304,3 @@ export function FocusView({ task, onExit, onPomodoroComplete, onLogTime }: Focus
   );
 }
 
-    
