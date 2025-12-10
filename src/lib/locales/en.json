@@ -127,7 +127,9 @@
     "reviewGeneration": "Review Generation",
     "reviewDescription": "Generate a summary of your completed tasks for daily or weekly review.",
     "dependencyRefinement": "Task Dependency Refinement",
-    "dependencyDescription": "Analyze and optimize task dependencies, due dates, tags, and project structure."
+    "dependencyDescription": "Analyze and optimize task dependencies, due dates, tags, and project structure.",
+    "planning": "Daily Planning & Priorities",
+    "planningDescription": "Let AI organize your day and suggest smart priority adjustments."
   },
   "aiReview": {
     "title": "AI Review",
@@ -420,5 +422,69 @@
     "form": {
       "saveAsTemplate": "Save as Template"
     }
+  },
+  "quickEntry": {
+    "title": "Quick Entry",
+    "placeholder": "What do you need to do? (e.g., 'Meeting tomorrow at 3pm #work !high')",
+    "noTitle": "Enter a task title...",
+    "tips": "Quick tips:",
+    "tipTag": "add a tag",
+    "tipPriority": "set priority",
+    "tipWorkspace": "set workspace",
+    "tipDate": "set due date",
+    "tipPomodoros": "set pomodoros",
+    "tipTime": "set time",
+    "create": "Create Task"
+  },
+  "aiPlanning": {
+    "title": "AI Planning Assistant",
+    "description": "Get AI-powered help to plan your day and optimize task priorities.",
+    "dailyPlan": "Plan My Day",
+    "smartPriority": "Smart Priorities",
+    "availableHours": "Available hours today",
+    "tasksToAnalyze": "tasks to analyze",
+    "estimatedPomodoros": "Estimated pomodoros needed",
+    "planMyDay": "Plan My Day",
+    "generating": "Generating...",
+    "analyzing": "Analyzing...",
+    "analyzePriorities": "Analyze Priorities",
+    "summary": "Today's Plan Summary",
+    "warnings": "Potential Issues",
+    "tips": "Productivity Tips",
+    "plannedTasks": "Planned Schedule",
+    "error": "Sorry, the planning could not be completed. Please try again.",
+    "priorityDescription": "AI will analyze your tasks and suggest priority adjustments based on deadlines, dependencies, and work patterns.",
+    "noChangesNeeded": "All priorities look good! No changes recommended.",
+    "urgencyScore": "urgency",
+    "applyChange": "Apply This Change",
+    "regenerate": "Regenerate Plan",
+    "reanalyze": "Reanalyze"
+  },
+  "focusAnalytics": {
+    "totalFocusTime": "Total Focus Time",
+    "thisWeek": "This week",
+    "currentStreak": "Current Streak",
+    "days": "days",
+    "best": "Best",
+    "pomodoros": "Pomodoros",
+    "avgPerDay": "Avg/day",
+    "avgFocus": "Avg Focus",
+    "perDay": "per day",
+    "weeklyTrend": "Weekly Focus Trend",
+    "productiveHours": "Most Productive Hours",
+    "mostProductive": "Peak hour",
+    "minutes": "Minutes",
+    "noData": "No data yet. Start focusing!",
+    "achievements": "Achievements",
+    "todaySummary": "Today's Summary",
+    "focusTime": "Focus time",
+    "sessions": "Sessions",
+    "tasksCompleted": "Tasks done"
+  },
+  "ambientSounds": {
+    "title": "Ambient Sounds",
+    "rain": "Rain",
+    "wind": "Wind",
+    "jungle": "Jungle"
   }
 }

@@ -8,7 +8,7 @@ import {
   DialogDescription,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { Sparkles, Network } from 'lucide-react';
+import { Sparkles, Network, Brain } from 'lucide-react';
 import { useI18n } from './i18n-provider';
 
 type AiFeatureSelectorProps = {
@@ -16,13 +16,15 @@ type AiFeatureSelectorProps = {
   onClose: () => void;
   onSelectReview: () => void;
   onSelectDependency: () => void;
+  onSelectPlanning?: () => void;
 };
 
 export function AiFeatureSelector({
   isOpen,
   onClose,
   onSelectReview,
-  onSelectDependency
+  onSelectDependency,
+  onSelectPlanning,
 }: AiFeatureSelectorProps) {
   const { t } = useI18n();
 
@@ -73,6 +75,25 @@ export function AiFeatureSelector({
               {t('aiFeatures.dependencyDescription')}
             </p>
           </Button>
+
+          {onSelectPlanning && (
+            <Button
+              variant="outline"
+              className="h-auto flex-col items-start gap-2 p-4 hover:bg-accent whitespace-normal"
+              onClick={() => {
+                onClose();
+                onSelectPlanning();
+              }}
+            >
+              <div className="flex items-center gap-2 w-full">
+                <Brain className="h-5 w-5 shrink-0 text-primary" />
+                <span className="font-semibold text-left">{t('aiFeatures.planning')}</span>
+              </div>
+              <p className="text-sm text-muted-foreground text-left w-full wrap-break-word">
+                {t('aiFeatures.planningDescription')}
+              </p>
+            </Button>
+          )}
         </div>
       </DialogContent>
     </Dialog>

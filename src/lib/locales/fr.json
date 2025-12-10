@@ -128,7 +128,9 @@
     "reviewGeneration": "Génération de Revue",
     "reviewDescription": "Générez un résumé de vos tâches terminées pour une revue quotidienne ou hebdomadaire.",
     "dependencyRefinement": "Raffinement des Dépendances",
-    "dependencyDescription": "Analysez et optimisez les dépendances, dates d'échéance, étiquettes et structure de projet."
+    "dependencyDescription": "Analysez et optimisez les dépendances, dates d'échéance, étiquettes et structure de projet.",
+    "planning": "Planification & Priorités",
+    "planningDescription": "Laissez l'IA organiser votre journée et suggérer des ajustements de priorité intelligents."
   },
   "aiReview": {
     "title": "Revue IA",
@@ -421,5 +423,69 @@
     "form": {
       "saveAsTemplate": "Ajouter au Modèle"
     }
+  },
+  "quickEntry": {
+    "title": "Saisie Rapide",
+    "placeholder": "Que devez-vous faire ? (ex: 'Réunion demain à 15h #travail !haute')",
+    "noTitle": "Entrez un titre de tâche...",
+    "tips": "Astuces rapides :",
+    "tipTag": "ajouter une étiquette",
+    "tipPriority": "définir la priorité",
+    "tipWorkspace": "définir l'espace",
+    "tipDate": "définir l'échéance",
+    "tipPomodoros": "définir les pomodoros",
+    "tipTime": "définir l'heure",
+    "create": "Créer la Tâche"
+  },
+  "aiPlanning": {
+    "title": "Assistant de Planification IA",
+    "description": "Obtenez l'aide de l'IA pour planifier votre journée et optimiser les priorités.",
+    "dailyPlan": "Planifier Ma Journée",
+    "smartPriority": "Priorités Intelligentes",
+    "availableHours": "Heures disponibles aujourd'hui",
+    "tasksToAnalyze": "tâches à analyser",
+    "estimatedPomodoros": "Pomodoros estimés nécessaires",
+    "planMyDay": "Planifier Ma Journée",
+    "generating": "Génération...",
+    "analyzing": "Analyse...",
+    "analyzePriorities": "Analyser les Priorités",
+    "summary": "Résumé du Plan du Jour",
+    "warnings": "Problèmes Potentiels",
+    "tips": "Conseils de Productivité",
+    "plannedTasks": "Emploi du Temps Planifié",
+    "error": "Désolé, la planification n'a pas pu être complétée. Veuillez réessayer.",
+    "priorityDescription": "L'IA analysera vos tâches et suggérera des ajustements de priorité basés sur les échéances, dépendances et habitudes de travail.",
+    "noChangesNeeded": "Toutes les priorités sont bonnes ! Aucun changement recommandé.",
+    "urgencyScore": "urgence",
+    "applyChange": "Appliquer ce Changement",
+    "regenerate": "Régénérer le Plan",
+    "reanalyze": "Réanalyser"
+  },
+  "focusAnalytics": {
+    "totalFocusTime": "Temps de Concentration Total",
+    "thisWeek": "Cette semaine",
+    "currentStreak": "Série Actuelle",
+    "days": "jours",
+    "best": "Meilleur",
+    "pomodoros": "Pomodoros",
+    "avgPerDay": "Moy/jour",
+    "avgFocus": "Concentration Moy",
+    "perDay": "par jour",
+    "weeklyTrend": "Tendance Hebdomadaire",
+    "productiveHours": "Heures les Plus Productives",
+    "mostProductive": "Heure de pointe",
+    "minutes": "Minutes",
+    "noData": "Pas encore de données. Commencez à vous concentrer !",
+    "achievements": "Succès",
+    "todaySummary": "Résumé du Jour",
+    "focusTime": "Temps de concentration",
+    "sessions": "Sessions",
+    "tasksCompleted": "Tâches terminées"
+  },
+  "ambientSounds": {
+    "title": "Sons Ambiants",
+    "rain": "Pluie",
+    "wind": "Vent",
+    "jungle": "Jungle"
   }
 }

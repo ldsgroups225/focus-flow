@@ -28,6 +28,8 @@ import { BulkActionsToolbar } from '@/app/components/bulk-actions-toolbar';
 import { TaskForm } from '@/app/components/task-form';
 import { AiFeatureSelector } from '@/app/components/ai-feature-selector';
 import { AiDependencyDialog } from '@/app/components/ai-dependency-dialog';
+import { QuickEntryModal } from '@/app/components/quick-entry-modal';
+import { AiPlanningDialog } from '@/app/components/ai-planning-dialog';
 
 import Link from 'next/link';
 import { DashboardSheet } from '@/components/ui/dashboard-sheet';
@@ -79,6 +81,8 @@ function DashboardContent() {
   const [isShortcutsOpen, setIsShortcutsOpen] = useState(false);
   const [isDashboardOpen, setIsDashboardOpen] = useState(false);
   const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
+  const [isQuickEntryOpen, setIsQuickEntryOpen] = useState(false);
+  const [isAiPlanningOpen, setIsAiPlanningOpen] = useState(false);
 
   const { t } = useI18n();
   const { selectedTaskIds, deselectAll } = useTaskSelection();
@@ -88,7 +92,19 @@ function DashboardContent() {
     onOpenSearch: () => setIsSearchOpen(true),
     onShowShortcuts: () => setIsShortcutsOpen(true),
     onClearSelection: () => deselectAll(),
-  }, !!editingTask || !!focusTask);
+  }, !!editingTask || !!focusTask || isQuickEntryOpen);
+
+  // Quick Entry keyboard shortcut (Cmd/Ctrl + Shift + T)
+  useEffect(() => {
+    const handleQuickEntry = (e: KeyboardEvent) => {
+      if ((e.metaKey || e.ctrlKey) && e.shiftKey && e.key.toLowerCase() === 't') {
+        e.preventDefault();
+        setIsQuickEntryOpen(true);
+      }
+    };
+    window.addEventListener('keydown', handleQuickEntry);
+    return () => window.removeEventListener('keydown', handleQuickEntry);
+  }, []);
 
   const handleSignOut = async () => {
     await signOut();
@@ -334,6 +350,7 @@ function DashboardContent() {
           onClose={() => setIsAiSelectorOpen(false)}
           onSelectReview={() => setIsReviewOpen(true)}
           onSelectDependency={() => setIsDependencyOpen(true)}
+          onSelectPlanning={() => setIsAiPlanningOpen(true)}
         />
 
         <Suspense fallback={null}>
@@ -358,6 +375,27 @@ function DashboardContent() {
           isOpen={isDashboardOpen}
           onClose={() => setIsDashboardOpen(false)}
           tasks={tasks}
+        />
+
+        {/* Quick Entry Modal */}
+        <QuickEntryModal
+          isOpen={isQuickEntryOpen}
+          onClose={() => setIsQuickEntryOpen(false)}
+          onSave={(task) => saveTask(task as TaskWithSubTasks, activeWorkspace)}
+          activeWorkspace={activeWorkspace}
+        />
+
+        {/* AI Planning Dialog */}
+        <AiPlanningDialog
+          isOpen={isAiPlanningOpen}
+          onClose={() => setIsAiPlanningOpen(false)}
+          tasks={tasks}
+          onApplyPriority={async (taskId, priority) => {
+            const task = tasks.find(t => t.id === taskId);
+            if (task) {
+              await saveTask({ ...task, priority }, activeWorkspace);
+            }
+          }}
         />
 
         {/* Mobile Sidebar Sheet */}

@@ -21,6 +21,7 @@ import { TrendingUp, Clock, CheckCircle2, BarChart3 } from 'lucide-react';
 import { useDashboard } from '@/contexts/dashboard-context';
 import { useI18n } from '@/app/components/i18n-provider';
 import { format, subDays, startOfDay, endOfDay, eachDayOfInterval, isSameDay } from 'date-fns';
+import { FocusAnalytics } from '@/app/components/focus-analytics';
 
 const COLORS = {
   primary: '#3b82f6',
@@ -169,7 +170,9 @@ export function AnalyticsTabContent() {
 
   return (
     <div className="space-y-4 md:space-y-6">
-      {/* Task Metrics Cards */}
+      <FocusAnalytics />
+
+      {/* Existing Task Metrics Cards - Keeping them for backward compatibility / broader overview */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">

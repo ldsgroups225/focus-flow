@@ -1,6 +1,6 @@
 'use client';
 
-import { X, Play, Pause, RefreshCw, Coffee, Bot, Send, LoaderCircle } from 'lucide-react';
+import { X, Play, Pause, RefreshCw, Coffee, Bot, Send, LoaderCircle, Maximize, Minimize } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import type { Task } from '@/lib/types';
 import { AnimatePresence, motion } from 'framer-motion';
@@ -10,6 +10,8 @@ import { useState, useRef, useCallback, useEffect } from 'react';
 import { cn } from '@/lib/utils';
 import { Input } from '@/components/ui/input';
 import { ScrollArea } from '@/components/ui/scroll-area';
+import { AmbientSoundPlayer } from './ambient-sounds';
+import { FocusSessionService } from '@/lib/services/focus-session-service';
 
 type FocusViewProps = {
   task: Task;
@@ -30,6 +32,9 @@ export function FocusView({ task, onExit, onPomodoroComplete, onLogTime }: Focus
   const [isIdle, setIsIdle] = useState(false);
   const idleTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const sessionStartTimeRef = useRef<number | null>(null);
+  const [isFullscreen, setIsFullscreen] = useState(false);
+  const [activeAmbientSound, setActiveAmbientSound] = useState<string | null>(null);
+  const pomodorosThisSessionRef = useRef(0);
 
   // Chat state
   const [messages, setMessages] = useState<Message[]>([]);
@@ -49,8 +54,44 @@ export function FocusView({ task, onExit, onPomodoroComplete, onLogTime }: Focus
 
   const handleExit = () => {
     logTimeSpent();
+    // Save focus session
+    if (sessionStartTimeRef.current || pomodorosThisSessionRef.current > 0) {
+      const now = new Date();
+      const startTime = sessionStartTimeRef.current ? new Date(sessionStartTimeRef.current) : now;
+      const duration = sessionStartTimeRef.current ? Math.round((Date.now() - sessionStartTimeRef.current) / 1000) : 0;
+
+      FocusSessionService.saveSession({
+        taskId: task.id,
+        taskTitle: task.title,
+        startTime,
+        endTime: now,
+        duration,
+        pomodorosCompleted: pomodorosThisSessionRef.current,
+        wasInterrupted: timerState.isActive,
+        ambientSound: activeAmbientSound || undefined,
+      });
+    }
     onExit();
   };
+
+  const toggleFullscreen = useCallback(() => {
+    if (!document.fullscreenElement) {
+      document.documentElement.requestFullscreen().catch(console.error);
+      setIsFullscreen(true);
+    } else {
+      document.exitFullscreen().catch(console.error);
+      setIsFullscreen(false);
+    }
+  }, []);
+
+  // Sync fullscreen state
+  useEffect(() => {
+    const handleFullscreenChange = () => {
+      setIsFullscreen(!!document.fullscreenElement);
+    };
+    document.addEventListener('fullscreenchange', handleFullscreenChange);
+    return () => document.removeEventListener('fullscreenchange', handleFullscreenChange);
+  }, []);
 
   const resetIdleTimeout = useCallback(() => {
     if (idleTimeoutRef.current) {
@@ -106,6 +147,7 @@ export function FocusView({ task, onExit, onPomodoroComplete, onLogTime }: Focus
 
   const handlePomodoroCycleComplete = () => {
     logTimeSpent();
+    pomodorosThisSessionRef.current += 1;
     onPomodoroComplete(task.id);
   };
 
@@ -339,12 +381,15 @@ export function FocusView({ task, onExit, onPomodoroComplete, onLogTime }: Focus
               duration: 0.8,
               ease: [0.25, 0.1, 0.25, 1]
             }}
+            className="flex items-center gap-4"
           >
             <PomodoroTimer
               ref={timerRef}
               onPomodoroComplete={handlePomodoroCycleComplete}
               onTimerUpdate={handleTimerUpdate}
             />
+            {/* Ambient Sounds */}
+            <AmbientSoundPlayer onSoundChange={setActiveAmbientSound} />
           </motion.div>
 
           <motion.div
@@ -366,6 +411,10 @@ export function FocusView({ task, onExit, onPomodoroComplete, onLogTime }: Focus
             </Button>
             <Button variant="ghost" size="icon" onClick={() => timerRef.current?.next()} aria-label={timerState.mode === 'work' ? t('pomodoro.startBreak') : t('pomodoro.startWork')}>
               <Coffee className="w-5 h-5" />
+            </Button>
+            <div className="w-px h-6 bg-border mx-1" />
+            <Button variant="ghost" size="icon" onClick={toggleFullscreen} aria-label={isFullscreen ? 'Exit fullscreen' : 'Enter fullscreen'}>
+              {isFullscreen ? <Minimize className="w-5 h-5" /> : <Maximize className="w-5 h-5" />}
             </Button>
           </motion.div>
         </footer>
