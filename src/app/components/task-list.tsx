@@ -4,6 +4,7 @@ import React, { useState, memo } from 'react';
 import { TaskItem } from './task-item';
 import type { TaskWithSubTasks } from '@/lib/types';
 import { AnimatePresence, motion } from 'framer-motion';
+import { containerStagger, listItem, spring } from '@/lib/animations';
 import { ListX } from 'lucide-react';
 import { useI18n } from './i18n-provider';
 
@@ -80,16 +81,22 @@ const TaskList = memo(function TaskList({ tasks, setTasks, onEdit, onDelete, onT
   }
 
   return (
-    <div className="space-y-3">
-      <AnimatePresence>
+    <motion.div
+      variants={containerStagger}
+      initial="hidden"
+      animate="show"
+      className="space-y-3"
+    >
+      <AnimatePresence mode="popLayout">
         {tasks.map(task => (
           <motion.div
             key={task.id}
             layout
-            initial={{ opacity: 0, y: 20, scale: 0.98 }}
-            animate={{ opacity: 1, y: 0, scale: 1 }}
-            exit={{ opacity: 0, scale: 0.95, transition: { duration: 0.2 } }}
-            transition={{ duration: 0.3, ease: [0.4, 0, 0.2, 1] }}
+            variants={listItem}
+            initial="hidden"
+            animate="show"
+            exit="exit"
+            transition={spring}
           >
             <TaskItem
               task={task}
@@ -108,7 +115,7 @@ const TaskList = memo(function TaskList({ tasks, setTasks, onEdit, onDelete, onT
           </motion.div>
         ))}
       </AnimatePresence>
-    </div>
+    </motion.div>
   );
 });
 

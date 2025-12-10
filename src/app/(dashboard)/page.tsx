@@ -3,8 +3,7 @@
 import { useState, useEffect, Suspense } from 'react';
 import { Plus, SlidersHorizontal, Orbit, Search, Sparkles, User2, Settings, BarChart3, FileText, List, CalendarIcon, Clock, Menu } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { Filters } from '@/app/components/filters';
-import type { Workspace, TaskWithSubTasks } from '@/lib/types';
+import type { TaskWithSubTasks } from '@/lib/types';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -47,6 +46,9 @@ import { TimelineTabContent } from '@/components/dashboard/tabs/timeline-tab-con
 import { AnalyticsTabContent } from '@/components/dashboard/tabs/analytics-tab-content';
 import { TemplatesTabContent } from '@/components/dashboard/tabs/templates-tab-content';
 
+import { motion, AnimatePresence } from 'framer-motion';
+import { slideUp, bouncySpring } from '@/lib/animations';
+
 function DashboardContent() {
   const { user, signOut } = useAuth();
 
@@ -54,11 +56,8 @@ function DashboardContent() {
     tasks,
     isLoadingTasks,
     saveTask,
-    toggleComplete,
-    deleteTask,
     updatePomodoro,
     logTime,
-    toggleSubTask,
     projects,
     templates,
     priorityFilter,
@@ -83,6 +82,7 @@ function DashboardContent() {
   const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
   const [isQuickEntryOpen, setIsQuickEntryOpen] = useState(false);
   const [isAiPlanningOpen, setIsAiPlanningOpen] = useState(false);
+  const [activeMobileTab, setActiveMobileTab] = useState("tasks");
 
   const { t } = useI18n();
   const { selectedTaskIds, deselectAll } = useTaskSelection();
@@ -115,191 +115,236 @@ function DashboardContent() {
   };
 
   return (
-    <div className="min-h-screen bg-background text-foreground">
-      <main className="container mx-auto max-w-5xl p-4 sm:p-6 md:p-8">
-        <header className="mb-6 md:mb-8">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-4">
-              <Orbit className="w-7 h-7 md:w-8 md:h-8 text-primary" />
-              <WorkspaceSwitcher activeWorkspace={activeWorkspace} setActiveWorkspace={setActiveWorkspace} />
-            </div>
-
-            <div className="flex items-center gap-2">
-              <Button variant="outline" size="icon" onClick={() => setIsSearchOpen(true)} className="hidden md:flex">
-                <Search className="size-4" />
-              </Button>
-              <div className="hidden md:flex items-center gap-2">
-                <LanguageSwitcher />
-                <ThemeToggle />
+    <div className="min-h-screen bg-background text-foreground selection:bg-primary/20">
+      <motion.header
+        initial={{ y: -20, opacity: 0 }}
+        animate={{ y: 0, opacity: 1 }}
+        transition={{ duration: 0.3, ease: 'easeOut' }}
+        className="sticky top-0 z-40 w-full backdrop-blur-xl bg-background/80 border-b border-border/40 shadow-sm"
+      >
+        <div className="container mx-auto max-w-5xl px-4 sm:px-6 md:px-8 h-16 flex items-center justify-between">
+          <div className="flex items-center gap-4">
+            <Link href="/" className="flex items-center gap-2 group">
+              <div className="p-1.5 bg-primary/10 rounded-xl group-hover:bg-primary/20 transition-colors">
+                <Orbit className="w-6 h-6 text-primary" />
               </div>
-              <Button variant="outline" size="icon" onClick={() => setIsAiSelectorOpen(true)}>
-                <Sparkles className="size-4" />
-                <span className="sr-only">{t('aiFeatures.title')}</span>
-              </Button>
-              <Button variant="outline" size="icon" onClick={() => setIsMobileSidebarOpen(true)} className="md:hidden">
-                <SlidersHorizontal className="size-4" />
-                <span className="sr-only">{t('header.filters')}</span>
-              </Button>
-
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <Button variant="ghost" className="relative h-8 w-8 rounded-full">
-                    <Avatar className="h-8 w-8">
-                      <AvatarImage src={user?.photoURL || undefined} alt={getAvatarInitial(user?.displayName || getNameFromEmail(user?.email))} />
-                      <AvatarFallback>{getAvatarInitial(user?.displayName || getNameFromEmail(user?.email))}</AvatarFallback>
-                    </Avatar>
-                  </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent className="w-56" align="end" forceMount>
-                  <div className="md:hidden flex items-center justify-between px-2 py-2 gap-2">
-                    <LanguageSwitcher />
-                    <ThemeToggle />
-                  </div>
-                  <DropdownMenuSeparator className="md:hidden" />
-
-                  <DropdownMenuItem disabled>
-                    <User2 className="mr-2 size-4" />
-                    {user?.displayName || getNameFromEmail(user?.email)}
-                  </DropdownMenuItem>
-                  <DropdownMenuSeparator />
-
-                  <DropdownMenuItem onClick={() => setIsDashboardOpen(true)}>
-                    <BarChart3 className="mr-2 size-4" />
-                    {t('dashboard.title')}
-                  </DropdownMenuItem>
-                  <DropdownMenuSeparator />
-                  <DropdownMenuItem asChild>
-                    <Link href="/settings">
-                      <Settings className="mr-2 size-4" />
-                      {t('settings.title')}
-                    </Link>
-                  </DropdownMenuItem>
-                  <DropdownMenuSeparator />
-                  <DropdownMenuItem onClick={handleSignOut}>
-                    {t('login.signOut')}
-                  </DropdownMenuItem>
-                </DropdownMenuContent>
-              </DropdownMenu>
-            </div>
+              <span className="font-bold text-lg tracking-tight hidden sm:inline-block">FocusFlow</span>
+            </Link>
+            <div className="h-6 w-px bg-border/50 hidden sm:block" />
+            <WorkspaceSwitcher activeWorkspace={activeWorkspace} setActiveWorkspace={setActiveWorkspace} />
           </div>
 
-          {/* Mobile Tabs Navigation */}
-          <Tabs defaultValue="tasks" className="w-full md:hidden mt-4">
-            <TabsList className="w-full">
-              <TabsTrigger value="tasks" className="flex-1">
-                <div className='flex flex-col items-center'>
+          <div className="flex items-center gap-2 sm:gap-3">
+            <Button variant="ghost" size="icon" onClick={() => setIsSearchOpen(true)} className="hidden md:flex opacity-70 hover:opacity-100 hover:bg-accent/50 rounded-xl">
+              <Search className="size-4.5" />
+            </Button>
+            <div className="hidden md:flex items-center gap-2">
+              <LanguageSwitcher />
+              <ThemeToggle />
+            </div>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setIsAiSelectorOpen(true)}
+              className="hidden sm:flex items-center gap-2 border-primary/20 bg-primary/5 hover:bg-primary/10 hover:border-primary/40 text-primary transition-all rounded-xl"
+            >
+              <Sparkles className="size-3.5" />
+              <span className="font-medium text-xs">{t('aiFeatures.title')}</span>
+            </Button>
+            <Button variant="ghost" size="icon" onClick={() => setIsMobileSidebarOpen(true)} className="md:hidden">
+              <SlidersHorizontal className="size-5" />
+              <span className="sr-only">{t('header.filters')}</span>
+            </Button>
+
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="ghost" className="relative h-9 w-9 rounded-full ring-2 ring-transparent hover:ring-border transition-all p-0 overflow-hidden">
+                  <Avatar className="h-full w-full">
+                    <AvatarImage src={user?.photoURL || undefined} alt={getAvatarInitial(user?.displayName || getNameFromEmail(user?.email))} />
+                    <AvatarFallback className="bg-primary/10 text-primary font-medium">{getAvatarInitial(user?.displayName || getNameFromEmail(user?.email))}</AvatarFallback>
+                  </Avatar>
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent className="w-56" align="end" forceMount>
+                <div className="md:hidden flex items-center justify-between px-2 py-2 gap-2">
+                  <LanguageSwitcher />
+                  <ThemeToggle />
+                </div>
+                <DropdownMenuSeparator className="md:hidden" />
+
+                <DropdownMenuItem disabled>
+                  <User2 className="mr-2 size-4" />
+                  {user?.displayName || getNameFromEmail(user?.email)}
+                </DropdownMenuItem>
+                <DropdownMenuSeparator />
+
+                <DropdownMenuItem onClick={() => setIsDashboardOpen(true)}>
+                  <BarChart3 className="mr-2 size-4" />
+                  {t('dashboard.title')}
+                </DropdownMenuItem>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem asChild>
+                  <Link href="/settings">
+                    <Settings className="mr-2 size-4" />
+                    {t('settings.title')}
+                  </Link>
+                </DropdownMenuItem>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem onClick={handleSignOut} className="text-red-500 focus:text-red-500 focus:bg-red-50 dark:focus:bg-red-950/20">
+                  {t('login.signOut')}
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          </div>
+        </div>
+
+        {/* Mobile Tabs Navigation - Inside Header for sticky behavior */}
+        <div className="md:hidden border-t border-border/40 bg-background/95 backdrop-blur-md">
+          <Tabs value={activeMobileTab} onValueChange={setActiveMobileTab} className="w-full">
+            <TabsList className="w-full h-12 rounded-none bg-transparent p-0 justify-around">
+              <TabsTrigger value="tasks" className="flex-1 h-full rounded-none data-[state=active]:border-b-2 data-[state=active]:border-primary data-[state=active]:shadow-none bg-transparent">
+                <div className='flex flex-col items-center gap-0.5'>
                   <List className="size-4" />
-                  <span className="text-xs">{t('navigation.tasks')}</span>
+                  <span className="text-[10px] uppercase tracking-wide">{t('navigation.tasks')}</span>
                 </div>
               </TabsTrigger>
-              <TabsTrigger value="calendar" className="flex-1">
-                <div className='flex flex-col items-center'>
+              <TabsTrigger value="calendar" className="flex-1 h-full rounded-none data-[state=active]:border-b-2 data-[state=active]:border-primary data-[state=active]:shadow-none bg-transparent">
+                <div className='flex flex-col items-center gap-0.5'>
                   <CalendarIcon className="size-4" />
-                  <span className="text-xs">{t('navigation.calendar')}</span>
+                  <span className="text-[10px] uppercase tracking-wide">{t('navigation.calendar')}</span>
                 </div>
               </TabsTrigger>
-              <TabsTrigger value="timeline" className="flex-1">
-                <div className='flex flex-col items-center'>
+              <TabsTrigger value="timeline" className="flex-1 h-full rounded-none data-[state=active]:border-b-2 data-[state=active]:border-primary data-[state=active]:shadow-none bg-transparent">
+                <div className='flex flex-col items-center gap-0.5'>
                   <Clock className="size-4" />
-                  <span className="text-xs">{t('navigation.timeline')}</span>
+                  <span className="text-[10px] uppercase tracking-wide">{t('navigation.timeline')}</span>
                 </div>
               </TabsTrigger>
-              <TabsTrigger value="analytics" className="flex-1">
-                <div className='flex flex-col items-center'>
-                  <BarChart3 className="size-4" />
-                  <span className="text-xs">{t('navigation.analytics')}</span>
-                </div>
-              </TabsTrigger>
-              <TabsTrigger value="templates" className="flex-1">
-                <div className='flex flex-col items-center'>
-                  <FileText className="size-4" />
-                  <span className="text-xs">{t('navigation.templates')}</span>
-                </div>
-              </TabsTrigger>
+              {/* <TabsTrigger value="analytics" className="flex-1 h-full rounded-none data-[state=active]:border-b-2 data-[state=active]:border-primary data-[state=active]:shadow-none bg-transparent">
+                  <div className='flex flex-col items-center gap-0.5'>
+                    <BarChart3 className="size-4" />
+                    <span className="text-[10px] uppercase tracking-wide">{t('navigation.analytics')}</span>
+                  </div>
+                </TabsTrigger> */}
             </TabsList>
-            <TabsContent value="tasks" className="mt-4">
-              <TasksTabContent />
-            </TabsContent>
-            <TabsContent value="calendar" className="mt-4">
-              <CalendarTabContent />
-            </TabsContent>
-            <TabsContent value="timeline" className="mt-4">
-              <TimelineTabContent />
-            </TabsContent>
-            <TabsContent value="analytics" className="mt-4">
-              <AnalyticsTabContent />
-            </TabsContent>
-            <TabsContent value="templates" className="mt-4">
-              <TemplatesTabContent />
-            </TabsContent>
+
+            {/* Note: TabsContent cannot be inside sticky header if we want it to scroll in body.
+                  We need to rethink this structure slightly. The TabsList SHOULD be sticky, but Content should be in Main.
+                  However, Radix Tabs expects Content to be inside Tabs.
+                  For now lets keep it here but realize content is hidden on mobile unless we move TabsContent out.
+                  Ah, the original code had Tabs wrapping everything.
+                  We'll use a controlled state for tabs to separate List and Content if needed, but for now let's just use Tabs primitive.
+                  Actually, simple fix: Mobile Tabs inside main content, sticky header only contains generic nav if needed.
+                  But user usually wants nav bar sticky.
+
+                  Let's revert to: Sticky Header contains basic top bar.
+                  TabsList is sticky below it? Or just put content in main.
+              */}
           </Tabs>
-        </header>
+        </div>
+      </motion.header>
+
+
+      <main className="container mx-auto max-w-5xl p-4 sm:p-6 md:p-8 pt-6">
+
+        {/* Mobile Tabs Content - Controlled by State */}
+        <div className="w-full md:hidden">
+          {activeMobileTab === 'tasks' && (
+            <div className="mt-0 space-y-4">
+              <TasksTabContent />
+            </div>
+          )}
+          {activeMobileTab === 'calendar' && (
+            <div className="mt-0">
+              <CalendarTabContent />
+            </div>
+          )}
+          {activeMobileTab === 'timeline' && (
+            <div className="mt-0">
+              <TimelineTabContent />
+            </div>
+          )}
+          {activeMobileTab === 'analytics' && (
+            <div className="mt-0">
+              <AnalyticsTabContent />
+            </div>
+          )}
+          {activeMobileTab === 'templates' && (
+            <div className="mt-0">
+              <TemplatesTabContent />
+            </div>
+          )}
+        </div>
 
         {/* Desktop Layout with Sidebar */}
         <div className="hidden md:grid grid-cols-1 md:grid-cols-4 gap-8">
-          <aside className="md:col-span-1 space-y-8">
-            <div className="sticky top-8">
-              <SidebarContent
-                priorityFilter={priorityFilter}
-                setPriorityFilter={setPriorityFilter}
-                tagFilter={tagFilter}
-                setTagFilter={setTagFilter}
-                uniqueTags={uniqueTags}
-                projects={projects}
-                setProjectFilter={setSelectedProjectId}
-              />
-              <div className="mt-8 space-y-2">
-                <h2 className="text-lg font-semibold mb-4">{t('navigation.views')}</h2>
-                <Button variant="outline" size="sm" className="w-full" asChild>
-                  <Link href="/calendar">{t('dashboard.calendar')}</Link>
-                </Button>
-                <Button variant="outline" size="sm" className="w-full" asChild>
-                  <Link href="/timeline">{t('dashboard.timeline')}</Link>
-                </Button>
-                <Button variant="outline" size="sm" className="w-full" asChild>
-                  <Link href="/analytics">
-                    <BarChart3 className="mr-2 size-4" />
-                    {t('analytics.title')}
-                  </Link>
-                </Button>
-                <Button variant="outline" size="sm" className="w-full" asChild>
-                  <Link href="/templates">
-                    <FileText className="mr-2 size-4" />
-                    {t('templates.title')}
-                  </Link>
-                </Button>
-              </div>
+          <motion.aside
+            initial={{ opacity: 0, x: -20 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ duration: 0.4, delay: 0.1 }}
+            className="md:col-span-1"
+          >
+            <SidebarContent
+              priorityFilter={priorityFilter}
+              setPriorityFilter={setPriorityFilter}
+              tagFilter={tagFilter}
+              setTagFilter={setTagFilter}
+              uniqueTags={uniqueTags}
+              projects={projects}
+              setProjectFilter={setSelectedProjectId}
+              className="top-24" // Sticky top offset
+            />
+            <div className="mt-8 space-y-2 sticky top-[calc(24px+300px)]">
+              {/* This second sticky block depends on height of sidebar content, simplified for now */}
             </div>
-          </aside>
+          </motion.aside>
 
-          <div className="md:col-span-3">
+          <motion.div
+            variants={slideUp}
+            initial="hidden"
+            animate="show"
+            className="md:col-span-3 min-h-[500px]"
+          >
             {isLoadingTasks ? (
               <div className="flex justify-center items-center h-80">
                 <div className="text-center">
                   <Orbit className="h-12 w-12 animate-spin text-primary mx-auto" />
-                  <p className="mt-4 text-muted-foreground">{t('loading.tasks')}</p>
+                  <p className="mt-4 text-muted-foreground font-medium animate-pulse">{t('loading.tasks')}</p>
                 </div>
               </div>
             ) : (
               <TasksTabContent />
             )}
-          </div>
+          </motion.div>
         </div>
 
-        {/* Floating Action Button for Quick Capture */}
-        <Button onClick={() => handleSetEditingTask('new')} className="fixed bottom-6 right-6 h-14 w-14 rounded-full shadow-lg z-30" title={t('header.addTask')}>
-          <Plus className="h-6 w-6" />
-        </Button>
+        {/* Floating Action Button for Quick Capture - Enhanced */}
+        <motion.div
+          initial={{ scale: 0, rotate: 90 }}
+          animate={{ scale: 1, rotate: 0 }}
+          transition={{ ...bouncySpring, delay: 0.5 }}
+          className="fixed bottom-8 right-8 z-50"
+        >
+          <Button
+            onClick={() => handleSetEditingTask('new')}
+            className="h-16 w-16 rounded-full shadow-2xl shadow-primary/30 hover:shadow-primary/50 transition-all duration-300 bg-primary hover:bg-primary/90"
+            title={t('header.addTask')}
+          >
+            <Plus className="h-8 w-8" />
+          </Button>
+        </motion.div>
 
         {/* Modals and Other Global UI */}
         <Suspense fallback={null}>
-          {isSearchOpen && (
-            <CommandSearch
-              isOpen={isSearchOpen}
-              setIsOpen={setIsSearchOpen}
-              setSearchQuery={setSearchQuery}
-            />
-          )}
+          <AnimatePresence>
+            {isSearchOpen && (
+              <CommandSearch
+                isOpen={isSearchOpen}
+                setIsOpen={setIsSearchOpen}
+                setSearchQuery={setSearchQuery}
+              />
+            )}
+          </AnimatePresence>
         </Suspense>
 
         <Suspense fallback={null}>
@@ -404,7 +449,7 @@ function DashboardContent() {
             <SheetHeader>
               <SheetTitle>{t('dashboard.title')}</SheetTitle>
             </SheetHeader>
-            <div className="px-4 pb-4">
+            <div className="px-4 pb-4 mt-6">
               <SidebarContent
                 priorityFilter={priorityFilter}
                 setPriorityFilter={setPriorityFilter}
@@ -417,27 +462,12 @@ function DashboardContent() {
                   setIsMobileSidebarOpen(false);
                 }}
               />
-              <div className="mt-8 space-y-2">
-                <h2 className="text-lg font-semibold mb-4">{t('navigation.views')}</h2>
-                <Button variant="outline" size="sm" className="w-full" asChild onClick={() => setIsMobileSidebarOpen(false)}>
-                  <Link href="/calendar">{t('dashboard.calendar')}</Link>
-                </Button>
-                <Button variant="outline" size="sm" className="w-full" asChild onClick={() => setIsMobileSidebarOpen(false)}>
-                  <Link href="/timeline">{t('dashboard.timeline')}</Link>
-                </Button>
-                <Button variant="outline" size="sm" className="w-full" asChild onClick={() => setIsMobileSidebarOpen(false)}>
-                  <Link href="/analytics">
-                    <BarChart3 className="mr-2 size-4" />
-                    {t('analytics.title')}
-                  </Link>
-                </Button>
-                <Button variant="outline" size="sm" className="w-full" asChild onClick={() => setIsMobileSidebarOpen(false)}>
-                  <Link href="/templates">
-                    <FileText className="mr-2 size-4" />
-                    {t('templates.title')}
-                  </Link>
-                </Button>
-              </div>
+              <Button variant="outline" size="sm" className="mt-8 w-full" asChild onClick={() => setIsMobileSidebarOpen(false)}>
+                <Link href="/analytics">
+                  <BarChart3 className="mr-2 size-4" />
+                  {t('analytics.title')}
+                </Link>
+              </Button>
             </div>
           </SheetContent>
         </Sheet>

@@ -266,7 +266,7 @@ export function FocusView({ task, onExit, onPomodoroComplete, onLogTime }: Focus
             damping: 20,
             mass: 1,
           }}
-          className="absolute left-0 right-0 flex flex-col items-center text-center px-4"
+          className="absolute left-0 right-0 flex flex-col items-center text-center px-4 z-20"
         >
           {/* Focusing On Label */}
           <motion.p
@@ -290,7 +290,7 @@ export function FocusView({ task, onExit, onPomodoroComplete, onLogTime }: Focus
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5, delay: 0.2 }}
-            className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold mb-4 max-w-4xl leading-tight"
+            className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold mb-4 max-w-4xl leading-tight wrap-break-word w-full"
           >
             {task.title}
           </motion.h1>
@@ -305,7 +305,7 @@ export function FocusView({ task, onExit, onPomodoroComplete, onLogTime }: Focus
               }}
               transition={{ duration: 0.5, delay: 0.3 }}
               className={cn(
-                "text-lg sm:text-xl text-muted-foreground max-w-2xl mx-auto",
+                "text-lg sm:text-xl text-muted-foreground max-w-2xl mx-auto wrap-break-word w-full",
                 "line-clamp-3" // Limit to 3 lines to prevent overflow
               )}
             >
@@ -329,17 +329,17 @@ export function FocusView({ task, onExit, onPomodoroComplete, onLogTime }: Focus
             mass: 0.8,
             opacity: { duration: 0.5, ease: [0.25, 0.1, 0.25, 1] }
           }}
-          className="absolute left-1/2 -translate-x-1/2 w-full max-w-2xl px-4"
-          style={{ top: '55%' }}
+          className="absolute left-1/2 -translate-x-1/2 w-full max-w-2xl px-4 z-20"
+          style={{ top: '60%' }}
         >
-          <div className="bg-background/50 border rounded-lg p-3 shadow-lg">
-            <ScrollArea className="h-40 mb-2">
+          <div className="bg-background/50 border rounded-lg p-3 shadow-lg backdrop-blur-sm">
+            <ScrollArea className="h-32 sm:h-40 mb-2">
               <div className="space-y-4 text-left px-2">
                 {messages.map((msg, index) => (
                   msg.content && (
                     <div key={index} className={cn("flex items-start gap-3", msg.role === 'user' ? "justify-end" : "")}>
                       {msg.role === 'model' && <Bot className="w-5 h-5 text-primary shrink-0 mt-1" />}
-                      <p className={cn("text-sm rounded-lg px-3 py-2 max-w-md whitespace-pre-wrap", msg.role === 'model' ? "bg-muted" : "bg-primary text-primary-foreground")}>
+                      <p className={cn("text-sm rounded-lg px-3 py-2 max-w-md whitespace-pre-wrap wrap-break-word", msg.role === 'model' ? "bg-muted" : "bg-primary text-primary-foreground")}>
                         {msg.content}
                       </p>
                     </div>
@@ -362,6 +362,7 @@ export function FocusView({ task, onExit, onPomodoroComplete, onLogTime }: Focus
                 onChange={(e) => setUserInput(e.target.value)}
                 placeholder={t('focusView.askAssistant')}
                 disabled={isAssistantLoading}
+                className="bg-background/60"
               />
               <Button type="submit" size="icon" disabled={isAssistantLoading || !userInput.trim()}>
                 <Send className="w-4 h-4" />
@@ -371,52 +372,54 @@ export function FocusView({ task, onExit, onPomodoroComplete, onLogTime }: Focus
         </motion.div>
 
         {/* Footer with Timer Controls - FIXED at bottom */}
-        <footer className="absolute bottom-4 left-4 right-4 sm:bottom-8 sm:left-8 sm:right-8 flex items-end justify-between">
-          <motion.div
-            animate={{
-              opacity: isIdle ? 0.3 : 1,
-              filter: isIdle ? 'blur(2px)' : 'blur(0px)'
-            }}
-            transition={{
-              duration: 0.8,
-              ease: [0.25, 0.1, 0.25, 1]
-            }}
-            className="flex items-center gap-4"
-          >
-            <PomodoroTimer
-              ref={timerRef}
-              onPomodoroComplete={handlePomodoroCycleComplete}
-              onTimerUpdate={handleTimerUpdate}
-            />
-            {/* Ambient Sounds */}
-            <AmbientSoundPlayer onSoundChange={setActiveAmbientSound} />
-          </motion.div>
+        <footer className="absolute bottom-4 left-4 right-4 sm:bottom-8 sm:left-8 sm:right-8 flex flex-col-reverse sm:flex-row items-center justify-between gap-4 z-30 pointer-events-none">
+          <div className="contents *:pointer-events-auto">
+            <motion.div
+              animate={{
+                opacity: isIdle ? 0.3 : 1,
+                filter: isIdle ? 'blur(2px)' : 'blur(0px)'
+              }}
+              transition={{
+                duration: 0.8,
+                ease: [0.25, 0.1, 0.25, 1]
+              }}
+              className="flex items-center gap-4 bg-background/50 p-2 rounded-full backdrop-blur-sm sm:bg-transparent sm:p-0 sm:backdrop-blur-none"
+            >
+              <PomodoroTimer
+                ref={timerRef}
+                onPomodoroComplete={handlePomodoroCycleComplete}
+                onTimerUpdate={handleTimerUpdate}
+              />
+              {/* Ambient Sounds */}
+              <AmbientSoundPlayer onSoundChange={setActiveAmbientSound} />
+            </motion.div>
 
-          <motion.div
-            animate={{
-              opacity: isIdle ? 0 : 1,
-            }}
-            transition={{
-              duration: 0.6,
-              ease: [0.25, 0.1, 0.25, 1],
-              delay: isIdle ? 0 : 0.1
-            }}
-            className="flex items-center gap-2"
-          >
-            <Button variant="ghost" size="icon" onClick={() => timerRef.current?.reset()} aria-label={t('pomodoro.resetTimer')}>
-              <RefreshCw className="w-5 h-5" />
-            </Button>
-            <Button size="icon" className="w-12 h-12 rounded-full" onClick={() => timerRef.current?.toggle()} aria-label={timerState.isActive ? t('pomodoro.pauseTimer') : t('pomodoro.startTimer')}>
-              {timerState.isActive ? <Pause className="w-6 h-6" /> : <Play className="w-6 h-6" />}
-            </Button>
-            <Button variant="ghost" size="icon" onClick={() => timerRef.current?.next()} aria-label={timerState.mode === 'work' ? t('pomodoro.startBreak') : t('pomodoro.startWork')}>
-              <Coffee className="w-5 h-5" />
-            </Button>
-            <div className="w-px h-6 bg-border mx-1" />
-            <Button variant="ghost" size="icon" onClick={toggleFullscreen} aria-label={isFullscreen ? 'Exit fullscreen' : 'Enter fullscreen'}>
-              {isFullscreen ? <Minimize className="w-5 h-5" /> : <Maximize className="w-5 h-5" />}
-            </Button>
-          </motion.div>
+            <motion.div
+              animate={{
+                opacity: isIdle ? 0 : 1,
+              }}
+              transition={{
+                duration: 0.6,
+                ease: [0.25, 0.1, 0.25, 1],
+                delay: isIdle ? 0 : 0.1
+              }}
+              className="flex items-center gap-2 bg-background/50 p-1 rounded-lg backdrop-blur-sm sm:bg-transparent sm:backdrop-blur-none"
+            >
+              <Button variant="ghost" size="icon" onClick={() => timerRef.current?.reset()} aria-label={t('pomodoro.resetTimer')}>
+                <RefreshCw className="w-5 h-5" />
+              </Button>
+              <Button size="icon" className="w-12 h-12 rounded-full shadow-lg" onClick={() => timerRef.current?.toggle()} aria-label={timerState.isActive ? t('pomodoro.pauseTimer') : t('pomodoro.startTimer')}>
+                {timerState.isActive ? <Pause className="w-6 h-6" /> : <Play className="w-6 h-6 ml-1" />}
+              </Button>
+              <Button variant="ghost" size="icon" onClick={() => timerRef.current?.next()} aria-label={timerState.mode === 'work' ? t('pomodoro.startBreak') : t('pomodoro.startWork')}>
+                <Coffee className="w-5 h-5" />
+              </Button>
+              <div className="w-px h-6 bg-border mx-1" />
+              <Button variant="ghost" size="icon" onClick={toggleFullscreen} aria-label={isFullscreen ? 'Exit fullscreen' : 'Enter fullscreen'}>
+                {isFullscreen ? <Minimize className="w-5 h-5" /> : <Maximize className="w-5 h-5" />}
+              </Button>
+            </motion.div>
+          </div>
         </footer>
       </motion.div>
     </AnimatePresence>

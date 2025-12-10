@@ -292,6 +292,7 @@
   },
   "projects": {
     "title": "Gérer les Projets",
+    "manage": "Gérer",
     "back": "Retour",
     "create": {
       "title": "Créer un Projet",

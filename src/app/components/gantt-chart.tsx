@@ -88,7 +88,7 @@ export function GanttChart({ tasks }: GanttChartProps) {
             >
               <CartesianGrid
                 strokeDasharray="3 3"
-                stroke="hsl(var(--border))"
+                stroke="var(--border)"
                 opacity={0.5}
               />
               <XAxis
@@ -96,19 +96,19 @@ export function GanttChart({ tasks }: GanttChartProps) {
                 domain={['dataMin', 'dataMax']}
                 tickFormatter={(time) => format(new Date(time), 'MMM d')}
                 scale="time"
-                stroke="hsl(var(--muted-foreground))"
-                tick={{ fill: 'hsl(var(--muted-foreground))', fontSize: 11 }}
+                stroke="var(--muted-foreground)"
+                tick={{ fill: 'var(--muted-foreground)', fontSize: 11 }}
                 height={40}
               />
               <YAxis
                 dataKey="name"
                 type="category"
                 width={150}
-                tick={{ fill: 'hsl(var(--foreground))', fontSize: 12 }}
-                stroke="hsl(var(--muted-foreground))"
+                tick={{ fill: 'var(--foreground)', fontSize: 12 }}
+                stroke="var(--muted-foreground)"
               />
               <Tooltip
-                cursor={{ fill: 'hsl(var(--accent))', opacity: 0.15 }}
+                cursor={{ fill: 'var(--accent)', opacity: 0.15 }}
                 content={({ payload }) => {
                   if (payload && payload.length > 0) {
                     const data = payload[0].payload;
@@ -116,7 +116,7 @@ export function GanttChart({ tasks }: GanttChartProps) {
                     return (
                       <div className="bg-popover border-2 border-border p-3 rounded-lg shadow-xl max-w-xs">
                         <div className="flex items-start justify-between gap-2 mb-2">
-                          <p className="font-semibold text-sm leading-tight">{data.name}</p>
+                          <p className="font-semibold text-sm leading-tight text-popover-foreground">{data.name}</p>
                           {data.completed && (
                             <Badge variant="secondary" className="text-xs shrink-0">
                               Done

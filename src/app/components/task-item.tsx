@@ -26,6 +26,7 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/comp
 import { cn } from '@/lib/utils';
 import { useI18n } from './i18n-provider';
 import type { Priority, TaskWithSubTasks, SubTask } from '@/lib/types';
+import { motion } from 'framer-motion';
 
 // Types
 type ExtendedTask = TaskWithSubTasks & {
@@ -70,13 +71,13 @@ const getIndentClass = (blockLevel?: number): string => {
 const PriorityIcon = memo(({ priority, t }: { priority: Priority; t: (key: string) => string }) => {
   const priorityName = t(`filters.${priority}`);
   const icons = {
-    high: <ArrowUp className="h-4 w-4 text-red-500" />,
-    medium: <Minus className="h-4 w-4 text-yellow-500" />,
-    low: <ArrowDown className="h-4 w-4 text-green-500" />
+    high: <ArrowUp className="h-3.5 w-3.5 text-red-500" />,
+    medium: <Minus className="h-3.5 w-3.5 text-orange-500" />,
+    low: <ArrowDown className="h-3.5 w-3.5 text-green-500" />
   };
 
   return (
-    <span className="mr-2 shrink-0" title={t('taskItem.priority').replace('{priority}', priorityName)}>
+    <span className="shrink-0" title={t('taskItem.priority').replace('{priority}', priorityName)}>
       {icons[priority]}
     </span>
   );
@@ -106,17 +107,17 @@ const SubTaskItem = memo(({
     <div style={{ marginLeft: `${level * 20}px` }}>
       <div
         className={cn(
-          'flex items-center gap-2 group/subtask',
+          'flex items-center gap-2 group/subtask p-1 rounded-sm hover:bg-muted/50 transition-colors',
           isTaskCompleted ? 'cursor-default' : 'cursor-pointer'
         )}
         onClick={handleClick}
       >
         {subTask.completed ? (
-          <CheckCircle2 className="w-4 h-4 text-green-500" />
+          <CheckCircle2 className="w-3.5 h-3.5 text-green-500" />
         ) : (
-          <Circle className="w-4 h-4 group-hover/subtask:text-primary" />
+          <Circle className="w-3.5 h-3.5 text-muted-foreground group-hover/subtask:text-primary transition-colors" />
         )}
-        <span className={cn(subTask.completed && 'line-through')}>{subTask.title}</span>
+        <span className={cn("text-xs", subTask.completed && 'line-through text-muted-foreground')}>{subTask.title}</span>
       </div>
     </div>
   );
@@ -137,14 +138,13 @@ const SubTaskList = memo(({
   const progress = (completedCount / subTasks.length) * 100;
 
   return (
-    <div className="space-y-2 pt-2">
-      <div className="flex items-center gap-2">
-        <Progress value={progress} className="h-1 w-24" />
-        <span className="text-xs text-muted-foreground">
-          {completedCount}/{subTasks.length}
-        </span>
+    <div className="space-y-1 pt-1.5 border-t border-border/40 mt-2">
+      <div className="flex items-center justify-between text-xs text-muted-foreground mb-1.5">
+        <span>Subtasks</span>
+        <span>{completedCount}/{subTasks.length}</span>
       </div>
-      <ul className="text-sm text-muted-foreground space-y-1.5">
+      <Progress value={progress} className="h-1 mb-2 bg-muted/40" />
+      <ul className="text-sm text-muted-foreground space-y-0.5">
         {subTasks.map(subTask => (
           <SubTaskItem
             key={subTask.id}
@@ -173,25 +173,30 @@ const TaskMetadata = memo(({
   blockingTasks: string[];
   t: (key: string) => string;
 }) => (
-  <div className="flex items-center flex-wrap gap-x-4 gap-y-1 text-sm text-muted-foreground">
-    <div className="flex items-center">
+  <div className="flex items-center flex-wrap gap-x-3 gap-y-1.5 text-xs text-muted-foreground mt-1">
+    <div className="flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-muted/30 border border-border/30">
       <PriorityIcon priority={task.priority} t={t} />
-      <span className="capitalize">{t(`filters.${task.priority}`)}</span>
+      <span className="capitalize font-medium">{t(`filters.${task.priority}`)}</span>
     </div>
 
-    {dueDateText && <span>{dueDateText}</span>}
+    {dueDateText && (
+      <div className={cn("flex items-center gap-1.5 px-2 py-0.5 rounded-full border border-border/30", isPast(new Date(task.dueDate || '')) && !task.completed ? "bg-red-500/10 text-red-600 border-red-200" : "bg-muted/30")}>
+        <Clock className="w-3 H-3" />
+        <span>{dueDateText}</span>
+      </div>
+    )}
 
-    {isBlocked && (
+    {isBlocked && isBlocked > 0 && (
       <TooltipProvider>
         <Tooltip>
           <TooltipTrigger asChild>
-            <div className="flex items-center gap-1 text-yellow-600 dark:text-yellow-400">
-              <Link className="w-4 h-4" />
+            <div className="flex items-center gap-1 text-yellow-600 dark:text-yellow-400 px-2 py-0.5 rounded-full bg-yellow-50 dark:bg-yellow-950/30 border border-yellow-200 dark:border-yellow-900/50">
+              <Link className="w-3 h-3" />
               <span>{t('taskItem.blocked')}</span>
             </div>
           </TooltipTrigger>
           <TooltipContent>
-            <p>{t('taskItem.blockedBy').replace('{tasks}', blockingTasks.join(', '))}</p>
+            <p className="text-xs">{t('taskItem.blockedBy').replace('{tasks}', blockingTasks.join(', '))}</p>
           </TooltipContent>
         </Tooltip>
       </TooltipProvider>
@@ -201,33 +206,17 @@ const TaskMetadata = memo(({
       <TooltipProvider>
         <Tooltip>
           <TooltipTrigger asChild>
-            <div className="flex items-center gap-1">
-              <BrainCircuit className="w-4 h-4 text-primary/80" />
-              <span>{task.completedPomodoros}/{task.pomodoros}</span>
+            <div className="flex items-center gap-1 px-2 py-0.5 rounded-full bg-primary/5 border border-primary/10">
+              <BrainCircuit className="w-3 h-3 text-primary" />
+              <span className="text-primary/80 font-medium">{task.completedPomodoros}/{task.pomodoros}</span>
             </div>
           </TooltipTrigger>
           <TooltipContent>
-            <p>
+            <p className="text-xs">
               {t('taskItem.pomodorosCompleted')
                 .replace('{completed}', task.completedPomodoros.toString())
                 .replace('{total}', task.pomodoros.toString())}
             </p>
-          </TooltipContent>
-        </Tooltip>
-      </TooltipProvider>
-    )}
-
-    {task.timeSpent > 0 && (
-      <TooltipProvider>
-        <Tooltip>
-          <TooltipTrigger asChild>
-            <div className="flex items-center gap-1">
-              <Clock className="w-4 h-4 text-primary/80" />
-              <span>{formatTimeSpent(task.timeSpent)}</span>
-            </div>
-          </TooltipTrigger>
-          <TooltipContent>
-            <p>{t('taskItem.timeSpent').replace('{time}', formatTimeSpent(task.timeSpent))}</p>
           </TooltipContent>
         </Tooltip>
       </TooltipProvider>
@@ -252,37 +241,52 @@ const TaskActions = memo(({
   onDelete: (taskId: string) => void;
   t: (key: string) => string;
 }) => (
-  <div className="flex flex-col sm:flex-row items-center gap-0 sm:gap-1 opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity duration-300 -mr-2 -my-2 sm:m-0">
-    <Button
-      variant="ghost"
-      size="icon"
-      onClick={() => onFocus(task)}
-      title={t('taskItem.focusMode')}
-      disabled={!!isBlocked}
-    >
-      <Crosshair className="h-4 w-4" />
-    </Button>
-    <Button
-      variant="ghost"
-      size="icon"
-      onClick={() => onEdit(task)}
-      title={t('taskItem.editTask')}
-    >
-      <Edit className="h-4 w-4" />
-    </Button>
-    <Button
-      variant="ghost"
-      size="icon"
-      onClick={() => onDelete(task.id)}
-      className="text-destructive hover:text-destructive"
-      title={t('taskItem.deleteTask')}
-    >
-      <Trash2 className="h-4 w-4" />
-    </Button>
+  <div className="flex flex-col gap-1 opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity duration-200 static">
+    <TooltipProvider>
+      <Tooltip>
+        <TooltipTrigger asChild>
+          <Button
+            variant="secondary"
+            size="icon"
+            className="h-8 w-8 shadow-sm hover:shadow-md bg-background/80 backdrop-blur-sm"
+            onClick={() => onFocus(task)}
+            disabled={!!isBlocked}
+          >
+            <Crosshair className="h-4 w-4 text-primary" />
+          </Button>
+        </TooltipTrigger>
+        <TooltipContent side="left"><p className="text-xs">{t('taskItem.focusMode')}</p></TooltipContent>
+      </Tooltip>
+    </TooltipProvider>
+
+    <div className="flex flex-col gap-1">
+      <Button
+        variant="ghost"
+        size="icon"
+        className="h-8 w-8 hover:bg-muted"
+        onClick={() => onEdit(task)}
+        title={t('taskItem.editTask')}
+      >
+        <Edit className="h-4 w-4 text-muted-foreground" />
+      </Button>
+      <Button
+        variant="ghost"
+        size="icon"
+        className="h-8 w-8 hover:bg-destructive/10"
+        onClick={() => onDelete(task.id)}
+        title={t('taskItem.deleteTask')}
+      >
+        <Trash2 className="h-4 w-4 text-destructive/80" />
+      </Button>
+    </div>
   </div>
 ));
 
 TaskActions.displayName = 'TaskActions';
+
+// Main Component
+// Create MotionCard for animation support
+const MotionCard = motion(Card);
 
 // Main Component
 export const TaskItem = memo(function TaskItem({
@@ -321,29 +325,25 @@ export const TaskItem = memo(function TaskItem({
 
     if (isYesterday(dueDate)) {
       const label = isFr ? 'Hier' : 'Yesterday';
-      return `${label} ⚠️`;
+      return `${label}`;
     }
 
     // For dates in the past (overdue)
     if (isPast(dueDate)) {
       const daysAgo = Math.abs(differenceInDays(dueDate, new Date()));
       if (daysAgo <= 7) {
-        const label = isFr ? `Il y a ${daysAgo} jours` : `${daysAgo} days ago`;
-        return `${label} ⚠️`;
+        return isFr ? `Il y a ${daysAgo}j` : `${daysAgo}d ago`;
       }
-      // For older dates, show the formatted date
-      return format(dueDate, isFr ? 'd MMM yyyy' : 'MMM d, yyyy', { locale: dateLocale }) + ' ⚠️';
+      return format(dueDate, isFr ? 'd MMM' : 'MMM d', { locale: dateLocale });
     }
 
     // For future dates
     const daysUntil = differenceInDays(dueDate, new Date());
     if (daysUntil <= 7) {
-      // Show day name for the next 7 days
       return format(dueDate, 'EEEE', { locale: dateLocale });
     }
 
-    // For dates farther in the future
-    return format(dueDate, isFr ? 'd MMM yyyy' : 'MMM d, yyyy', { locale: dateLocale });
+    return format(dueDate, isFr ? 'd MMM' : 'MMM d', { locale: dateLocale });
   }, [task.dueDate, dateLocale, locale]);
 
   const pomodoroProgress = useMemo(() => {
@@ -351,24 +351,38 @@ export const TaskItem = memo(function TaskItem({
   }, [task.pomodoros, task.completedPomodoros]);
 
   const handleCardClick = (e: React.MouseEvent) => {
-    if ((e.target as HTMLElement).closest('a, button')) return;
+    if ((e.target as HTMLElement).closest('a, button, [role="checkbox"]')) return;
     onSelect(task.id);
   };
 
   return (
-    <Card
+    <MotionCard
+      layout
+      whileHover={{ scale: 1.005, backgroundColor: "var(--accent-hover)" }}
+      whileTap={{ scale: 0.995 }}
+      transition={{ type: "spring", stiffness: 400, damping: 30 }}
       data-selected={isSelected}
       className={cn(
-        'group transition-all duration-200 hover:shadow-lg hover:border-primary/50',
-        'data-[selected=true]:border-primary data-[selected=true]:shadow-[0_0_20px_4px_var(--border)]/80',
-        'data-[selected=true]:ring-1 data-[selected=true]:ring-primary/30',
-        isBlocked && `${getIndentClass(isBlocked)} bg-card/50 border-dashed`,
-        isDragging && 'opacity-30 shadow-2xl scale-105',
-        task.completed ? 'bg-card/60' : 'bg-card'
+        'group relative border-border/40 hover:border-primary/30',
+        'data-[selected=true]:border-primary data-[selected=true]:shadow-[0_4px_20px_-4px_rgba(var(--primary-rgb),0.3)]',
+        'data-[selected=true]:ring-1 data-[selected=true]:ring-primary/20',
+        isBlocked && `${getIndentClass(isBlocked)} bg-muted/10 border-dashed border-yellow-200 dark:border-yellow-900/30`,
+        isDragging && 'opacity-40 scale-105 rotate-1 shadow-2xl cursor-grabbing',
+        task.completed ? 'opacity-70 bg-muted/20 hover:opacity-100' : 'bg-card hover:shadow-lg'
       )}
     >
-      <CardContent className="p-4 flex items-start gap-3 sm:gap-4">
-        <div className="flex flex-col items-center gap-4 mt-1">
+      {/* Selection/Status Indicator Bar */}
+      <motion.div
+        layoutId={`indicator-${task.id}`}
+        className={cn(
+          "absolute left-0 top-0 bottom-0 w-1 rounded-l-lg transition-colors",
+          isSelected ? "bg-primary" : "bg-transparent group-hover:bg-primary/30",
+          task.priority === 'high' && !task.completed && !isSelected && "bg-red-500/50"
+        )}
+      />
+
+      <CardContent className="p-3 sm:p-4 flex items-start gap-3 sm:gap-4">
+        <div className="flex flex-col items-center gap-4 mt-0.5 pl-1.5">
           <Checkbox
             id={`complete-${task.id}`}
             checked={task.completed}
@@ -376,30 +390,48 @@ export const TaskItem = memo(function TaskItem({
             aria-label={t(task.completed ? 'taskItem.markIncomplete' : 'taskItem.markComplete')
               .replace('{taskTitle}', task.title)}
             disabled={isTaskBlocked}
+            className="w-5 h-5 rounded-full data-[state=checked]:bg-green-500 data-[state=checked]:border-green-500 transition-all duration-300"
           />
         </div>
 
         <div
           className={cn(
-            'grow space-y-3',
+            'grow space-y-2 min-w-0 pb-1',
             isTaskBlocked ? 'cursor-not-allowed' : 'cursor-pointer'
           )}
           onClick={handleCardClick}
         >
-          <span
-            className={cn(
-              'font-medium transition-colors',
-              task.completed ? 'line-through text-muted-foreground' : 'text-foreground'
-            )}
-          >
-            {task.title}
-          </span>
+          <div className="flex items-start justify-between gap-4">
+            <span
+              className={cn(
+                'font-medium transition-colors text-base leading-tight',
+                task.completed ? 'line-through text-muted-foreground' : 'text-foreground group-hover:text-primary/90'
+              )}
+            >
+              {task.title}
+            </span>
+          </div>
 
           {task.description && (
-            <p className={cn('text-sm', isBlocked ? 'text-muted-foreground/70' : 'text-muted-foreground')}>
+            <p className={cn('text-xs sm:text-sm text-muted-foreground line-clamp-2', isBlocked && 'text-muted-foreground/70')}>
               {task.description}
             </p>
           )}
+
+          <div className="flex flex-wrap items-center gap-2 pt-1">
+            <TaskMetadata
+              task={task}
+              dueDateText={dueDateText}
+              isBlocked={isBlocked}
+              blockingTasks={blockingTasks}
+              t={t}
+            />
+            {task.tags.length > 0 && task.tags.map(tag => (
+              <Badge key={tag} variant="outline" className="text-[10px] px-1.5 py-0 h-5 font-normal border-primary/20 text-primary/80 bg-primary/5">
+                #{tag}
+              </Badge>
+            ))}
+          </div>
 
           {task.subTasks && task.subTasks.length > 0 && (
             <SubTaskList
@@ -409,44 +441,27 @@ export const TaskItem = memo(function TaskItem({
             />
           )}
 
-          <TaskMetadata
-            task={task}
-            dueDateText={dueDateText}
-            isBlocked={isBlocked}
-            blockingTasks={blockingTasks}
-            t={t}
-          />
-
-          {task.tags.length > 0 && (
-            <div className="flex flex-wrap gap-2 pt-1">
-              {task.tags.map(tag => (
-                <Badge key={tag} variant="secondary" className="font-normal">
-                  {tag}
-                </Badge>
-              ))}
-            </div>
-          )}
-
           {task.pomodoros > 0 && !task.completed && (
-            <Progress value={pomodoroProgress} className="h-1 mt-3" />
+            <div className="relative pt-1">
+              <Progress value={pomodoroProgress} className="h-1 bg-muted" indicatorClassName="bg-primary/60" />
+            </div>
           )}
         </div>
 
-        <div className="flex flex-col items-center">
+        <div className="flex flex-col items-end gap-2">
           <div
             draggable={!isTaskBlocked}
             onDragStart={isTaskBlocked ? undefined : onDragStart}
             onDragOver={onDragOver}
             onDragEnd={onDragEnd}
             className={cn(
-              'cursor-grab text-muted-foreground/50 transition-opacity',
-              isTaskBlocked ? 'cursor-not-allowed' : 'hover:text-muted-foreground',
-              isDragging && 'opacity-30'
+              'cursor-grab text-muted-foreground/30 transition-colors p-1 rounded hover:bg-muted',
+              isTaskBlocked ? 'cursor-not-allowed opacity-50' : 'hover:text-foreground',
+              isDragging && 'cursor-grabbing'
             )}
           >
-            <GripVertical className="h-5 w-5" />
+            <GripVertical className="h-4 w-4" />
           </div>
-          <div className="grow" />
           <TaskActions
             task={task}
             isBlocked={isBlocked}
@@ -457,7 +472,7 @@ export const TaskItem = memo(function TaskItem({
           />
         </div>
       </CardContent>
-    </Card>
+    </MotionCard>
   );
 });
 
