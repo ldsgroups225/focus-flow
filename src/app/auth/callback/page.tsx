@@ -5,10 +5,12 @@ import { useRouter } from 'next/navigation';
 import { Loader2, CheckCircle2, XCircle } from 'lucide-react';
 import { getCurrentUser } from '@/lib/appwrite/auth-services';
 import { useI18n } from '@/app/components/i18n-provider';
+import { useAuth } from '@/components/providers/auth-provider';
 
 export default function AuthCallback() {
   const router = useRouter();
   const { t } = useI18n();
+  const { refreshUser } = useAuth();
   const [status, setStatus] = useState<'loading' | 'success' | 'error'>('loading');
   const [errorMessage, setErrorMessage] = useState<string>('');
 
@@ -22,10 +24,13 @@ export default function AuthCallback() {
         const user = await getCurrentUser();
 
         if (user) {
+          // Refresh the auth context with the new user
+          await refreshUser();
           setStatus('success');
+
           // Redirect to home after a brief success message
           setTimeout(() => {
-            router.push('/');
+            router.replace('/');
           }, 1500);
         } else {
           throw new Error(t('login.noSession'));
@@ -37,13 +42,13 @@ export default function AuthCallback() {
 
         // Redirect to login after showing error
         setTimeout(() => {
-          router.push('/?error=auth_failed');
+          router.replace('/login?error=auth_failed');
         }, 3000);
       }
     };
 
     handleCallback();
-  }, [router, t]);
+  }, [router, t, refreshUser]);
 
   return (
     <div className="flex flex-col items-center justify-center h-screen bg-background">
@@ -73,3 +78,4 @@ export default function AuthCallback() {
     </div>
   );
 }
+

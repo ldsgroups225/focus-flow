@@ -1,9 +1,6 @@
-import { NextResponse } from 'next/server';
+import { NextResponse, NextRequest } from 'next/server';
 
-export async function proxy() {
-  // Note: Proxy cannot access localStorage (client-side only)
-  // Authentication redirects are handled client-side in AuthProvider and layouts
-
+export async function proxy(request: NextRequest) {
   // Add security headers to all responses
   const response = NextResponse.next();
 
@@ -47,3 +44,5 @@ export const config = {
     '/((?!api|_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)',
   ],
 };
+
+

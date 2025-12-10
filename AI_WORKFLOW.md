@@ -49,16 +49,19 @@ What was done.
 ## 🔄 Workflow
 
 ### 1. New request
+
 1. Create task in `kanban.md` → "📝 To Do"
 2. Unique ID (TASK-XXX) auto-incremented
 3. Break down into subtasks if needed
 
 ### 2. Start work
+
 1. Move → "🚀 In Progress"
 2. Add `**Started**: YYYY-MM-DD`
 3. Check off subtasks progressively
 
 ### 3. Finish work
+
 1. Move → "✅ Done"
 2. Add `**Finished**: YYYY-MM-DD`
 3. Document in `**Notes**:`:
@@ -137,6 +140,7 @@ Real-time notifications with WebSockets.
 ## 🎯 Golden Rules
 
 ### ✅ ALWAYS
+
 1. Create task BEFORE coding
 2. Strict format (no `##` in tasks)
 3. Break down if complex
@@ -146,6 +150,7 @@ Real-time notifications with WebSockets.
 7. Leave in "Done" (archive only on user request)
 
 ### ❌ NEVER
+
 1. `## Title` in a task
 2. Code without creating task
 3. Forget to check off subtasks
@@ -265,6 +270,7 @@ Each AI has its own configuration file:
 | **Codeium / Windsurf** | `instructions.md` | `.windsurf/` or `.codeium/` |
 
 **These files must:**
+
 1. Reference this file `AI_WORKFLOW.md`
 2. Be adapted to each AI's specifics
 3. Remain minimalist (only a few lines)
@@ -305,11 +311,12 @@ This file contains everything: format, workflow, commands, examples.
 
 On your first interaction with the AI:
 
-```
+```txt
 "Read AI_WORKFLOW.md and use the task system"
 ```
 
 The AI will automatically:
+
 1. Read `AI_WORKFLOW.md`
 2. Understand the complete format and workflow
 3. Be ready to manage tasks according to defined rules
@@ -317,22 +324,26 @@ The AI will automatically:
 ### Usage Examples
 
 **Create a task:**
-```
+
+```txt
 "Plan adding a real-time notification system"
 ```
 
 **Work on a task:**
-```
+
+```txt
 "Do TASK-007"
 ```
 
 **Status update:**
-```
+
+```txt
 "Where are we?"
 ```
 
 **Archive:**
-```
+
+```txt
 "Archive completed tasks"
 ```
 

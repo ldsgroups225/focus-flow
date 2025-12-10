@@ -51,7 +51,10 @@ export const getTasks = (
       );
       callback(tasks);
     } catch (error) {
-      console.error('Error fetching tasks:', error);
+      const err = error as unknown as { message?: string; code?: number; response?: { status?: number } };
+      if (err?.code !== 401 && err?.response?.status !== 401) {
+        console.error('Error fetching tasks:', error);
+      }
       callback([]);
     }
   };

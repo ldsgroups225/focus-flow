@@ -31,7 +31,10 @@ export const getProjects = (
       );
       callback(projects);
     } catch (error) {
-      console.error('Error fetching projects:', error);
+      const err = error as unknown as { message?: string; code?: number; response?: { status?: number } };
+      if (err?.code !== 401 && err?.response?.status !== 401) {
+        console.error('Error fetching projects:', error);
+      }
       callback([]);
     }
   };

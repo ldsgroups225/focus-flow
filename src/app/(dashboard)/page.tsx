@@ -17,7 +17,6 @@ import { LanguageSwitcher } from '@/app/components/language-switcher';
 import { WorkspaceSwitcher } from '@/app/components/workspace-switcher';
 import { useI18n } from '@/app/components/i18n-provider';
 import { useAuth } from '@/components/providers/auth-provider';
-import { signOut } from '@/lib/appwrite/auth-services';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { useTaskSelection } from '@/lib/hooks/use-task-selection';
 import { useKeyboardShortcuts } from '@/lib/hooks/use-keyboard-shortcuts';
@@ -29,7 +28,7 @@ import { BulkActionsToolbar } from '@/app/components/bulk-actions-toolbar';
 import { TaskForm } from '@/app/components/task-form';
 import { AiFeatureSelector } from '@/app/components/ai-feature-selector';
 import { AiDependencyDialog } from '@/app/components/ai-dependency-dialog';
-import { useRouter } from 'next/navigation';
+
 import Link from 'next/link';
 import { DashboardSheet } from '@/components/ui/dashboard-sheet';
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sheet';
@@ -47,8 +46,7 @@ import { AnalyticsTabContent } from '@/components/dashboard/tabs/analytics-tab-c
 import { TemplatesTabContent } from '@/components/dashboard/tabs/templates-tab-content';
 
 function DashboardContent() {
-  const router = useRouter();
-  const { user } = useAuth();
+  const { user, signOut } = useAuth();
 
   const {
     tasks,
@@ -93,12 +91,7 @@ function DashboardContent() {
   }, !!editingTask || !!focusTask);
 
   const handleSignOut = async () => {
-    try {
-      await signOut();
-      router.replace('/login');
-    } catch (error) {
-      console.error('Sign out error:', error);
-    }
+    await signOut();
   };
 
   const handleSetEditingTask = (task: TaskWithSubTasks | 'new' | null) => {
