@@ -44,6 +44,7 @@ import { CalendarIcon, BrainCircuit, Link, Sparkles, LoaderCircle, Trash2, FileT
 import { Calendar } from '@/components/ui/calendar';
 import { cn } from '@/lib/utils';
 import { format } from 'date-fns';
+import { enUS, fr } from 'date-fns/locale';
 import type { Task, Workspace } from '@/lib/types';
 import { useI18n } from './i18n-provider';
 import { suggestTags, suggestDueDate, breakdownTask } from '@/ai/flows/features-flow';
@@ -126,7 +127,8 @@ type TaskFormProps = {
 };
 
 export function TaskForm({ isOpen, onClose, onSave, task, allTasks, activeWorkspace, projects, templates }: TaskFormProps) {
-  const { t } = useI18n();
+  const { t, locale } = useI18n();
+  const dateLocale = locale === 'fr' ? fr : enUS;
   const { user } = useAuth();
   const currentTaskSchema = taskSchema(t);
   const [isAiLoading, setIsAiLoading] = useState<Record<string, boolean>>({});
@@ -475,7 +477,7 @@ export function TaskForm({ isOpen, onClose, onSave, task, allTasks, activeWorksp
                               )}
                             >
                               {field.value ? (
-                                format(field.value, "PPP")
+                                format(field.value, "PPP", { locale: dateLocale })
                               ) : (
                                 <span>{t('taskForm.pickDate')}</span>
                               )}
@@ -486,6 +488,7 @@ export function TaskForm({ isOpen, onClose, onSave, task, allTasks, activeWorksp
                         <PopoverContent className="w-auto p-0" align="start">
                           <Calendar
                             mode="single"
+                            locale={dateLocale}
                             selected={field.value}
                             onSelect={field.onChange}
                             disabled={(date) => date < new Date(new Date().setHours(0, 0, 0, 0))}
@@ -517,7 +520,7 @@ export function TaskForm({ isOpen, onClose, onSave, task, allTasks, activeWorksp
                               )}
                             >
                               {field.value ? (
-                                format(field.value, "PPP")
+                                format(field.value, "PPP", { locale: dateLocale })
                               ) : (
                                 <span>{t('taskForm.pickDate')}</span>
                               )}
@@ -528,6 +531,7 @@ export function TaskForm({ isOpen, onClose, onSave, task, allTasks, activeWorksp
                         <PopoverContent className="w-auto p-0" align="start">
                           <Calendar
                             mode="single"
+                            locale={dateLocale}
                             selected={field.value}
                             onSelect={field.onChange}
                             disabled={(date) => date < new Date(new Date().setHours(0, 0, 0, 0))}
@@ -557,7 +561,7 @@ export function TaskForm({ isOpen, onClose, onSave, task, allTasks, activeWorksp
                                 )}
                               >
                                 {field.value ? (
-                                  format(field.value, "PPP")
+                                  format(field.value, "PPP", { locale: dateLocale })
                                 ) : (
                                   <span>{t('taskForm.pickDate')}</span>
                                 )}
@@ -568,6 +572,7 @@ export function TaskForm({ isOpen, onClose, onSave, task, allTasks, activeWorksp
                           <PopoverContent className="w-auto p-0" align="start">
                             <Calendar
                               mode="single"
+                              locale={dateLocale}
                               selected={field.value}
                               onSelect={field.onChange}
                               disabled={(date) => date < new Date(new Date().setHours(0, 0, 0, 0))}
