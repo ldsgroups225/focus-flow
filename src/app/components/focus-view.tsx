@@ -1,4 +1,3 @@
-
 'use client';
 
 import { X, Play, Pause, RefreshCw, Coffee, Bot, Send, LoaderCircle } from 'lucide-react';
@@ -197,50 +196,102 @@ export function FocusView({ task, onExit, onPomodoroComplete, onLogTime }: Focus
         }}
         exit={{ opacity: 0 }}
         transition={{ duration: 0.5 }}
-        className="fixed inset-0 z-50 backdrop-blur-lg flex flex-col p-4 sm:p-8"
+        className="fixed inset-0 z-50 backdrop-blur-lg"
       >
+        {/* Header - Close Button */}
         <motion.header
-          animate={{ opacity: isIdle ? 0.33 : 1, filter: isIdle ? 'blur(4px)' : 'blur(0px)' }}
-          transition={{ duration: 0.5 }}
-          className="w-full flex justify-end relative z-10"
+          animate={{ opacity: isIdle ? 0 : 1 }}
+          transition={{
+            duration: 0.8,
+            ease: [0.25, 0.1, 0.25, 1] // Smooth ease-out
+          }}
+          className="absolute top-4 right-4 sm:top-8 sm:right-8 z-10"
         >
           <Button onClick={handleExit} variant="ghost" size="icon" className="text-muted-foreground" aria-label={t('focusView.endSession')}>
             <X className="h-6 w-6" />
           </Button>
         </motion.header>
 
-        <main
-          className="flex-1 flex flex-col items-center justify-center text-center -mt-16"
+        {/* Task Content - Absolute positioned, true center when idle */}
+        <motion.div
+          animate={{
+            top: isIdle ? '50%' : '30%',
+            y: '-50%',
+          }}
+          transition={{
+            type: 'spring',
+            stiffness: 100,
+            damping: 20,
+            mass: 1,
+          }}
+          className="absolute left-0 right-0 flex flex-col items-center text-center px-4"
         >
+          {/* Focusing On Label */}
           <motion.p
-            animate={{ opacity: isIdle ? 0 : 1, y: isIdle ? -20 : 0 }}
-            transition={{ duration: 0.5 }}
-            className="text-lg text-muted-foreground mb-4">{t('focusView.focusingOn')}
+            animate={{
+              opacity: isIdle ? 0 : 1,
+              height: isIdle ? 0 : 'auto',
+              marginBottom: isIdle ? 0 : 16
+            }}
+            transition={{
+              duration: 0.6,
+              ease: [0.25, 0.1, 0.25, 1],
+              delay: isIdle ? 0 : 0.15 // Delay appearance when becoming active
+            }}
+            className="text-lg text-muted-foreground overflow-hidden"
+          >
+            {t('focusView.focusingOn')}
           </motion.p>
+
+          {/* Task Title */}
           <motion.h1
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5, delay: 0.2 }}
-            className="text-4xl md:text-6xl font-bold mb-6">{task.title}
+            className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold mb-4 max-w-4xl leading-tight"
+          >
+            {task.title}
           </motion.h1>
+
+          {/* Task Description - With Clamping */}
           {task.description && (
             <motion.p
               initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
+              animate={{
+                opacity: isIdle ? 0.7 : 1,
+                y: 0,
+              }}
               transition={{ duration: 0.5, delay: 0.3 }}
-              className="text-xl text-muted-foreground max-w-2xl mx-auto">{task.description}
+              className={cn(
+                "text-lg sm:text-xl text-muted-foreground max-w-2xl mx-auto",
+                "line-clamp-3" // Limit to 3 lines to prevent overflow
+              )}
+            >
+              {task.description}
             </motion.p>
           )}
-        </main>
+        </motion.div>
 
-        {/* Chat Assistant */}
+        {/* Chat Assistant - Positioned below task area, fades out when idle */}
         <motion.div
-          animate={{ opacity: isIdle ? 0 : 1, y: isIdle ? 20 : 0 }}
-          transition={{ duration: 0.5 }}
-          className="absolute bottom-28 left-1/2 -translate-x-1/2 w-full max-w-2xl px-4"
+          animate={{
+            opacity: isIdle ? 0 : 1,
+            y: isIdle ? 30 : 0,
+            scale: isIdle ? 0.98 : 1,
+            pointerEvents: isIdle ? 'none' : 'auto'
+          }}
+          transition={{
+            type: 'spring',
+            stiffness: 120,
+            damping: 20,
+            mass: 0.8,
+            opacity: { duration: 0.5, ease: [0.25, 0.1, 0.25, 1] }
+          }}
+          className="absolute left-1/2 -translate-x-1/2 w-full max-w-2xl px-4"
+          style={{ top: '55%' }}
         >
           <div className="bg-background/50 border rounded-lg p-3 shadow-lg">
-            <ScrollArea className="h-48 mb-2">
+            <ScrollArea className="h-40 mb-2">
               <div className="space-y-4 text-left px-2">
                 {messages.map((msg, index) => (
                   msg.content && (
@@ -277,17 +328,36 @@ export function FocusView({ task, onExit, onPomodoroComplete, onLogTime }: Focus
           </div>
         </motion.div>
 
-        <motion.footer
-          animate={{ opacity: isIdle ? 0.33 : 1, filter: isIdle ? 'blur(4px)' : 'blur(0px)' }}
-          transition={{ duration: 0.5 }}
-          className="w-full flex items-end justify-between"
-        >
-          <PomodoroTimer
-            ref={timerRef}
-            onPomodoroComplete={handlePomodoroCycleComplete}
-            onTimerUpdate={handleTimerUpdate}
-          />
-          <div className="flex items-center gap-2">
+        {/* Footer with Timer Controls - FIXED at bottom */}
+        <footer className="absolute bottom-4 left-4 right-4 sm:bottom-8 sm:left-8 sm:right-8 flex items-end justify-between">
+          <motion.div
+            animate={{
+              opacity: isIdle ? 0.3 : 1,
+              filter: isIdle ? 'blur(2px)' : 'blur(0px)'
+            }}
+            transition={{
+              duration: 0.8,
+              ease: [0.25, 0.1, 0.25, 1]
+            }}
+          >
+            <PomodoroTimer
+              ref={timerRef}
+              onPomodoroComplete={handlePomodoroCycleComplete}
+              onTimerUpdate={handleTimerUpdate}
+            />
+          </motion.div>
+
+          <motion.div
+            animate={{
+              opacity: isIdle ? 0 : 1,
+            }}
+            transition={{
+              duration: 0.6,
+              ease: [0.25, 0.1, 0.25, 1],
+              delay: isIdle ? 0 : 0.1
+            }}
+            className="flex items-center gap-2"
+          >
             <Button variant="ghost" size="icon" onClick={() => timerRef.current?.reset()} aria-label={t('pomodoro.resetTimer')}>
               <RefreshCw className="w-5 h-5" />
             </Button>
@@ -297,10 +367,9 @@ export function FocusView({ task, onExit, onPomodoroComplete, onLogTime }: Focus
             <Button variant="ghost" size="icon" onClick={() => timerRef.current?.next()} aria-label={timerState.mode === 'work' ? t('pomodoro.startBreak') : t('pomodoro.startWork')}>
               <Coffee className="w-5 h-5" />
             </Button>
-          </div>
-        </motion.footer>
+          </motion.div>
+        </footer>
       </motion.div>
     </AnimatePresence>
   );
 }
-
