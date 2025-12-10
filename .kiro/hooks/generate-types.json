@@ -1,0 +1,12 @@
+{
+  "name": "Generate Types",
+  "description": "Generate TypeScript types from data or API response",
+  "trigger": {
+    "type": "manual"
+  },
+  "action": {
+    "type": "agentMessage",
+    "message": "Generate TypeScript types and Zod schemas for the data structures in the current file or clipboard. Include proper type definitions, optional fields, and validation rules."
+  },
+  "enabled": true
+}

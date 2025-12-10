@@ -1,0 +1,12 @@
+{
+  "name": "Update Kanban",
+  "description": "Update kanban.md with current task status",
+  "trigger": {
+    "type": "onAgentComplete"
+  },
+  "action": {
+    "type": "agentMessage",
+    "message": "Update kanban.md to reflect the work just completed. Follow the format in AI_WORKFLOW.md. Move completed tasks to Done, update In Progress tasks, and add any new tasks discovered."
+  },
+  "enabled": false
+}

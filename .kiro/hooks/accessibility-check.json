@@ -1,0 +1,12 @@
+{
+  "name": "Accessibility Check",
+  "description": "Check component for accessibility issues",
+  "trigger": {
+    "type": "manual"
+  },
+  "action": {
+    "type": "agentMessage",
+    "message": "Audit the current component for accessibility: ARIA labels, keyboard navigation, focus management, color contrast, screen reader support. Suggest fixes using Radix UI primitives where applicable."
+  },
+  "enabled": true
+}

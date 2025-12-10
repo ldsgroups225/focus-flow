@@ -1,0 +1,12 @@
+{
+  "name": "Refactor Assist",
+  "description": "Analyze code for refactoring opportunities",
+  "trigger": {
+    "type": "manual"
+  },
+  "action": {
+    "type": "agentMessage",
+    "message": "Analyze the current file for refactoring opportunities. Look for: code smells, duplicate logic, long functions, complex conditionals, and opportunities to extract reusable hooks or components. Provide specific suggestions with code examples."
+  },
+  "enabled": true
+}

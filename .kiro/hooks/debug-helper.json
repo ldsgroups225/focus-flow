@@ -1,0 +1,12 @@
+{
+  "name": "Debug Helper",
+  "description": "Help diagnose issues in the current file",
+  "trigger": {
+    "type": "manual"
+  },
+  "action": {
+    "type": "agentMessage",
+    "message": "Help debug the current file. Check for: TypeScript errors, potential runtime issues, React anti-patterns, missing error handling, and common bugs. Run diagnostics and suggest fixes."
+  },
+  "enabled": true
+}

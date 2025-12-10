@@ -1,0 +1,13 @@
+{
+  "name": "TypeCheck on Save",
+  "description": "Run TypeScript type checking when saving TS files",
+  "trigger": {
+    "type": "onFileSave",
+    "pattern": "**/*.{ts,tsx}"
+  },
+  "action": {
+    "type": "shellCommand",
+    "command": "bun typecheck"
+  },
+  "enabled": false
+}

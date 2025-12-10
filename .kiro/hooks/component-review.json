@@ -1,0 +1,12 @@
+{
+  "name": "Component Review",
+  "description": "Review React component for best practices",
+  "trigger": {
+    "type": "manual"
+  },
+  "action": {
+    "type": "agentMessage",
+    "message": "Review the current file for React best practices: component structure, hooks usage, accessibility, performance optimizations, and TypeScript types. Suggest improvements."
+  },
+  "enabled": true
+}

@@ -1,0 +1,13 @@
+{
+  "name": "Lint on Save",
+  "description": "Run ESLint when saving TypeScript/React files",
+  "trigger": {
+    "type": "onFileSave",
+    "pattern": "**/*.{ts,tsx}"
+  },
+  "action": {
+    "type": "shellCommand",
+    "command": "bun lint --fix ${file}"
+  },
+  "enabled": true
+}
