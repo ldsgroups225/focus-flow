@@ -190,24 +190,71 @@ export function useTasks(userId: string | null) {
     });
   }, [userId, tasks, toast, t, addOptimistic, startTransition]);
 
-  // Update pomodoro count
+  // Update pomodoro count with optimistic update
   const updatePomodoro = useCallback(async (taskId: string) => {
     if (!userId) return;
     const task = tasks.find(t => t.id === taskId);
-    if (task) {
-      const newCount = task.completedPomodoros + 1;
-      await TaskService.updatePomodoroCount(userId, taskId, newCount);
-    }
-  }, [userId, tasks]);
+    if (!task) return;
 
-  // Log time
-  const logTime = useCallback(async (taskId: string, seconds: number) => {
-    if (!userId) return;
-    const task = tasks.find(t => t.id === taskId);
-    if (task) {
-      await TaskService.logTimeSpent(userId, taskId, seconds, task.timeSpent);
+    const newCount = task.completedPomodoros + 1;
+    const original = [...tasks];
+
+    // Optimistic update
+    startTransition(() => {
+      addOptimistic({ type: 'update', id: taskId, patch: { completedPomodoros: newCount } });
+      setTasks(prev => prev.map(t => t.id === taskId ? { ...t, completedPomodoros: newCount } : t));
+    });
+
+    try {
+      await TaskService.updatePomodoroCount(userId, taskId, newCount);
+      toast({
+        title: t('toast.pomodoroComplete'),
+        description: t('toast.pomodoroCompleteDesc').replace('{count}', newCount.toString()),
+      });
+    } catch (error) {
+      console.error('Failed to update pomodoro count:', error);
+      // Rollback on error
+      startTransition(() => {
+        setTasks(original);
+      });
+      toast({
+        variant: 'destructive',
+        title: t('toast.updateError'),
+        description: t('toast.pomodoroUpdateErrorDesc'),
+      });
     }
-  }, [userId, tasks]);
+  }, [userId, tasks, addOptimistic, toast, t]);
+
+  // Log time with optimistic update
+  const logTime = useCallback(async (taskId: string, seconds: number) => {
+    if (!userId || seconds <= 0) return;
+    const task = tasks.find(t => t.id === taskId);
+    if (!task) return;
+
+    const newTimeSpent = task.timeSpent + seconds;
+    const original = [...tasks];
+
+    // Optimistic update
+    startTransition(() => {
+      addOptimistic({ type: 'update', id: taskId, patch: { timeSpent: newTimeSpent } });
+      setTasks(prev => prev.map(t => t.id === taskId ? { ...t, timeSpent: newTimeSpent } : t));
+    });
+
+    try {
+      await TaskService.logTimeSpent(userId, taskId, seconds, task.timeSpent);
+    } catch (error) {
+      console.error('Failed to log time:', error);
+      // Rollback on error
+      startTransition(() => {
+        setTasks(original);
+      });
+      toast({
+        variant: 'destructive',
+        title: t('toast.updateError'),
+        description: t('toast.timeLogErrorDesc'),
+      });
+    }
+  }, [userId, tasks, addOptimistic, toast, t]);
 
   // Toggle subtask
   const toggleSubTask = useCallback(async (subTaskId: string) => {

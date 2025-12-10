@@ -174,7 +174,15 @@
     "taskDeleted": "Tâche supprimée",
     "undo": "Annuler",
     "deleteError": "Échec de la suppression",
-    "deleteErrorDesc": "La tâche n'a pas pu être supprimée de la base de données."
+    "deleteErrorDesc": "La tâche n'a pas pu être supprimée de la base de données.",
+    "updateError": "Échec de la mise à jour",
+    "updateErrorDesc": "La tâche n'a pas pu être mise à jour.",
+    "createError": "Échec de la création",
+    "createErrorDesc": "La tâche n'a pas pu être créée.",
+    "pomodoroComplete": "Pomodoro Terminé ! 🍅",
+    "pomodoroCompleteDesc": "Session #{count} terminée. Excellent travail !",
+    "pomodoroUpdateErrorDesc": "Impossible de sauvegarder le progrès du pomodoro. Veuillez réessayer.",
+    "timeLogErrorDesc": "Impossible de sauvegarder le temps passé. Veuillez réessayer."
   },
   "data": {
     "title": "Gestion des Données",

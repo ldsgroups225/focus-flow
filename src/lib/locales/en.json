@@ -173,7 +173,15 @@
     "taskDeleted": "Task deleted",
     "undo": "Undo",
     "deleteError": "Deletion Failed",
-    "deleteErrorDesc": "The task could not be deleted from the database."
+    "deleteErrorDesc": "The task could not be deleted from the database.",
+    "updateError": "Update Failed",
+    "updateErrorDesc": "The task could not be updated.",
+    "createError": "Creation Failed",
+    "createErrorDesc": "The task could not be created.",
+    "pomodoroComplete": "Pomodoro Complete! 🍅",
+    "pomodoroCompleteDesc": "Session #{count} completed. Great work!",
+    "pomodoroUpdateErrorDesc": "Could not save pomodoro progress. Please try again.",
+    "timeLogErrorDesc": "Could not save time spent. Please try again."
   },
   "data": {
     "title": "Data Management",
