@@ -15,7 +15,7 @@ import {
   Clock,
   GripVertical
 } from 'lucide-react';
-import { formatDistanceToNow } from 'date-fns';
+import { isToday, isTomorrow, isYesterday, format, isPast, differenceInDays } from 'date-fns';
 import { enUS, fr } from 'date-fns/locale';
 import { Card, CardContent } from '@/components/ui/card';
 import { Checkbox } from '@/components/ui/checkbox';
@@ -53,7 +53,7 @@ const formatTimeSpent = (seconds: number): string => {
   if (seconds < 60) return '0m';
   const hours = Math.floor(seconds / 3600);
   const minutes = Math.floor((seconds % 3600) / 60);
-  
+
   if (hours > 0) {
     return minutes > 0 ? `${hours}h ${minutes}m` : `${hours}h`;
   }
@@ -74,7 +74,7 @@ const PriorityIcon = memo(({ priority, t }: { priority: Priority; t: (key: strin
     medium: <Minus className="h-4 w-4 text-yellow-500" />,
     low: <ArrowDown className="h-4 w-4 text-green-500" />
   };
-  
+
   return (
     <span className="mr-2 shrink-0" title={t('taskItem.priority').replace('{priority}', priorityName)}>
       {icons[priority]}
@@ -307,11 +307,44 @@ export const TaskItem = memo(function TaskItem({
 
   const dueDateText = useMemo(() => {
     if (!task.dueDate) return '';
-    return formatDistanceToNow(new Date(task.dueDate), {
-      addSuffix: true,
-      locale: dateLocale
-    });
-  }, [task.dueDate, dateLocale]);
+
+    const dueDate = new Date(task.dueDate);
+    const isFr = locale === 'fr';
+
+    if (isToday(dueDate)) {
+      return isFr ? "Aujourd'hui" : 'Today';
+    }
+
+    if (isTomorrow(dueDate)) {
+      return isFr ? 'Demain' : 'Tomorrow';
+    }
+
+    if (isYesterday(dueDate)) {
+      const label = isFr ? 'Hier' : 'Yesterday';
+      return `${label} ⚠️`;
+    }
+
+    // For dates in the past (overdue)
+    if (isPast(dueDate)) {
+      const daysAgo = Math.abs(differenceInDays(dueDate, new Date()));
+      if (daysAgo <= 7) {
+        const label = isFr ? `Il y a ${daysAgo} jours` : `${daysAgo} days ago`;
+        return `${label} ⚠️`;
+      }
+      // For older dates, show the formatted date
+      return format(dueDate, isFr ? 'd MMM yyyy' : 'MMM d, yyyy', { locale: dateLocale }) + ' ⚠️';
+    }
+
+    // For future dates
+    const daysUntil = differenceInDays(dueDate, new Date());
+    if (daysUntil <= 7) {
+      // Show day name for the next 7 days
+      return format(dueDate, 'EEEE', { locale: dateLocale });
+    }
+
+    // For dates farther in the future
+    return format(dueDate, isFr ? 'd MMM yyyy' : 'MMM d, yyyy', { locale: dateLocale });
+  }, [task.dueDate, dateLocale, locale]);
 
   const pomodoroProgress = useMemo(() => {
     return task.pomodoros > 0 ? (task.completedPomodoros / task.pomodoros) * 100 : 0;
