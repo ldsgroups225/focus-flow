@@ -276,7 +276,7 @@ TaskActions.displayName = 'TaskActions';
 
 // Main Component
 // Create MotionCard for animation support
-const MotionCard = motion(Card);
+const MotionCard = motion.create(Card);
 
 // Main Component
 export const TaskItem = memo(function TaskItem({

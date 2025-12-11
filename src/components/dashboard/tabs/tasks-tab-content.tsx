@@ -194,43 +194,56 @@ export function TasksTabContent() {
             </p>
           </motion.div>
         ) : (
-          <div className="space-y-6">
-            <TaskList
-              tasks={activeTasks}
-              setTasks={() => { }}
-              onEdit={handleEdit}
-              onDelete={deleteTask}
-              onToggle={toggleComplete}
-              onFocus={handleFocus}
-              selectedTaskIds={selectedTaskIds}
-              onSelectTask={handleSelectTask}
-              onSubTaskToggle={toggleSubTask}
-            />
+          <div className="flex flex-col min-h-[calc(100vh-300px)]">
+            <div className="space-y-6">
+              <TaskList
+                tasks={activeTasks}
+                setTasks={() => { }}
+                onEdit={handleEdit}
+                onDelete={deleteTask}
+                onToggle={toggleComplete}
+                onFocus={handleFocus}
+                selectedTaskIds={selectedTaskIds}
+                onSelectTask={handleSelectTask}
+                onSubTaskToggle={toggleSubTask}
+              />
+            </div>
 
-            {completedTasks.length > 0 && (
-              <Accordion type="single" collapsible defaultValue="completed-tasks" className="w-full border rounded-xl bg-card/30 overflow-hidden">
-                <AccordionItem value="completed-tasks" className="border-none">
-                  <AccordionTrigger className="px-4 py-3 hover:bg-accent/50 transition-colors hover:no-underline data-[state=open]:bg-accent/50">
-                    <span className="text-sm font-medium text-muted-foreground flex items-center gap-2">
-                      {t('taskList.completed', { count: completedTasks.length })}
-                    </span>
-                  </AccordionTrigger>
-                  <AccordionContent className="px-4 pb-4 pt-2">
-                    <TaskList
-                      tasks={completedTasks}
-                      setTasks={() => { }}
-                      onEdit={handleEdit}
-                      onDelete={deleteTask}
-                      onToggle={toggleComplete}
-                      onFocus={handleFocus}
-                      selectedTaskIds={selectedTaskIds}
-                      onSelectTask={handleSelectTask}
-                      onSubTaskToggle={toggleSubTask}
-                    />
-                  </AccordionContent>
-                </AccordionItem>
-              </Accordion>
-            )}
+            <div className="flex-1" />
+
+            <AnimatePresence>
+              {completedTasks.length > 0 && (
+                <motion.div
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: 20 }}
+                  transition={{ duration: 0.3, ease: [0.25, 0.1, 0.25, 1] }}
+                >
+                  <Accordion type="single" collapsible defaultValue="completed-tasks" className="w-full border rounded-xl bg-card/30 overflow-hidden mt-6">
+                    <AccordionItem value="completed-tasks" className="border-none">
+                      <AccordionTrigger className="px-4 py-3 hover:bg-accent/50 transition-colors hover:no-underline data-[state=open]:bg-accent/50">
+                        <span className="text-sm font-medium text-muted-foreground flex items-center gap-2">
+                          {t('taskList.completed', { count: completedTasks.length })}
+                        </span>
+                      </AccordionTrigger>
+                      <AccordionContent className="px-4 pb-4 pt-2">
+                        <TaskList
+                          tasks={completedTasks}
+                          setTasks={() => { }}
+                          onEdit={handleEdit}
+                          onDelete={deleteTask}
+                          onToggle={toggleComplete}
+                          onFocus={handleFocus}
+                          selectedTaskIds={selectedTaskIds}
+                          onSelectTask={handleSelectTask}
+                          onSubTaskToggle={toggleSubTask}
+                        />
+                      </AccordionContent>
+                    </AccordionItem>
+                  </Accordion>
+                </motion.div>
+              )}
+            </AnimatePresence>
           </div>
         )}
       </div>
