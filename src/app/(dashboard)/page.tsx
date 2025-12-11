@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect, Suspense } from 'react';
-import { Plus, SlidersHorizontal, Orbit, Search, Sparkles, User2, Settings, BarChart3, FileText, List, CalendarIcon, Clock, Menu } from 'lucide-react';
+import { Plus, SlidersHorizontal, Orbit, Search, Sparkles, User2, Settings, BarChart3, List, CalendarIcon, Clock } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import type { TaskWithSubTasks } from '@/lib/types';
 import {
@@ -36,7 +36,7 @@ import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sh
 import { SidebarContent } from '@/app/components/sidebar-content';
 import { getNameFromEmail } from '@/lib/utils/get-name-from-email';
 import { getAvatarInitial } from '@/lib/utils/get-avatar-initial';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { DashboardProvider, useDashboard } from '@/contexts/dashboard-context';
 
 // Import tab content components directly (not lazy loaded to avoid context issues)

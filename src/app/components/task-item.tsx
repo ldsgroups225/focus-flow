@@ -50,16 +50,6 @@ type TaskItemProps = {
 };
 
 // Utility Functions
-const formatTimeSpent = (seconds: number): string => {
-  if (seconds < 60) return '0m';
-  const hours = Math.floor(seconds / 3600);
-  const minutes = Math.floor((seconds % 3600) / 60);
-
-  if (hours > 0) {
-    return minutes > 0 ? `${hours}h ${minutes}m` : `${hours}h`;
-  }
-  return `${minutes}m`;
-};
 
 const getIndentClass = (blockLevel?: number): string => {
   if (!blockLevel || blockLevel === 0) return 'ml-0';

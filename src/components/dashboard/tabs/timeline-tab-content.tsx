@@ -4,7 +4,7 @@ import { GanttChart } from '@/app/components/gantt-chart';
 import { useDashboard } from '@/contexts/dashboard-context';
 import { useI18n } from '@/app/components/i18n-provider';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Calendar, Clock, AlertCircle } from 'lucide-react';
+import { Calendar, Clock } from 'lucide-react';
 import { motion } from 'framer-motion';
 
 export function TimelineTabContent() {

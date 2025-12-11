@@ -23,15 +23,14 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from '@/components/ui/card';
-import { ArrowLeft, FolderPlus, Folder, Briefcase, User, Layers, Info, Trash2, Edit2, CheckCircle2 } from 'lucide-react';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
+import { ArrowLeft, FolderPlus, Folder, Briefcase, User, Layers, Trash2, Edit2 } from 'lucide-react';
 import { useProjects } from '@/lib/hooks/use-projects';
 import { useAuth } from '@/components/providers/auth-provider';
 import { useI18n } from '@/app/components/i18n-provider';
 import type { Project } from '@/lib/types';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Badge } from '@/components/ui/badge';
-import { Separator } from '@/components/ui/separator';
 
 const projectSchema = z.object({
   id: z.string().optional(),

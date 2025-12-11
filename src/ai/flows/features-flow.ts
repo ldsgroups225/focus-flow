@@ -42,7 +42,6 @@ const focusAssistantInputSchema = z.object({
 });
 type FocusAssistantInput = z.infer<typeof focusAssistantInputSchema>;
 
-const focusAssistantOutputSchema = z.string().nullable();
 type FocusAssistantOutput = string;
 
 // 1. AI Flow for Auto-Tag Generation

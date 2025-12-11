@@ -1,6 +1,6 @@
-import { NextResponse, NextRequest } from 'next/server';
+import { NextResponse } from 'next/server';
 
-export async function proxy(request: NextRequest) {
+export async function proxy() {
   // Add security headers to all responses
   const response = NextResponse.next();
 
