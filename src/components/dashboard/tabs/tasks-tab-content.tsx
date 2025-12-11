@@ -48,12 +48,18 @@ export function TasksTabContent() {
     setSelectedProjectId,
     selectedProjectId,
     templates,
+    setIsFocusMode,
   } = useDashboard();
 
   const [editingTask, setEditingTask] = useState<TaskWithSubTasks | 'new' | null>(
     null,
   );
   const [focusTask, setFocusTask] = useState<TaskWithSubTasks | null>(null);
+
+  const handleFocusTask = (task: TaskWithSubTasks | null) => {
+    setFocusTask(task);
+    setIsFocusMode(!!task);
+  };
   const [selectedTaskIds, setSelectedTaskIds] = useState<Set<string>>(
     new Set(),
   );
@@ -63,7 +69,7 @@ export function TasksTabContent() {
   };
 
   const handleFocus = (task: TaskWithSubTasks) => {
-    setFocusTask(task);
+    handleFocusTask(task);
   };
 
   const handleSelectTask = (taskId: string) => {
@@ -258,7 +264,7 @@ export function TasksTabContent() {
         {focusTask && (
           <LazyFocusView
             task={focusTask}
-            onExit={() => setFocusTask(null)}
+            onExit={() => handleFocusTask(null)}
             onPomodoroComplete={updatePomodoro}
             onLogTime={logTime}
           />

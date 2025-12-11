@@ -69,6 +69,7 @@ function DashboardContent() {
     activeWorkspace,
     setActiveWorkspace,
     setSelectedProjectId,
+    isFocusMode,
   } = useDashboard();
 
   const [editingTask, setEditingTask] = useState<TaskWithSubTasks | 'new' | null>(null);
@@ -319,20 +320,22 @@ function DashboardContent() {
         </div>
 
         {/* Floating Action Button for Quick Capture - Enhanced */}
-        <motion.div
-          initial={{ scale: 0, rotate: 90 }}
-          animate={{ scale: 1, rotate: 0 }}
-          transition={{ ...bouncySpring, delay: 0.5 }}
-          className="fixed bottom-8 right-8 z-50"
-        >
-          <Button
-            onClick={() => handleSetEditingTask('new')}
-            className="h-16 w-16 rounded-full shadow-2xl shadow-primary/30 hover:shadow-primary/50 transition-all duration-300 bg-primary hover:bg-primary/90"
-            title={t('header.addTask')}
+        {!isFocusMode && (
+          <motion.div
+            initial={{ scale: 0, rotate: 90 }}
+            animate={{ scale: 1, rotate: 0 }}
+            transition={{ ...bouncySpring, delay: 0.5 }}
+            className="fixed bottom-8 right-8 z-50"
           >
-            <Plus className="h-8 w-8" />
-          </Button>
-        </motion.div>
+            <Button
+              onClick={() => handleSetEditingTask('new')}
+              className="h-16 w-16 rounded-full shadow-2xl shadow-primary/30 hover:shadow-primary/50 transition-all duration-300 bg-primary hover:bg-primary/90"
+              title={t('header.addTask')}
+            >
+              <Plus className="h-8 w-8" />
+            </Button>
+          </motion.div>
+        )}
 
         {/* Modals and Other Global UI */}
         <Suspense fallback={null}>

@@ -57,6 +57,8 @@ type DashboardContextType = {
   setActiveWorkspace: (workspace: Workspace) => void;
   selectedProjectId: string | undefined;
   setSelectedProjectId: (projectId: string | undefined) => void;
+  isFocusMode: boolean;
+  setIsFocusMode: (isFocusMode: boolean) => void;
 
   // User
   user: User | null;
@@ -70,6 +72,7 @@ export function DashboardProvider({ children }: { children: ReactNode }) {
   // Workspace state
   const [activeWorkspace, setActiveWorkspace] = useState<Workspace>('personal');
   const [selectedProjectId, setSelectedProjectId] = useState<string | undefined>(undefined);
+  const [isFocusMode, setIsFocusMode] = useState(false);
 
   // Tasks
   const {
@@ -176,6 +179,8 @@ export function DashboardProvider({ children }: { children: ReactNode }) {
     setActiveWorkspace,
     selectedProjectId,
     setSelectedProjectId,
+    isFocusMode,
+    setIsFocusMode,
 
     // User
     user,
