@@ -63,6 +63,20 @@ export const getTasks = (
   fetchTasks();
 };
 
+export const getTask = async (taskId: string): Promise<Task | null> => {
+  try {
+    const row = await databases.getRow({
+      databaseId: DATABASE_ID,
+      tableId: TASKS_TABLE_ID,
+      rowId: taskId,
+    });
+    return mapTaskFromAppwrite(row);
+  } catch (error) {
+    console.error('Error fetching task:', error);
+    return null;
+  }
+};
+
 export const addTask = async (userId: string, taskData: Omit<Task, 'id' | 'completed' | 'completedPomodoros' | 'timeSpent' | 'completedDate'>) => {
   try {
     const newTask = {

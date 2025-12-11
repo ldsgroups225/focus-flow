@@ -43,6 +43,7 @@ export const taskSchema = z.object({
   startDate: z.coerce.date().optional(),
   duration: z.number().optional(), // Duration in days
   projectId: z.string().optional(),
+  prompt: z.string().optional(),
 }).describe('A task object').refine((data) => {
   // Milestones must have zero duration
   if (data.type === 'milestone' && data.duration && data.duration !== 0) {

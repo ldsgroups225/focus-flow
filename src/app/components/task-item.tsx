@@ -13,7 +13,6 @@ import {
   Circle,
   Link,
   Clock,
-  GripVertical,
   Copy
 } from 'lucide-react';
 import { isToday, isTomorrow, isYesterday, format, isPast, differenceInDays } from 'date-fns';
@@ -237,14 +236,24 @@ const TaskActions = memo(({
 
   const handleCopy = async () => {
     try {
-      const textToCopy = task.description
+      // Use the generated prompt if available, otherwise fallback to title/description
+      const textToCopy = task.prompt || (task.description
         ? `${task.title}\n${task.description}`
-        : task.title;
+        : task.title);
+
       await navigator.clipboard.writeText(textToCopy);
-      toast({
-        title: t('taskItem.copiedToClipboard') || "Copied to clipboard",
-        description: t('taskItem.copySuccess') || "Task details copied successfully",
-      });
+
+      if (task.prompt) {
+        toast({
+          title: t('taskItem.copiedToClipboard') || "Copied to clipboard",
+          description: t('taskItem.copyPromptSuccess') || "Task prompt copied successfully",
+        });
+      } else {
+        toast({
+          title: t('taskItem.copiedToClipboard') || "Copied to clipboard",
+          description: t('taskItem.copySuccess') || "Task details copied (prompt not ready)",
+        });
+      }
     } catch (err) {
       toast({
         title: "Failed to copy",
@@ -473,19 +482,6 @@ export const TaskItem = memo(function TaskItem({
         </div>
 
         <div className="flex flex-col items-end gap-2">
-          <div
-            draggable={!isTaskBlocked}
-            onDragStart={isTaskBlocked ? undefined : onDragStart}
-            onDragOver={onDragOver}
-            onDragEnd={onDragEnd}
-            className={cn(
-              'cursor-grab text-muted-foreground/30 transition-colors p-1 rounded hover:bg-muted',
-              isTaskBlocked ? 'cursor-not-allowed opacity-50' : 'hover:text-foreground',
-              isDragging && 'cursor-grabbing'
-            )}
-          >
-            <GripVertical className="h-4 w-4" />
-          </div>
           <TaskActions
             task={task}
             isBlocked={isBlocked}

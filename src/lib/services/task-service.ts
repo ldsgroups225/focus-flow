@@ -1,4 +1,4 @@
-import { getTasks, addTask, updateTask, deleteTask } from '@/lib/appwrite/task-services';
+import { getTasks, getTask, addTask, updateTask, deleteTask } from '@/lib/appwrite/task-services';
 import {
   getSubTasksByTaskId,
   addSubTask,
@@ -8,6 +8,7 @@ import {
   bulkUpdateSubTasks
 } from '@/lib/appwrite/subtask-services';
 import type { Task, SubTask } from '@/lib/types';
+import { generatePrompt } from '@/ai/flows/generate-prompt-flow';
 
 // Extended Task type with subtasks loaded
 export type TaskWithSubTasks = Task & {
@@ -52,12 +53,52 @@ export class TaskService {
       );
     }
 
+    // Background Task: Generate Engineering Prompt
+    // Fire and forget - do not await
+    const promptInput = {
+      title: newTask.title,
+      description: newTask.description || '',
+      priority: newTask.priority,
+      tags: newTask.tags || [],
+      project: newTask.projectId,
+    };
+
+    generatePrompt(promptInput).then(async (generatedPrompt) => {
+      if (generatedPrompt && generatedPrompt !== "Error generating prompt.") {
+        await updateTask(userId, newTask.$id, { prompt: generatedPrompt });
+      }
+    }).catch(err => console.error("Background prompt generation failed:", err));
+
     return newTask;
   }
 
   // Update task data
   static async updateTaskData(userId: string, taskId: string, taskData: Partial<Task>) {
-    return updateTask(userId, taskId, taskData);
+    const updatedTask = await updateTask(userId, taskId, taskData);
+
+    // Trigger prompt regeneration if relevant fields changed
+    if (taskData.title || taskData.description || taskData.tags) {
+       // Strategy: Fetch fresh task data to ensure we have everything for the prompt
+       // We use getTask(id) instead of fetching all tasks for performance
+       getTask(taskId).then((fullTask) => {
+         if (fullTask) {
+           const promptInput = {
+             title: fullTask.title,
+             description: fullTask.description || '',
+             priority: fullTask.priority,
+             tags: fullTask.tags || [],
+             project: fullTask.projectId,
+           };
+           generatePrompt(promptInput).then(async (generatedPrompt) => {
+             if (generatedPrompt && generatedPrompt !== "Error generating prompt.") {
+               await updateTask(userId, taskId, { prompt: generatedPrompt });
+             }
+           }).catch(err => console.error("Background prompt generation failed:", err));
+         }
+       });
+    }
+
+    return updatedTask;
   }
 
   // Toggle task completion
