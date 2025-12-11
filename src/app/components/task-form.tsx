@@ -158,6 +158,8 @@ export function TaskForm({ isOpen, onClose, onSave, task, allTasks, activeWorksp
   const [templateDescription, setTemplateDescription] = useState('');
 
   const [dateInputMode, setDateInputMode] = useState<'dueDate' | 'duration'>('dueDate');
+  const [dueDateOpen, setDueDateOpen] = useState(false);
+  const [startDateOpen, setStartDateOpen] = useState(false);
 
   const form = useForm<TaskFormValues>({
     resolver: zodResolver(currentTaskSchema) as Resolver<TaskFormValues>,
@@ -539,7 +541,7 @@ export function TaskForm({ isOpen, onClose, onSave, task, allTasks, activeWorksp
                               {t('taskForm.dueDate')}
                               <AITriggerButton feature="dueDate" className="w-3.5 h-3.5 ml-2" />
                             </FormLabel>
-                            <Popover>
+                            <Popover open={dueDateOpen} onOpenChange={setDueDateOpen}>
                               <PopoverTrigger asChild>
                                 <FormControl>
                                   <Button
@@ -563,7 +565,10 @@ export function TaskForm({ isOpen, onClose, onSave, task, allTasks, activeWorksp
                                   mode="single"
                                   locale={dateLocale}
                                   selected={field.value}
-                                  onSelect={field.onChange}
+                                  onSelect={(date) => {
+                                    field.onChange(date);
+                                    setDueDateOpen(false);
+                                  }}
                                   disabled={(date) => date < new Date(new Date().setHours(0, 0, 0, 0))}
                                 />
                               </PopoverContent>
@@ -582,7 +587,7 @@ export function TaskForm({ isOpen, onClose, onSave, task, allTasks, activeWorksp
                               {t('taskForm.dueDate')}
                               <AITriggerButton feature="dueDate" className="w-3.5 h-3.5 ml-2" />
                             </FormLabel>
-                            <Popover>
+                            <Popover open={dueDateOpen} onOpenChange={setDueDateOpen}>
                               <PopoverTrigger asChild>
                                 <FormControl>
                                   <Button
@@ -606,7 +611,10 @@ export function TaskForm({ isOpen, onClose, onSave, task, allTasks, activeWorksp
                                   mode="single"
                                   locale={dateLocale}
                                   selected={field.value}
-                                  onSelect={field.onChange}
+                                  onSelect={(date) => {
+                                    field.onChange(date);
+                                    setDueDateOpen(false);
+                                  }}
                                   disabled={(date) => date < new Date(new Date().setHours(0, 0, 0, 0))}
                                 />
                               </PopoverContent>
@@ -623,7 +631,7 @@ export function TaskForm({ isOpen, onClose, onSave, task, allTasks, activeWorksp
                           render={({ field }) => (
                             <FormItem className="flex flex-col">
                               <FormLabel className="text-xs font-semibold text-muted-foreground mb-1">{t('taskForm.startDate')}</FormLabel>
-                              <Popover>
+                              <Popover open={startDateOpen} onOpenChange={setStartDateOpen}>
                                 <PopoverTrigger asChild>
                                   <FormControl>
                                     <Button
@@ -647,7 +655,10 @@ export function TaskForm({ isOpen, onClose, onSave, task, allTasks, activeWorksp
                                     mode="single"
                                     locale={dateLocale}
                                     selected={field.value}
-                                    onSelect={field.onChange}
+                                    onSelect={(date) => {
+                                      field.onChange(date);
+                                      setStartDateOpen(false);
+                                    }}
                                     disabled={(date) => date < new Date(new Date().setHours(0, 0, 0, 0))}
                                   />
                                 </PopoverContent>
