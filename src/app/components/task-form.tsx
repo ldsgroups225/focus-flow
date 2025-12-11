@@ -179,7 +179,7 @@ export function TaskForm({ isOpen, onClose, onSave, task, allTasks, activeWorksp
     },
   });
 
-  const potentialDependencies = allTasks.filter(t => t.id !== task?.id && t.workspace === activeWorkspace);
+  const potentialDependencies = allTasks.filter(t => t.id !== task?.id && t.workspace === activeWorkspace && !t.completed);
 
   useEffect(() => {
     if (isOpen) {
