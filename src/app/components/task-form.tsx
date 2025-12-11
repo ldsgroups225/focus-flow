@@ -361,12 +361,12 @@ export function TaskForm({ isOpen, onClose, onSave, task, allTasks, activeWorksp
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="w-[95vw] sm:w-full sm:max-w-[550px] max-h-[90vh] flex flex-col p-0 gap-0 border-border/60 bg-background/95 backdrop-blur-xl shadow-2xl rounded-xl overflow-hidden">
+      <DialogContent className="w-[95vw] sm:w-full sm:max-w-[550px] max-h-[80vh] flex flex-col p-0 gap-0 border-border/60 bg-background/95 backdrop-blur-xl shadow-2xl rounded-xl overflow-hidden">
         <motion.div
           variants={containerStagger}
           initial="hidden"
           animate="show"
-          className="flex flex-col h-full w-full"
+          className="flex flex-col h-full w-full overflow-hidden"
         >
           <motion.div variants={slideUp} className="shrink-0">
             <DialogHeader className="p-6 pb-2 border-b/0">
@@ -379,10 +379,10 @@ export function TaskForm({ isOpen, onClose, onSave, task, allTasks, activeWorksp
             </DialogHeader>
           </motion.div>
 
-          <motion.div variants={slideUp} className="flex flex-col flex-1 min-h-0">
+          <motion.div variants={slideUp} className="flex flex-col flex-1 min-h-0 overflow-hidden">
             <Form {...form}>
               <form onSubmit={form.handleSubmit(onSubmit)} className="flex flex-col flex-1 min-h-0">
-                <div className="space-y-6 py-4 overflow-y-auto flex-1 px-6 scrollbar-thin">
+                <div className="space-y-6 py-4 overflow-y-auto overflow-x-hidden flex-1 px-6 scrollbar-thin">
                   {!task && templates.length > 0 && (
                     <FormItem>
                       <FormLabel className="text-xs font-medium uppercase tracking-wider text-muted-foreground mb-1.5 block">
