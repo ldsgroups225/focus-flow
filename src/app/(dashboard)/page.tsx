@@ -145,6 +145,14 @@ function DashboardContent() {
             </div>
             <Button
               variant="outline"
+              size="icon"
+              onClick={() => setIsAiSelectorOpen(true)}
+              className="sm:hidden border-primary/20 bg-primary/5 hover:bg-primary/10 hover:border-primary/40 text-primary transition-all rounded-xl"
+            >
+              <Sparkles className="size-4" />
+            </Button>
+            <Button
+              variant="outline"
               size="sm"
               onClick={() => setIsAiSelectorOpen(true)}
               className="hidden sm:flex items-center gap-2 border-primary/20 bg-primary/5 hover:bg-primary/10 hover:border-primary/40 text-primary transition-all rounded-xl"
