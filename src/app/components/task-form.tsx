@@ -40,7 +40,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group';
-import { CalendarIcon, BrainCircuit, Link, Sparkles, LoaderCircle, Trash2, FileText, Plus } from 'lucide-react';
+import { CalendarIcon, BrainCircuit, Link, Sparkles, LoaderCircle, Trash2, FileText, Plus, RotateCcw } from 'lucide-react';
 import { Calendar } from '@/components/ui/calendar';
 import { cn } from '@/lib/utils';
 import { format } from 'date-fns';
@@ -147,6 +147,8 @@ type TaskFormProps = {
   templates: Template[];
 };
 
+const TASK_FORM_STORAGE_KEY = 'focusflow-task-form-draft';
+
 export function TaskForm({ isOpen, onClose, onSave, task, allTasks, activeWorkspace, projects, templates }: TaskFormProps) {
   const { t, locale } = useI18n();
   const dateLocale = locale === 'fr' ? fr : enUS;
@@ -160,6 +162,7 @@ export function TaskForm({ isOpen, onClose, onSave, task, allTasks, activeWorksp
   const [dateInputMode, setDateInputMode] = useState<'dueDate' | 'duration'>('dueDate');
   const [dueDateOpen, setDueDateOpen] = useState(false);
   const [startDateOpen, setStartDateOpen] = useState(false);
+  const [hasDraft, setHasDraft] = useState(false);
 
   const form = useForm<TaskFormValues>({
     resolver: zodResolver(currentTaskSchema) as Resolver<TaskFormValues>,
@@ -181,6 +184,7 @@ export function TaskForm({ isOpen, onClose, onSave, task, allTasks, activeWorksp
 
   const potentialDependencies = allTasks.filter(t => t.id !== task?.id && t.workspace === activeWorkspace && !t.completed);
 
+  // Load draft from localStorage for new tasks
   useEffect(() => {
     if (isOpen) {
       if (task) {
@@ -204,25 +208,102 @@ export function TaskForm({ isOpen, onClose, onSave, task, allTasks, activeWorksp
         if (task.duration && task.duration > 0 && task.startDate) {
           setDateInputMode('duration');
         }
+        setHasDraft(false);
       } else {
-        form.reset({
-          title: '',
-          description: '',
-          priority: 'medium',
-          type: 'task',
-          tags: '',
-          dueDate: undefined,
-          startDate: undefined,
-          duration: 0,
-          pomodoros: 1,
-          dependsOn: [],
-          workspace: activeWorkspace,
-          subTasks: [],
-        });
-        setDateInputMode('dueDate');
+        // Try to restore draft from localStorage
+        try {
+          const savedDraft = localStorage.getItem(TASK_FORM_STORAGE_KEY);
+          if (savedDraft) {
+            const draft = JSON.parse(savedDraft);
+            form.reset({
+              ...draft,
+              dueDate: draft.dueDate ? new Date(draft.dueDate) : undefined,
+              startDate: draft.startDate ? new Date(draft.startDate) : undefined,
+              workspace: activeWorkspace,
+            });
+            if (draft.dateInputMode) {
+              setDateInputMode(draft.dateInputMode);
+            }
+            setHasDraft(true);
+          } else {
+            form.reset({
+              title: '',
+              description: '',
+              priority: 'medium',
+              type: 'task',
+              tags: '',
+              dueDate: undefined,
+              startDate: undefined,
+              duration: 0,
+              pomodoros: 1,
+              dependsOn: [],
+              workspace: activeWorkspace,
+              subTasks: [],
+            });
+            setDateInputMode('dueDate');
+            setHasDraft(false);
+          }
+        } catch {
+          form.reset({
+            title: '',
+            description: '',
+            priority: 'medium',
+            type: 'task',
+            tags: '',
+            dueDate: undefined,
+            startDate: undefined,
+            duration: 0,
+            pomodoros: 1,
+            dependsOn: [],
+            workspace: activeWorkspace,
+            subTasks: [],
+          });
+          setDateInputMode('dueDate');
+          setHasDraft(false);
+        }
       }
     }
   }, [task, form, isOpen, activeWorkspace]);
+
+  // Auto-save draft to localStorage for new tasks
+  const formValues = form.watch();
+  useEffect(() => {
+    if (isOpen && !task) {
+      const hasContent = formValues.title || formValues.description || formValues.tags ||
+        (formValues.subTasks && formValues.subTasks.length > 0);
+      if (hasContent) {
+        const draft = {
+          ...formValues,
+          dueDate: formValues.dueDate?.toISOString(),
+          startDate: formValues.startDate?.toISOString(),
+          dateInputMode,
+        };
+        localStorage.setItem(TASK_FORM_STORAGE_KEY, JSON.stringify(draft));
+        setHasDraft(true);
+      }
+    }
+  }, [formValues, isOpen, task, dateInputMode]);
+
+  // Clear draft from localStorage
+  const clearDraft = () => {
+    localStorage.removeItem(TASK_FORM_STORAGE_KEY);
+    form.reset({
+      title: '',
+      description: '',
+      priority: 'medium',
+      type: 'task',
+      tags: '',
+      dueDate: undefined,
+      startDate: undefined,
+      duration: 0,
+      pomodoros: 1,
+      dependsOn: [],
+      workspace: activeWorkspace,
+      subTasks: [],
+    });
+    setDateInputMode('dueDate');
+    setHasDraft(false);
+  };
 
   const handleAiFeature = async (feature: 'tags' | 'dueDate' | 'subTasks') => {
     const { title, description } = form.getValues();
@@ -317,6 +398,9 @@ export function TaskForm({ isOpen, onClose, onSave, task, allTasks, activeWorksp
     }
 
     const tagsArray = data.tags ? data.tags.split(',').map(tag => tag.trim()).filter(Boolean) : [];
+    // Clear draft on successful save
+    localStorage.removeItem(TASK_FORM_STORAGE_KEY);
+    setHasDraft(false);
     onSave({ ...data, tags: tagsArray });
     onClose();
   };
@@ -363,7 +447,7 @@ export function TaskForm({ isOpen, onClose, onSave, task, allTasks, activeWorksp
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="w-[95vw] sm:w-full sm:max-w-[550px] max-h-[80vh] flex flex-col p-0 gap-0 border-border/60 bg-background/95 backdrop-blur-xl shadow-2xl rounded-xl overflow-hidden">
+      <DialogContent hideCloseButton className="w-[95vw] sm:w-full sm:max-w-[550px] max-h-[80vh] flex flex-col p-0 gap-0 border-border/60 bg-background/95 backdrop-blur-xl shadow-2xl rounded-xl overflow-hidden">
         <motion.div
           variants={containerStagger}
           initial="hidden"
@@ -372,9 +456,23 @@ export function TaskForm({ isOpen, onClose, onSave, task, allTasks, activeWorksp
         >
           <motion.div variants={slideUp} className="shrink-0">
             <DialogHeader className="p-6 pb-2 border-b/0">
-              <DialogTitle className="text-xl font-semibold tracking-tight">
-                {task ? t('taskForm.editTask') : t('taskForm.addTask')}
-              </DialogTitle>
+              <div className="flex items-center justify-between">
+                <DialogTitle className="text-xl font-semibold tracking-tight">
+                  {task ? t('taskForm.editTask') : t('taskForm.addTask')}
+                </DialogTitle>
+                {!task && hasDraft && (
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="icon"
+                    onClick={clearDraft}
+                    className="h-8 w-8 text-muted-foreground hover:text-destructive"
+                    title={t('taskForm.clearDraft')}
+                  >
+                    <RotateCcw className="h-4 w-4" />
+                  </Button>
+                )}
+              </div>
               <DialogDescription>
                 {task ? 'Edit the details of your task.' : 'Create a new task to track your progress.'}
               </DialogDescription>

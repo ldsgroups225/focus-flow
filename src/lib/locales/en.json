@@ -91,7 +91,8 @@
       "tags": "Suggest Tags with AI",
       "dueDate": "Suggest Due Date with AI",
       "subTasks": "Breakdown Task with AI"
-    }
+    },
+    "clearDraft": "Clear draft"
   },
   "focusView": {
     "focusingOn": "Focusing on",

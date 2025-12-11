@@ -92,7 +92,8 @@
       "tags": "Suggérer des Étiquettes avec l'IA",
       "dueDate": "Suggérer une Date d'Échéance avec l'IA",
       "subTasks": "Décomposer la Tâche avec l'IA"
-    }
+    },
+    "clearDraft": "Effacer le brouillon"
   },
   "focusView": {
     "focusingOn": "Concentration sur",
