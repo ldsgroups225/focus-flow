@@ -33,6 +33,8 @@
     "timeSpent": "{time} passé sur cette tâche",
     "focusMode": "Mode Focus",
     "editTask": "Modifier la Tâche",
+    "copyTask": "Copier la tâche",
+    "taskCopied": "Tâche copiée dans le presse-papiers",
     "deleteTask": "Supprimer la Tâche",
     "blocked": "Bloquée",
     "blockedBy": "Cette tâche est bloquée par : {tasks}",

@@ -32,6 +32,8 @@
     "timeSpent": "{time} spent on this task",
     "focusMode": "Focus Mode",
     "editTask": "Edit Task",
+    "copyTask": "Copy Task",
+    "taskCopied": "Task copied to clipboard",
     "deleteTask": "Delete Task",
     "blocked": "Blocked",
     "blockedBy": "This task is blocked by: {tasks}",
