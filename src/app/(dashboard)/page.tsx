@@ -36,7 +36,7 @@ import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sh
 import { SidebarContent } from '@/app/components/sidebar-content';
 import { getNameFromEmail } from '@/lib/utils/get-name-from-email';
 import { getAvatarInitial } from '@/lib/utils/get-avatar-initial';
-import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import { DashboardProvider, useDashboard } from '@/contexts/dashboard-context';
 
 // Import tab content components directly (not lazy loaded to avoid context issues)
@@ -116,7 +116,11 @@ function DashboardContent() {
   };
 
   return (
-    <div className="min-h-screen bg-background text-foreground selection:bg-primary/20">
+    <Tabs
+      value={activeMobileTab}
+      onValueChange={setActiveMobileTab}
+      className="min-h-screen bg-background text-foreground selection:bg-primary/20 flex flex-col gap-0"
+    >
       <motion.header
         initial={{ y: -20, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
@@ -209,80 +213,55 @@ function DashboardContent() {
 
         {/* Mobile Tabs Navigation - Inside Header for sticky behavior */}
         <div className="md:hidden border-t border-border/40 bg-background/95 backdrop-blur-md">
-          <Tabs value={activeMobileTab} onValueChange={setActiveMobileTab} className="w-full">
-            <TabsList className="w-full h-12 rounded-none bg-transparent p-0 justify-around">
-              <TabsTrigger value="tasks" className="flex-1 h-full rounded-none data-[state=active]:border-b-2 data-[state=active]:border-primary data-[state=active]:shadow-none bg-transparent">
-                <div className='flex flex-col items-center gap-0.5'>
-                  <List className="size-4" />
-                  <span className="text-[10px] uppercase tracking-wide">{t('navigation.tasks')}</span>
-                </div>
-              </TabsTrigger>
-              <TabsTrigger value="calendar" className="flex-1 h-full rounded-none data-[state=active]:border-b-2 data-[state=active]:border-primary data-[state=active]:shadow-none bg-transparent">
-                <div className='flex flex-col items-center gap-0.5'>
-                  <CalendarIcon className="size-4" />
-                  <span className="text-[10px] uppercase tracking-wide">{t('navigation.calendar')}</span>
-                </div>
-              </TabsTrigger>
-              <TabsTrigger value="timeline" className="flex-1 h-full rounded-none data-[state=active]:border-b-2 data-[state=active]:border-primary data-[state=active]:shadow-none bg-transparent">
-                <div className='flex flex-col items-center gap-0.5'>
-                  <Clock className="size-4" />
-                  <span className="text-[10px] uppercase tracking-wide">{t('navigation.timeline')}</span>
-                </div>
-              </TabsTrigger>
-              {/* <TabsTrigger value="analytics" className="flex-1 h-full rounded-none data-[state=active]:border-b-2 data-[state=active]:border-primary data-[state=active]:shadow-none bg-transparent">
+          <TabsList className="w-full h-12 rounded-none bg-transparent p-0 justify-around">
+            <TabsTrigger value="tasks" className="flex-1 h-full rounded-none data-[state=active]:border-b-2 data-[state=active]:border-primary data-[state=active]:shadow-none bg-transparent">
+              <div className='flex flex-col items-center gap-0.5'>
+                <List className="size-4" />
+                <span className="text-[10px] uppercase tracking-wide">{t('navigation.tasks')}</span>
+              </div>
+            </TabsTrigger>
+            <TabsTrigger value="calendar" className="flex-1 h-full rounded-none data-[state=active]:border-b-2 data-[state=active]:border-primary data-[state=active]:shadow-none bg-transparent">
+              <div className='flex flex-col items-center gap-0.5'>
+                <CalendarIcon className="size-4" />
+                <span className="text-[10px] uppercase tracking-wide">{t('navigation.calendar')}</span>
+              </div>
+            </TabsTrigger>
+            <TabsTrigger value="timeline" className="flex-1 h-full rounded-none data-[state=active]:border-b-2 data-[state=active]:border-primary data-[state=active]:shadow-none bg-transparent">
+              <div className='flex flex-col items-center gap-0.5'>
+                <Clock className="size-4" />
+                <span className="text-[10px] uppercase tracking-wide">{t('navigation.timeline')}</span>
+              </div>
+            </TabsTrigger>
+            {/* <TabsTrigger value="analytics" className="flex-1 h-full rounded-none data-[state=active]:border-b-2 data-[state=active]:border-primary data-[state=active]:shadow-none bg-transparent">
                   <div className='flex flex-col items-center gap-0.5'>
                     <BarChart3 className="size-4" />
                     <span className="text-[10px] uppercase tracking-wide">{t('navigation.analytics')}</span>
                   </div>
                 </TabsTrigger> */}
-            </TabsList>
-
-            {/* Note: TabsContent cannot be inside sticky header if we want it to scroll in body.
-                  We need to rethink this structure slightly. The TabsList SHOULD be sticky, but Content should be in Main.
-                  However, Radix Tabs expects Content to be inside Tabs.
-                  For now lets keep it here but realize content is hidden on mobile unless we move TabsContent out.
-                  Ah, the original code had Tabs wrapping everything.
-                  We'll use a controlled state for tabs to separate List and Content if needed, but for now let's just use Tabs primitive.
-                  Actually, simple fix: Mobile Tabs inside main content, sticky header only contains generic nav if needed.
-                  But user usually wants nav bar sticky.
-
-                  Let's revert to: Sticky Header contains basic top bar.
-                  TabsList is sticky below it? Or just put content in main.
-              */}
-          </Tabs>
+          </TabsList>
         </div>
       </motion.header>
 
 
       <main className="container mx-auto max-w-5xl p-4 sm:p-6 md:p-8 pt-6">
 
-        {/* Mobile Tabs Content - Controlled by State */}
+        {/* Mobile Tabs Content - Using TabsContent for proper structure */}
         <div className="w-full md:hidden">
-          {activeMobileTab === 'tasks' && (
-            <div className="mt-0 space-y-4">
-              <TasksTabContent />
-            </div>
-          )}
-          {activeMobileTab === 'calendar' && (
-            <div className="mt-0">
-              <CalendarTabContent />
-            </div>
-          )}
-          {activeMobileTab === 'timeline' && (
-            <div className="mt-0">
-              <TimelineTabContent />
-            </div>
-          )}
-          {activeMobileTab === 'analytics' && (
-            <div className="mt-0">
-              <AnalyticsTabContent />
-            </div>
-          )}
-          {activeMobileTab === 'templates' && (
-            <div className="mt-0">
-              <TemplatesTabContent />
-            </div>
-          )}
+          <TabsContent value="tasks" className="mt-0 space-y-4">
+            <TasksTabContent />
+          </TabsContent>
+          <TabsContent value="calendar" className="mt-0">
+            <CalendarTabContent />
+          </TabsContent>
+          <TabsContent value="timeline" className="mt-0">
+            <TimelineTabContent />
+          </TabsContent>
+          <TabsContent value="analytics" className="mt-0">
+            <AnalyticsTabContent />
+          </TabsContent>
+          <TabsContent value="templates" className="mt-0">
+            <TemplatesTabContent />
+          </TabsContent>
         </div>
 
         {/* Desktop Layout with Sidebar */}
@@ -483,7 +462,7 @@ function DashboardContent() {
           </SheetContent>
         </Sheet>
       </main>
-    </div>
+    </Tabs>
   );
 }
 
