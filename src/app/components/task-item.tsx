@@ -7,6 +7,7 @@ import {
   Minus,
   Trash2,
   Edit,
+  Copy,
   Crosshair,
   BrainCircuit,
   CheckCircle2,
@@ -25,6 +26,7 @@ import { Progress } from '@/components/ui/progress';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { cn } from '@/lib/utils';
 import { useI18n } from './i18n-provider';
+import { useToast } from '@/hooks/use-toast';
 import type { Priority, TaskWithSubTasks, SubTask } from '@/lib/types';
 import { motion } from 'framer-motion';
 
@@ -230,47 +232,74 @@ const TaskActions = memo(({
   onEdit: (task: TaskWithSubTasks) => void;
   onDelete: (taskId: string) => void;
   t: (key: string) => string;
-}) => (
-  <div className="flex flex-col gap-1 opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity duration-200 static">
-    <TooltipProvider>
-      <Tooltip>
-        <TooltipTrigger asChild>
-          <Button
-            variant="secondary"
-            size="icon"
-            className="h-8 w-8 shadow-sm hover:shadow-md bg-background/80 backdrop-blur-sm"
-            onClick={() => onFocus(task)}
-            disabled={!!isBlocked}
-          >
-            <Crosshair className="h-4 w-4 text-primary" />
-          </Button>
-        </TooltipTrigger>
-        <TooltipContent side="left"><p className="text-xs">{t('taskItem.focusMode')}</p></TooltipContent>
-      </Tooltip>
-    </TooltipProvider>
+}) => {
+  const { toast } = useToast();
 
-    <div className="flex flex-col gap-1">
-      <Button
-        variant="ghost"
-        size="icon"
-        className="h-8 w-8 hover:bg-muted"
-        onClick={() => onEdit(task)}
-        title={t('taskItem.editTask')}
-      >
-        <Edit className="h-4 w-4 text-muted-foreground" />
-      </Button>
-      <Button
-        variant="ghost"
-        size="icon"
-        className="h-8 w-8 hover:bg-destructive/10"
-        onClick={() => onDelete(task.id)}
-        title={t('taskItem.deleteTask')}
-      >
-        <Trash2 className="h-4 w-4 text-destructive/80" />
-      </Button>
+  const handleCopy = () => {
+    const textToCopy = `${task.title}\n${task.description || ''}`.trim();
+    navigator.clipboard.writeText(textToCopy).then(() => {
+      toast({
+        title: t('taskItem.copiedToClipboard'),
+        description: t('taskItem.copiedToClipboardDescription'),
+        duration: 2000,
+      });
+    }).catch(() => {
+      // Fail silently or maybe show an error toast if needed, but simple return is often enough for UX if permission denied
+    });
+  };
+
+  return (
+    <div className="flex flex-col gap-1 opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity duration-200 static">
+      <TooltipProvider>
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <Button
+              variant="secondary"
+              size="icon"
+              className="h-8 w-8 shadow-sm hover:shadow-md bg-background/80 backdrop-blur-sm"
+              onClick={() => onFocus(task)}
+              disabled={!!isBlocked}
+            >
+              <Crosshair className="h-4 w-4 text-primary" />
+            </Button>
+          </TooltipTrigger>
+          <TooltipContent side="left"><p className="text-xs">{t('taskItem.focusMode')}</p></TooltipContent>
+        </Tooltip>
+      </TooltipProvider>
+
+      <div className="flex flex-col gap-1">
+        <Button
+          variant="ghost"
+          size="icon"
+          className="h-8 w-8 hover:bg-muted"
+          onClick={() => onEdit(task)}
+          title={t('taskItem.editTask')}
+        >
+          <Edit className="h-4 w-4 text-muted-foreground" />
+        </Button>
+        <Button
+          variant="ghost"
+          size="icon"
+          className="h-8 w-8 hover:bg-muted"
+          onClick={handleCopy}
+          title={t('taskItem.copyTask')}
+          aria-label={t('taskItem.copyTask')}
+        >
+          <Copy className="h-4 w-4 text-muted-foreground" />
+        </Button>
+        <Button
+          variant="ghost"
+          size="icon"
+          className="h-8 w-8 hover:bg-destructive/10"
+          onClick={() => onDelete(task.id)}
+          title={t('taskItem.deleteTask')}
+        >
+          <Trash2 className="h-4 w-4 text-destructive/80" />
+        </Button>
+      </div>
     </div>
-  </div>
-));
+  );
+});
 
 TaskActions.displayName = 'TaskActions';
 
