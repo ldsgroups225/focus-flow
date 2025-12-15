@@ -39,9 +39,9 @@ export const getTasks = (
         tableId: TASKS_TABLE_ID,
         queries: [
           Query.equal("userId", userId),
-          // Multi-level ordering: priority desc, dueDate asc, createdAt asc
-          Query.orderDesc("priority"),
+          // Multi-level ordering: dueDate asc, priority desc, createdAt asc
           Query.orderAsc("dueDate"),
+          Query.orderDesc("priority"),
           Query.orderAsc("$createdAt"),
         ],
       });
