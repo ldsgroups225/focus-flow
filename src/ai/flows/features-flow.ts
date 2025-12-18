@@ -48,7 +48,10 @@ type FocusAssistantOutput = string;
 const suggestTagsPrompt = ai.definePrompt({
   name: 'suggestTagsPrompt',
   input: { schema: suggestTagsInputSchema },
-  output: { schema: suggestTagsOutputSchema },
+  output: {
+    schema: suggestTagsOutputSchema,
+    format: 'json'
+  },
   system: `You are a task categorization expert for FocusFlow, a productivity app. Your role is to generate precise, useful tags that help users organize and filter their tasks effectively.`,
   prompt: `<task>
 Generate 2-4 relevant tags for the following task.
@@ -101,7 +104,10 @@ export async function suggestTags(input: SuggestTagsInput): Promise<SuggestTagsO
 const suggestDueDatePrompt = ai.definePrompt({
   name: 'suggestDueDatePrompt',
   input: { schema: suggestDueDateInputSchema },
-  output: { schema: suggestDueDateOutputSchema },
+  output: {
+    schema: suggestDueDateOutputSchema,
+    format: 'text' // Dates are simple strings
+  },
   system: `You are a project estimation expert for FocusFlow. Your role is to suggest realistic due dates based on task complexity analysis.`,
   prompt: `<task>
 Analyze task complexity and suggest a realistic due date.
@@ -159,7 +165,10 @@ export async function suggestDueDate(input: SuggestDueDateInput): Promise<Sugges
 const breakdownTaskPrompt = ai.definePrompt({
   name: 'breakdownTaskPrompt',
   input: { schema: breakdownTaskInputSchema },
-  output: { schema: breakdownTaskOutputSchema },
+  output: {
+    schema: breakdownTaskOutputSchema,
+    format: 'json'
+  },
   system: `You are a task decomposition expert for FocusFlow. Your role is to break complex tasks into manageable, actionable sub-tasks that follow best practices for productivity.`,
   prompt: `<task>
 Break down the following task into smaller, actionable sub-tasks.
