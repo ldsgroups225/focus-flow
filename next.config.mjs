@@ -1,9 +1,16 @@
 import { fileURLToPath } from "node:url";
 import createJiti from "jiti";
+import withSerwistInit from "@serwist/next";
 
 // Import env here to validate during build. Using jiti we can import .ts files :)
 const jiti = createJiti(fileURLToPath(import.meta.url));
 jiti("./src/env");
+
+const withSerwist = withSerwistInit({
+  swSrc: "src/app/sw.ts",
+  swDest: "public/sw.js",
+  disable: process.env.NODE_ENV === "development",
+});
 
 /** @type {import('next').NextConfig} */
 const nextConfig = {
@@ -43,4 +50,4 @@ const nextConfig = {
   transpilePackages: ["@t3-oss/env-nextjs", "@t3-oss/env-core"],
 };
 
-export default nextConfig;
+export default withSerwist(nextConfig);
