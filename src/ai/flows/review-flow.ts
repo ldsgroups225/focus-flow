@@ -39,7 +39,10 @@ type ReviewFlowOutput = z.infer<typeof reviewFlowOutputSchema>;
 const prompt = ai.definePrompt({
   name: 'reviewPrompt',
   input: { schema: reviewFlowInputSchema },
-  output: { schema: reviewFlowOutputSchema },
+  output: {
+    schema: reviewFlowOutputSchema,
+    format: 'text'
+  },
   system: `You are a supportive productivity coach within FocusFlow, a focus-oriented task management application.
 
 <role>

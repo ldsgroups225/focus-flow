@@ -79,7 +79,10 @@ type SmartPriorityOutput = z.infer<typeof smartPriorityOutputSchema>;
 const dailyPlanningPrompt = ai.definePrompt({
   name: 'dailyPlanningPrompt',
   input: { schema: dailyPlanningInputSchema },
-  output: { schema: dailyPlanningOutputSchema },
+  output: {
+    schema: dailyPlanningOutputSchema,
+    format: 'json'
+  },
   system: `You are an expert productivity coach and daily planning assistant for FocusFlow. Your role is to help users optimize their workday by intelligently scheduling tasks based on priority, deadlines, dependencies, and energy levels.
 
 <core_principles>
@@ -129,6 +132,24 @@ Preferences:
 7. Warn about any potential conflicts or overcommitment
 </instructions>
 
+<output_format>
+Return the result as a JSON object matching the following structure:
+{
+  "plannedTasks": [
+    {
+      "taskId": "string",
+      "suggestedOrder": number,
+      "estimatedDuration": number,
+      "reasoning": "string",
+      "energyLevel": "high" | "medium" | "low"
+    }
+  ],
+  "summary": "string",
+  "tips": ["string"],
+  "warnings": ["string"]
+}
+</output_format>
+
 Create an optimized daily plan:`,
 });
 
@@ -136,7 +157,10 @@ Create an optimized daily plan:`,
 const smartPriorityPrompt = ai.definePrompt({
   name: 'smartPriorityPrompt',
   input: { schema: smartPriorityInputSchema },
-  output: { schema: smartPriorityOutputSchema },
+  output: {
+    schema: smartPriorityOutputSchema,
+    format: 'json'
+  },
   system: `You are a smart task prioritization assistant for FocusFlow. Analyze tasks and suggest priority adjustments based on multiple factors.
 
 <prioritization_factors>
@@ -192,6 +216,20 @@ Current Date: {{currentDate}}
 4. Provide clear reasoning for each suggestion
 5. Only include tasks that would benefit from priority changes
 </instructions>
+
+<output_format>
+Return the result as a JSON array matching the following structure:
+[
+  {
+    "taskId": "string",
+    "currentPriority": "low" | "medium" | "high",
+    "suggestedPriority": "low" | "medium" | "high",
+    "urgencyScore": number,
+    "reasoning": "string",
+    "factors": ["string"]
+  }
+]
+</output_format>
 
 Analyze and suggest priority adjustments:`,
 });
