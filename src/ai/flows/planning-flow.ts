@@ -132,6 +132,24 @@ Preferences:
 7. Warn about any potential conflicts or overcommitment
 </instructions>
 
+<output_format>
+Return the result as a JSON object matching the following structure:
+{
+  "plannedTasks": [
+    {
+      "taskId": "string",
+      "suggestedOrder": number,
+      "estimatedDuration": number,
+      "reasoning": "string",
+      "energyLevel": "high" | "medium" | "low"
+    }
+  ],
+  "summary": "string",
+  "tips": ["string"],
+  "warnings": ["string"]
+}
+</output_format>
+
 Create an optimized daily plan:`,
 });
 
@@ -198,6 +216,20 @@ Current Date: {{currentDate}}
 4. Provide clear reasoning for each suggestion
 5. Only include tasks that would benefit from priority changes
 </instructions>
+
+<output_format>
+Return the result as a JSON array matching the following structure:
+[
+  {
+    "taskId": "string",
+    "currentPriority": "low" | "medium" | "high",
+    "suggestedPriority": "low" | "medium" | "high",
+    "urgencyScore": number,
+    "reasoning": "string",
+    "factors": ["string"]
+  }
+]
+</output_format>
 
 Analyze and suggest priority adjustments:`,
 });
