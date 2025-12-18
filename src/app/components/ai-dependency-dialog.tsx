@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useMemo } from 'react';
 import {
   Dialog,
   DialogContent,
@@ -117,6 +117,8 @@ export function AiDependencyDialog({
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
+  const activeTasks = useMemo(() => tasks.filter(task => !task.completed), [tasks]);
+
   const handleGenerate = useCallback(async () => {
     setIsLoading(true);
     setError(null);
@@ -129,7 +131,7 @@ export function AiDependencyDialog({
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          tasks: tasks.map(serializeTask),
+          tasks: activeTasks.map(serializeTask),
           locale,
         }),
       });
@@ -147,7 +149,7 @@ export function AiDependencyDialog({
     } finally {
       setIsLoading(false);
     }
-  }, [locale, tasks, t]);
+  }, [locale, activeTasks, t]);
 
   const handleClose = useCallback(() => {
     onClose();
@@ -186,7 +188,7 @@ export function AiDependencyDialog({
               </AlertDescription>
             </Alert>
             <p className="text-sm text-muted-foreground">
-              {t('aiDependency.taskCount', { count: String(tasks.length) })}
+              {t('aiDependency.taskCount', { count: String(activeTasks.length) })}
             </p>
           </div>
         )}
@@ -214,7 +216,7 @@ export function AiDependencyDialog({
           {!suggestions && (
             <Button
               onClick={handleGenerate}
-              disabled={isLoading || tasks.length === 0}
+              disabled={isLoading || activeTasks.length === 0}
             >
               {isLoading ? t('aiDependency.analyzing') : t('aiDependency.analyze')}
             </Button>
