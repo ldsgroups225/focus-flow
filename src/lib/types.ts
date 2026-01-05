@@ -1,6 +1,19 @@
 import { z } from 'zod';
 
-export type Priority = "low" | "medium" | "high";
+// Numeric priority enum for database storage
+export enum Priority {
+  LOW = 1,
+  MEDIUM = 2,
+  HIGH = 3,
+  URGENT = 4
+}
+
+// Display type for UI components
+export type PriorityDisplay = 'low' | 'medium' | 'high' | 'urgent';
+
+// Legacy type for backwards compatibility
+export type PriorityLegacy = "low" | "medium" | "high";
+
 export type Workspace = "personal" | "work" | "side-project";
 export type TaskType = "task" | "milestone" | "subtask";
 
@@ -30,7 +43,7 @@ export const taskSchema = z.object({
   title: z.string(),
   description: z.string().optional(),
   completed: z.boolean(),
-  priority: z.enum(['low', 'medium', 'high']),
+  priority: z.nativeEnum(Priority).default(Priority.MEDIUM),
   type: z.enum(['task', 'milestone', 'subtask']).default('task'),
   tags: z.array(z.string()),
   dueDate: z.coerce.date().optional(),

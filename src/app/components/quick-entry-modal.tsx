@@ -9,7 +9,8 @@ import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
 import { parseNaturalLanguageTask, type ParsedTask } from '@/lib/utils/natural-language-parser';
 import { useI18n } from '@/app/components/i18n-provider';
-import type { Priority, Workspace, TaskWithSubTasks } from '@/lib/types';
+import type { Workspace, TaskWithSubTasks } from '@/lib/types';
+import { Priority } from '@/lib/priority';
 import { format } from 'date-fns';
 
 type QuickEntryModalProps = {
@@ -64,7 +65,7 @@ export function QuickEntryModal({ isOpen, onClose, onSave, activeWorkspace }: Qu
       await onSave({
         title: parsedTask.title,
         tags: parsedTask.tags || [],
-        priority: parsedTask.priority || 'medium',
+        priority: parsedTask.priority || Priority.MEDIUM,
         workspace: parsedTask.workspace || activeWorkspace,
         dueDate: parsedTask.dueDate,
         pomodoros: parsedTask.pomodoros || 2,
@@ -85,9 +86,9 @@ export function QuickEntryModal({ isOpen, onClose, onSave, activeWorkspace }: Qu
 
   const getPriorityColor = (priority: Priority) => {
     switch (priority) {
-      case 'high': return 'bg-red-500/20 text-red-400 border-red-500/50';
-      case 'medium': return 'bg-yellow-500/20 text-yellow-400 border-yellow-500/50';
-      case 'low': return 'bg-green-500/20 text-green-400 border-green-500/50';
+      case Priority.HIGH: return 'bg-red-500/20 text-red-400 border-red-500/50';
+      case Priority.MEDIUM: return 'bg-yellow-500/20 text-yellow-400 border-yellow-500/50';
+      case Priority.LOW: return 'bg-green-500/20 text-green-400 border-green-500/50';
     }
   };
 

@@ -11,7 +11,8 @@
  * @module NaturalLanguageParser
  */
 
-import type { Priority, Workspace } from '@/lib/types';
+import type { Workspace } from '@/lib/types';
+import { Priority } from '@/lib/priority';
 
 /** Result of parsing a natural language task input */
 export type ParsedTask = {
@@ -232,13 +233,13 @@ function parsePriority(input: string): { priority: Priority | undefined; cleaned
   let cleanedInput = input;
 
   if (PRIORITY_PATTERNS.high.test(input)) {
-    priority = 'high';
+    priority = Priority.HIGH;
     cleanedInput = cleanedInput.replace(PRIORITY_PATTERNS.high, '');
   } else if (PRIORITY_PATTERNS.medium.test(input)) {
-    priority = 'medium';
+    priority = Priority.MEDIUM;
     cleanedInput = cleanedInput.replace(PRIORITY_PATTERNS.medium, '');
   } else if (PRIORITY_PATTERNS.low.test(input)) {
-    priority = 'low';
+    priority = Priority.LOW;
     cleanedInput = cleanedInput.replace(PRIORITY_PATTERNS.low, '');
   }
 

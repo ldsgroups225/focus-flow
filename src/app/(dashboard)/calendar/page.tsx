@@ -8,6 +8,7 @@ import { useEffect, useMemo, useState } from 'react';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { ArrowLeft, Calendar as CalendarIcon, Orbit, CheckCircle2, Clock, AlertCircle } from 'lucide-react';
+import { Priority } from '@/lib/priority';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import type { Task } from '@/lib/types';
@@ -234,8 +235,8 @@ export default function CalendarPage() {
                             transition={{ delay: index * 0.05 }}
                             className="group p-3 rounded-xl border bg-card hover:bg-accent hover:border-accent transition-all cursor-pointer relative overflow-hidden"
                           >
-                            <div className={`absolute left-0 top-0 bottom-0 w-1 ${task.priority === 'high' ? 'bg-red-500' :
-                              task.priority === 'medium' ? 'bg-orange-500' :
+                            <div className={`absolute left-0 top-0 bottom-0 w-1 ${task.priority === Priority.HIGH ? 'bg-red-500' :
+                              task.priority === Priority.MEDIUM ? 'bg-orange-500' :
                                 'bg-green-500'
                               }`}
                             />

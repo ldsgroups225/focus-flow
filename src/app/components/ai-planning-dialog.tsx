@@ -20,7 +20,8 @@ import { Slider } from '@/components/ui/slider';
 import { Label } from '@/components/ui/label';
 import { cn } from '@/lib/utils';
 import { useI18n } from '@/app/components/i18n-provider';
-import type { TaskWithSubTasks, Priority } from '@/lib/types';
+import type { TaskWithSubTasks } from '@/lib/types';
+import { Priority } from '@/lib/priority';
 
 type PlannedTask = {
   taskId: string;
@@ -148,9 +149,9 @@ export function AiPlanningDialog({ isOpen, onClose, tasks, onApplyPriority }: Ai
 
   const getPriorityColor = (priority: Priority) => {
     switch (priority) {
-      case 'high': return 'text-red-500 bg-red-500/10';
-      case 'medium': return 'text-yellow-500 bg-yellow-500/10';
-      case 'low': return 'text-green-500 bg-green-500/10';
+      case Priority.HIGH: return 'text-red-500 bg-red-500/10';
+      case Priority.MEDIUM: return 'text-yellow-500 bg-yellow-500/10';
+      case Priority.LOW: return 'text-green-500 bg-green-500/10';
     }
   };
 

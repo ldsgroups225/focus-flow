@@ -16,13 +16,14 @@ import {
 import { ArrowLeft, Palette, Timer, Bell, Keyboard, Settings as SettingsIcon } from 'lucide-react';
 import { useTheme } from 'next-themes';
 import { useI18n } from '@/app/components/i18n-provider';
-import type { Workspace, Priority } from '@/lib/types';
+import type { Workspace } from '@/lib/types';
+import { Priority } from '@/lib/priority';
 
 export default function SettingsPage() {
   const { theme, setTheme } = useTheme();
   const { t } = useI18n();
 
-  const [defaultPriority, setDefaultPriority] = useState<Priority>('medium');
+  const [defaultPriority, setDefaultPriority] = useState<Priority>(Priority.MEDIUM);
   const [defaultWorkspace, setDefaultWorkspace] = useState<Workspace>('personal');
   const [defaultPomodoros, setDefaultPomodoros] = useState(2);
 
@@ -163,14 +164,14 @@ export default function SettingsPage() {
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <div className="space-y-2">
                   <Label htmlFor="default-priority">{t('settings.defaults.priority')}</Label>
-                  <Select value={defaultPriority} onValueChange={(v: Priority) => setDefaultPriority(v)}>
+                  <Select value={defaultPriority.toString()} onValueChange={(v: string) => setDefaultPriority(Number(v) as Priority)}>
                     <SelectTrigger id="default-priority">
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="low">{t('taskForm.low')}</SelectItem>
-                      <SelectItem value="medium">{t('taskForm.medium')}</SelectItem>
-                      <SelectItem value="high">{t('taskForm.high')}</SelectItem>
+                      <SelectItem value={Priority.LOW.toString()}>{t('taskForm.low')}</SelectItem>
+                      <SelectItem value={Priority.MEDIUM.toString()}>{t('taskForm.medium')}</SelectItem>
+                      <SelectItem value={Priority.HIGH.toString()}>{t('taskForm.high')}</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>

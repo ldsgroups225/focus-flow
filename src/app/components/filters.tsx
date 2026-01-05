@@ -12,7 +12,8 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import { Button } from "@/components/ui/button";
-import type { Priority, Project } from "@/lib/types";
+import type { Project } from '@/lib/types';
+import { Priority } from '@/lib/priority';
 import { useI18n } from "./i18n-provider";
 import { Select, SelectContent, SelectGroup, SelectItem, SelectSeparator, SelectTrigger, SelectValue } from '@/components/ui/select';
 
@@ -39,13 +40,13 @@ const Filters = memo(function Filters({ projectFilter, setProjectFilter, priorit
           size="xs"
           type="multiple"
           variant="outline"
-          value={priorityFilter}
-          onValueChange={(value: Priority[]) => setPriorityFilter(value)}
+          value={priorityFilter.map(p => p.toString())}
+          onValueChange={(value: string[]) => setPriorityFilter(value.map(v => Number(v) as Priority))}
           className="flex flex-wrap justify-start gap-2"
         >
-          <ToggleGroupItem value="low" aria-label="Toggle low priority" className="rounded-full">{t('filters.low')}</ToggleGroupItem>
-          <ToggleGroupItem value="medium" aria-label="Toggle medium priority" className="rounded-full">{t('filters.medium')}</ToggleGroupItem>
-          <ToggleGroupItem value="high" aria-label="Toggle high priority" className="rounded-full">{t('filters.high')}</ToggleGroupItem>
+          <ToggleGroupItem value={Priority.LOW.toString()} aria-label="Toggle low priority" className="rounded-full">{t('filters.low')}</ToggleGroupItem>
+          <ToggleGroupItem value={Priority.MEDIUM.toString()} aria-label="Toggle medium priority" className="rounded-full">{t('filters.medium')}</ToggleGroupItem>
+          <ToggleGroupItem value={Priority.HIGH.toString()} aria-label="Toggle high priority" className="rounded-full">{t('filters.high')}</ToggleGroupItem>
         </ToggleGroup>
       </div>
 

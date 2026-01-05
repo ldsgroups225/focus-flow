@@ -19,6 +19,7 @@ import {
 } from 'recharts';
 import { TrendingUp, Clock, CheckCircle2, BarChart3 } from 'lucide-react';
 import { useDashboard } from '@/contexts/dashboard-context';
+import { getPriorityLabel } from '@/lib/priority';
 import { useI18n } from '@/app/components/i18n-provider';
 import { format, subDays, startOfDay, endOfDay, eachDayOfInterval, isSameDay } from 'date-fns';
 import { FocusAnalytics } from '@/app/components/focus-analytics';
@@ -108,8 +109,8 @@ export function AnalyticsTabContent() {
 
     const priorityMap = new Map<string, number>();
     tasks.forEach((task) => {
-      const priority = task.priority || 'medium';
-      priorityMap.set(priority, (priorityMap.get(priority) || 0) + 1);
+      const priorityLabel = getPriorityLabel(task.priority, 'en');
+      priorityMap.set(priorityLabel, (priorityMap.get(priorityLabel) || 0) + 1);
     });
 
     const priorityDistribution = Array.from(priorityMap.entries()).map(([name, value]) => ({

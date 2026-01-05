@@ -27,6 +27,7 @@ import { ArrowLeft, FileText, Plus, Edit2, Trash2, Tag, Clock } from 'lucide-rea
 import { useI18n } from '@/app/components/i18n-provider';
 import { useAuth } from '@/components/providers/auth-provider';
 import { TemplateService, type Template } from '@/lib/services/template-service';
+import { Priority } from '@/lib/priority';
 
 export default function TemplatesPage() {
   const { t } = useI18n();
@@ -40,7 +41,7 @@ export default function TemplatesPage() {
     name: '',
     description: '',
     title: '',
-    priority: 'medium' as 'low' | 'medium' | 'high',
+    priority: Priority.MEDIUM,
     tags: '',
     pomodoros: 2,
     workspace: 'personal' as 'personal' | 'work' | 'side-project',
@@ -118,7 +119,7 @@ export default function TemplatesPage() {
       name: '',
       description: '',
       title: '',
-      priority: 'medium',
+      priority: Priority.MEDIUM,
       tags: '',
       pomodoros: 2,
       workspace: 'personal',
@@ -217,18 +218,18 @@ export default function TemplatesPage() {
                       Priority
                     </Label>
                     <Select
-                      value={formData.priority}
-                      onValueChange={(value: 'low' | 'medium' | 'high') =>
-                        setFormData({ ...formData, priority: value })
+                      value={formData.priority.toString()}
+                      onValueChange={(value: string) =>
+                        setFormData({ ...formData, priority: Number(value) as Priority })
                       }
                     >
                       <SelectTrigger className="col-span-3">
                         <SelectValue />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="low">{t('taskForm.low')}</SelectItem>
-                        <SelectItem value="medium">{t('taskForm.medium')}</SelectItem>
-                        <SelectItem value="high">{t('taskForm.high')}</SelectItem>
+                        <SelectItem value={Priority.LOW.toString()}>{t('taskForm.low')}</SelectItem>
+                        <SelectItem value={Priority.MEDIUM.toString()}>{t('taskForm.medium')}</SelectItem>
+                        <SelectItem value={Priority.HIGH.toString()}>{t('taskForm.high')}</SelectItem>
                       </SelectContent>
                     </Select>
                   </div>

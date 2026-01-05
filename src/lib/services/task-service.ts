@@ -8,6 +8,7 @@ import {
   bulkUpdateSubTasks
 } from '@/lib/appwrite/subtask-services';
 import type { Task, SubTask } from '@/lib/types';
+import { Priority, PRIORITY_SORT_ORDER } from '@/lib/priority';
 
 // Extended Task type with subtasks loaded
 export type TaskWithSubTasks = Task & {
@@ -110,8 +111,44 @@ export class TaskService {
   }
 
   // Filter and utility methods
+  static filterTasksByPriority(tasks: TaskWithSubTasks[], priorities: Priority[]): TaskWithSubTasks[] {
+    return tasks.filter(task => {
+      const taskPriority = task.priority;
+      return priorities.includes(taskPriority);
+    });
+  }
+
   static filterTasksByWorkspace(tasks: TaskWithSubTasks[], workspace: string): TaskWithSubTasks[] {
     return tasks.filter(task => task.workspace === workspace);
+  }
+
+  static sortTasksByPriority(tasks: TaskWithSubTasks[]): TaskWithSubTasks[] {
+    return tasks.sort((a, b) => {
+      const priorityA = a.priority;
+      const priorityB = b.priority;
+
+      // Sort by priority (highest first)
+      const priorityOrderA = PRIORITY_SORT_ORDER.indexOf(priorityA);
+      const priorityOrderB = PRIORITY_SORT_ORDER.indexOf(priorityB);
+
+      if (priorityOrderA !== priorityOrderB) {
+        return priorityOrderA - priorityOrderB;
+      }
+
+      // If same priority, sort by due date (earliest first)
+      if (a.dueDate && b.dueDate) {
+        return new Date(a.dueDate).getTime() - new Date(b.dueDate).getTime();
+      }
+      if (a.dueDate && !b.dueDate) {
+        return -1;
+      }
+      if (!a.dueDate && b.dueDate) {
+        return 1;
+      }
+
+      // If same priority and no due dates, sort by creation date (most recent first)
+      return 0;
+    });
   }
 
   static filterTasksByProject(tasks: TaskWithSubTasks[], projectId: string): TaskWithSubTasks[] {
@@ -213,7 +250,7 @@ export class TaskService {
   static filterTasks(
     tasks: (TaskWithSubTasks & { isBlocked?: number; blockingTasks?: string[] })[],
     filters: {
-      priorityFilter: string[];
+      priorityFilter: Priority[];
       tagFilter: string[];
       searchQuery: string;
       typeFilter?: string[];
@@ -221,9 +258,12 @@ export class TaskService {
     }
   ): (TaskWithSubTasks & { isBlocked?: number; blockingTasks?: string[] })[] {
     return tasks.filter(task => {
-      // Priority filter
-      if (filters.priorityFilter.length > 0 && !filters.priorityFilter.includes(task.priority)) {
-        return false;
+      // Priority filter - handle both string and numeric priorities
+      if (filters.priorityFilter.length > 0) {
+        const taskPriority = task.priority;
+        if (!filters.priorityFilter.includes(taskPriority)) {
+          return false;
+        }
       }
 
       // Tag filter

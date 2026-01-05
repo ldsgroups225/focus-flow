@@ -24,6 +24,7 @@ import { useI18n } from '@/app/components/i18n-provider';
 import { useAuth } from '@/components/providers/auth-provider';
 import { useTasks } from '@/lib/hooks/use-tasks';
 import { format, subDays, startOfDay, endOfDay, eachDayOfInterval, isSameDay } from 'date-fns';
+import { Priority, getPriorityLabel } from '@/lib/priority';
 
 const COLORS = {
   primary: '#3b82f6',
@@ -115,8 +116,8 @@ export default function AnalyticsPage() {
 
     const priorityMap = new Map<string, number>();
     tasks.forEach((task) => {
-      const priority = task.priority || 'medium';
-      priorityMap.set(priority, (priorityMap.get(priority) || 0) + 1);
+      const priorityLabel = getPriorityLabel(task.priority || Priority.MEDIUM, 'en');
+      priorityMap.set(priorityLabel, (priorityMap.get(priorityLabel) || 0) + 1);
     });
 
     const priorityDistribution = Array.from(priorityMap.entries()).map(([name, value]) => ({

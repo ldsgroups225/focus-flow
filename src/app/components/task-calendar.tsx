@@ -4,6 +4,7 @@ import { Calendar, CalendarDayButton } from '@/components/ui/calendar';
 import type { Task } from '@/lib/types';
 import { DayButton } from 'react-day-picker';
 import { cn } from '@/lib/utils';
+import { Priority } from '@/lib/priority';
 
 interface TaskCalendarProps {
   tasks: Task[];
@@ -26,7 +27,7 @@ export function TaskCalendar({ tasks, selectedDate, onSelectDate }: TaskCalendar
 
   function CustomDayButton(props: React.ComponentProps<typeof DayButton>) {
     const dayTasks = tasksByDate[props.day.date.toDateString()] || [];
-    const hasHighPriority = dayTasks.some(t => t.priority === 'high');
+    const hasHighPriority = dayTasks.some(t => t.priority === Priority.HIGH);
     const hasTasks = dayTasks.length > 0;
 
     return (
@@ -55,9 +56,9 @@ export function TaskCalendar({ tasks, selectedDate, onSelectDate }: TaskCalendar
                   key={task.id}
                   className={cn(
                     'h-1 w-1 md:h-1.5 md:w-1.5 rounded-full shadow-sm',
-                    task.priority === 'high' && 'bg-red-500',
-                    task.priority === 'medium' && 'bg-orange-500',
-                    task.priority === 'low' && 'bg-green-500',
+                    task.priority === Priority.HIGH && 'bg-red-500',
+                    task.priority === Priority.MEDIUM && 'bg-orange-500',
+                    task.priority === Priority.LOW && 'bg-green-500',
                     !task.priority && 'bg-blue-500'
                   )}
                 />

@@ -2,6 +2,7 @@ import { generateDailyPlan, suggestSmartPriorities } from '@/ai/flows/planning-f
 import { getCurrentUser } from '@/lib/appwrite/auth-services';
 import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
+import { Priority } from '@/lib/priority';
 
 export const runtime = 'nodejs';
 
@@ -9,7 +10,7 @@ const taskSchema = z.object({
   id: z.string(),
   title: z.string(),
   description: z.string().optional(),
-  priority: z.enum(['low', 'medium', 'high']),
+  priority: z.enum(Priority),
   dueDate: z.string().optional(),
   pomodoros: z.number(),
   completedPomodoros: z.number(),

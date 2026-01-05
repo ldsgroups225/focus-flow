@@ -3,7 +3,8 @@
 import { AnimatePresence, motion } from 'framer-motion';
 import { Button } from '@/components/ui/button';
 import { CheckCircle2, Trash2, ArrowUp, ArrowDown, Minus, X } from 'lucide-react';
-import type { Task, Priority } from '@/lib/types';
+import type { Task } from '@/lib/types';
+import { Priority } from '@/lib/priority';
 import { useI18n } from './i18n-provider';
 import {
   DropdownMenu,
@@ -58,9 +59,9 @@ export function BulkActionsToolbar({ selectedTaskIds, setSelectedTaskIds, setTas
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="center" side="top" className="mb-2">
-              <DropdownMenuItem onClick={() => handleBulkPriorityChange('high')}><ArrowUp className="w-4 h-4 mr-2 text-red-500" /> {t('filters.high')}</DropdownMenuItem>
-              <DropdownMenuItem onClick={() => handleBulkPriorityChange('medium')}><Minus className="w-4 h-4 mr-2 text-yellow-500" /> {t('filters.medium')}</DropdownMenuItem>
-              <DropdownMenuItem onClick={() => handleBulkPriorityChange('low')}><ArrowDown className="w-4 h-4 mr-2 text-green-500" /> {t('filters.low')}</DropdownMenuItem>
+              <DropdownMenuItem onClick={() => handleBulkPriorityChange(Priority.HIGH)}><ArrowUp className="w-4 h-4 mr-2 text-red-500" /> {t('filters.high')}</DropdownMenuItem>
+              <DropdownMenuItem onClick={() => handleBulkPriorityChange(Priority.MEDIUM)}><Minus className="w-4 h-4 mr-2 text-yellow-500" /> {t('filters.medium')}</DropdownMenuItem>
+              <DropdownMenuItem onClick={() => handleBulkPriorityChange(Priority.LOW)}><ArrowDown className="w-4 h-4 mr-2 text-green-500" /> {t('filters.low')}</DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
           <Button variant="ghost" size="icon" className="text-destructive hover:text-destructive" title={t('bulkActions.delete')} onClick={handleBulkDelete}>

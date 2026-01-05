@@ -23,13 +23,15 @@ import {
   DialogTrigger,
 } from '@/components/ui/dialog';
 import { FileText, Plus, Edit2, Trash2, Tag, Clock } from 'lucide-react';
-import { useDashboard } from '@/contexts/dashboard-context';
 import { useI18n } from '@/app/components/i18n-provider';
-import { TemplateService, type Template } from '@/lib/services/template-service';
+import { useAuth } from '@/components/providers/auth-provider';
+import { TemplateService } from '@/lib/services/template-service';
+import type { Template } from '@/lib/services/template-service';
+import { Priority } from '@/lib/priority';
 
 export function TemplatesTabContent() {
   const { t } = useI18n();
-  const { user } = useDashboard();
+  const { user } = useAuth();
   const [templates, setTemplates] = useState<Template[]>([]);
   const [isCreateOpen, setIsCreateOpen] = useState(false);
   const [editingTemplate, setEditingTemplate] = useState<Template | null>(null);
@@ -39,7 +41,7 @@ export function TemplatesTabContent() {
     name: '',
     description: '',
     title: '',
-    priority: 'medium' as 'low' | 'medium' | 'high',
+    priority: Priority.MEDIUM,
     tags: '',
     pomodoros: 2,
     workspace: 'personal' as 'personal' | 'work' | 'side-project',
@@ -61,17 +63,12 @@ export function TemplatesTabContent() {
     e.preventDefault();
     if (!user?.uid) return;
 
-    const tagsArray = formData.tags
-      .split(',')
-      .map(tag => tag.trim())
-      .filter(tag => tag.length > 0);
-
     const templateData = {
       name: formData.name,
       description: formData.description,
       title: formData.title,
-      priority: formData.priority,
-      tags: tagsArray,
+      priority: Priority.MEDIUM, // Default to medium for new templates
+      tags: formData.tags.split(',').map(tag => tag.trim()).filter(Boolean),
       pomodoros: formData.pomodoros,
       workspace: formData.workspace,
       subTasks: [],
@@ -117,7 +114,7 @@ export function TemplatesTabContent() {
       name: '',
       description: '',
       title: '',
-      priority: 'medium',
+      priority: Priority.MEDIUM,
       tags: '',
       pomodoros: 2,
       workspace: 'personal',
@@ -205,18 +202,18 @@ export function TemplatesTabContent() {
                     Priority
                   </Label>
                   <Select
-                    value={formData.priority}
-                    onValueChange={(value: 'low' | 'medium' | 'high') =>
-                      setFormData({ ...formData, priority: value })
+                    value={formData.priority.toString()}
+                    onValueChange={(value: string) =>
+                      setFormData({ ...formData, priority: Number(value) as Priority })
                     }
                   >
                     <SelectTrigger className="col-span-3">
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="low">{t('taskForm.low')}</SelectItem>
-                      <SelectItem value="medium">{t('taskForm.medium')}</SelectItem>
-                      <SelectItem value="high">{t('taskForm.high')}</SelectItem>
+                      <SelectItem value={Priority.LOW.toString()}>{t('taskForm.low')}</SelectItem>
+                      <SelectItem value={Priority.MEDIUM.toString()}>{t('taskForm.medium')}</SelectItem>
+                      <SelectItem value={Priority.HIGH.toString()}>{t('taskForm.high')}</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>

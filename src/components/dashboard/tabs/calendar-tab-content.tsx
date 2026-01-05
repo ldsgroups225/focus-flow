@@ -8,6 +8,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Badge } from '@/components/ui/badge';
 import { CheckCircle2, Clock, Calendar as CalendarIcon } from 'lucide-react';
 import type { Task } from '@/lib/types';
+import { Priority, getPriorityLabel } from '@/lib/priority';
 
 export function CalendarTabContent() {
   const { t } = useI18n();
@@ -144,14 +145,14 @@ export function CalendarTabContent() {
                       {task.priority && (
                         <Badge
                           variant="outline"
-                          className={`text-xs shrink-0 ${task.priority === 'high'
+                          className={`text-xs shrink-0 ${task.priority === Priority.HIGH
                             ? 'border-red-500 text-red-500 bg-red-500/10'
-                            : task.priority === 'medium'
+                            : task.priority === Priority.MEDIUM
                               ? 'border-orange-500 text-orange-500 bg-orange-500/10'
                               : 'border-green-500 text-green-500 bg-green-500/10'
                             }`}
                         >
-                          {task.priority}
+                          {getPriorityLabel(task.priority, 'en')}
                         </Badge>
                       )}
                     </div>

@@ -6,6 +6,7 @@ import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sh
 import { useI18n } from "@/app/components/i18n-provider";
 import type { Task } from "@/lib/types";
 import { cn } from "@/lib/utils";
+import { Priority } from "@/lib/priority";
 
 interface DashboardSheetProps {
   isOpen: boolean;
@@ -130,9 +131,9 @@ export function DashboardSheet({ isOpen, onClose, tasks }: DashboardSheetProps) 
   const totalTimeSpentHours = Math.round(totalTimeSpent / 3600 * 10) / 10;
 
   // Priority breakdown
-  const highPriority = tasks.filter(t => t.priority === "high" && !t.completed).length;
-  const mediumPriority = tasks.filter(t => t.priority === "medium" && !t.completed).length;
-  const lowPriority = tasks.filter(t => t.priority === "low" && !t.completed).length;
+  const highPriority = tasks.filter(t => t.priority === Priority.HIGH && !t.completed).length;
+  const mediumPriority = tasks.filter(t => t.priority === Priority.MEDIUM && !t.completed).length;
+  const lowPriority = tasks.filter(t => t.priority === Priority.LOW && !t.completed).length;
 
   // Workspace distribution
   const personalTasks = tasks.filter(t => t.workspace === "personal").length;

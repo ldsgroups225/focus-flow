@@ -2,6 +2,7 @@
 
 import { BarChart, Bar, XAxis, YAxis, Tooltip, CartesianGrid, ResponsiveContainer, Cell } from 'recharts';
 import type { Task } from '@/lib/types';
+import { Priority } from '@/lib/priority';
 import { useMemo } from 'react';
 import { format } from 'date-fns';
 import { Badge } from '@/components/ui/badge';
@@ -11,13 +12,13 @@ interface GanttChartProps {
 }
 
 // Priority color mapping with vibrant colors
-const getPriorityColor = (priority: string) => {
+const getPriorityColor = (priority: Priority) => {
   switch (priority) {
-    case 'high':
+    case Priority.HIGH:
       return '#ef4444'; // Vibrant red
-    case 'medium':
+    case Priority.MEDIUM:
       return '#f59e0b'; // Vibrant orange
-    case 'low':
+    case Priority.LOW:
       return '#10b981'; // Vibrant green
     default:
       return '#6366f1'; // Vibrant indigo

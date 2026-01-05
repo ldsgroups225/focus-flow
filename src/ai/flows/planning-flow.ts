@@ -2,6 +2,7 @@
 
 import { ai } from '@/ai/genkit';
 import { z } from 'genkit';
+import { Priority } from '@/lib/priority';
 
 // Input schema for daily planning
 const dailyPlanningInputSchema = z.object({
@@ -9,7 +10,7 @@ const dailyPlanningInputSchema = z.object({
     id: z.string(),
     title: z.string(),
     description: z.string().optional(),
-    priority: z.enum(['low', 'medium', 'high']),
+    priority: z.nativeEnum(Priority),
     dueDate: z.string().optional(),
     pomodoros: z.number(),
     completedPomodoros: z.number(),
@@ -50,7 +51,7 @@ const smartPriorityInputSchema = z.object({
     id: z.string(),
     title: z.string(),
     description: z.string().optional(),
-    priority: z.enum(['low', 'medium', 'high']),
+    priority: z.nativeEnum(Priority),
     dueDate: z.string().optional(),
     pomodoros: z.number(),
     completedPomodoros: z.number(),
@@ -67,8 +68,8 @@ type SmartPriorityInput = z.infer<typeof smartPriorityInputSchema>;
 // Smart prioritization output
 const smartPriorityOutputSchema = z.array(z.object({
   taskId: z.string(),
-  currentPriority: z.enum(['low', 'medium', 'high']),
-  suggestedPriority: z.enum(['low', 'medium', 'high']),
+  currentPriority: z.nativeEnum(Priority),
+  suggestedPriority: z.nativeEnum(Priority),
   urgencyScore: z.number().min(0).max(100),
   reasoning: z.string(),
   factors: z.array(z.string()).describe('Factors that influenced this suggestion'),
@@ -114,7 +115,7 @@ Preferences:
 {{#each tasks}}
 - ID: {{id}}
   Title: {{title}}
-  Priority: {{priority}}
+  Priority: {{getPriorityLabel priority 'en'}}
   {{#if dueDate}}Due: {{dueDate}}{{/if}}
   Pomodoros: {{completedPomodoros}}/{{pomodoros}} completed
   {{#if dependsOn.length}}Depends on: {{dependsOn}}{{/if}}
@@ -200,7 +201,7 @@ Current Date: {{currentDate}}
 {{#each tasks}}
 - ID: {{id}}
   Title: {{title}}
-  Current Priority: {{priority}}
+  Current Priority: {{getPriorityLabel priority 'en'}}
   {{#if dueDate}}Due: {{dueDate}}{{/if}}
   Progress: {{completedPomodoros}}/{{pomodoros}} pomodoros
   Time Spent: {{timeSpent}} seconds
@@ -222,8 +223,8 @@ Return the result as a JSON array matching the following structure:
 [
   {
     "taskId": "string",
-    "currentPriority": "low" | "medium" | "high",
-    "suggestedPriority": "low" | "medium" | "high",
+    "currentPriority": 1 | 2 | 3 | 4,
+    "suggestedPriority": 1 | 2 | 3 | 4,
     "urgencyScore": number,
     "reasoning": "string",
     "factors": ["string"]

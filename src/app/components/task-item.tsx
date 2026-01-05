@@ -27,7 +27,8 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/comp
 import { cn } from '@/lib/utils';
 import { useI18n } from './i18n-provider';
 import { useToast } from '@/hooks/use-toast';
-import type { Priority, TaskWithSubTasks, SubTask } from '@/lib/types';
+import type { TaskWithSubTasks, SubTask } from '@/lib/types';
+import { Priority, getPriorityLabel } from '@/lib/priority';
 import { motion } from 'framer-motion';
 
 // Types
@@ -60,12 +61,13 @@ const getIndentClass = (blockLevel?: number): string => {
 };
 
 // Sub-components
-const PriorityIcon = memo(({ priority, t }: { priority: Priority; t: (key: string) => string }) => {
-  const priorityName = t(`filters.${priority}`);
+const PriorityIcon = memo(({ priority, t, locale }: { priority: Priority; t: (key: string) => string; locale: 'en' | 'fr' }) => {
+  const priorityName = getPriorityLabel(priority, locale);
   const icons = {
-    high: <ArrowUp className="h-3.5 w-3.5 text-red-500" />,
-    medium: <Minus className="h-3.5 w-3.5 text-orange-500" />,
-    low: <ArrowDown className="h-3.5 w-3.5 text-green-500" />
+    [Priority.HIGH]: <ArrowUp className="h-3.5 w-3.5 text-red-500" />,
+    [Priority.MEDIUM]: <Minus className="h-3.5 w-3.5 text-orange-500" />,
+    [Priority.LOW]: <ArrowDown className="h-3.5 w-3.5 text-green-500" />,
+    [Priority.URGENT]: <ArrowUp className="h-3.5 w-3.5 text-red-600" />
   };
 
   return (
@@ -157,18 +159,23 @@ const TaskMetadata = memo(({
   dueDateText,
   isBlocked,
   blockingTasks,
-  t
+  t,
+  numericPriority
 }: {
   task: ExtendedTask;
   dueDateText: string;
   isBlocked?: number;
   blockingTasks: string[];
   t: (key: string) => string;
-}) => (
+  numericPriority: Priority;
+}) => {
+  const { locale } = useI18n();
+  
+  return (
   <div className="flex items-center flex-wrap gap-x-3 gap-y-1.5 text-xs text-muted-foreground mt-1">
     <div className="flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-muted/30 border border-border/30">
-      <PriorityIcon priority={task.priority} t={t} />
-      <span className="capitalize font-medium">{t(`filters.${task.priority}`)}</span>
+      <PriorityIcon priority={task.priority} t={t} locale={locale} />
+      <span className="capitalize font-medium">{getPriorityLabel(numericPriority, locale)}</span>
     </div>
 
     {dueDateText && (
@@ -214,7 +221,8 @@ const TaskMetadata = memo(({
       </TooltipProvider>
     )}
   </div>
-));
+  );
+});
 
 TaskMetadata.displayName = 'TaskMetadata';
 
@@ -327,6 +335,9 @@ export const TaskItem = memo(function TaskItem({
 
   const { isBlocked, blockingTasks = [] } = task;
   const isTaskBlocked = !!isBlocked && isBlocked > 0;
+  
+  // Convert priority to numeric for consistent handling
+  const numericPriority = task.priority;
 
   const dueDateText = useMemo(() => {
     if (!task.dueDate) return '';
@@ -396,7 +407,7 @@ export const TaskItem = memo(function TaskItem({
         className={cn(
           "absolute left-0 top-0 bottom-0 w-1 rounded-l-lg transition-colors",
           isSelected ? "bg-primary" : "bg-transparent group-hover:bg-primary/30",
-          task.priority === 'high' && !task.completed && !isSelected && "bg-red-500/50"
+          numericPriority === Priority.HIGH && !task.completed && !isSelected && "bg-red-500/50"
         )}
       />
 
@@ -444,6 +455,7 @@ export const TaskItem = memo(function TaskItem({
               isBlocked={isBlocked}
               blockingTasks={blockingTasks}
               t={t}
+              numericPriority={numericPriority}
             />
             {task.tags.length > 0 && task.tags.map(tag => (
               <Badge key={tag} variant="outline" className="text-[10px] px-1.5 py-0 h-5 font-normal border-primary/20 text-primary/80 bg-primary/5">

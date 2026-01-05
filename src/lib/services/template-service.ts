@@ -1,12 +1,13 @@
 import { z } from 'zod';
-import type { Priority, Workspace } from '@/lib/types';
+import type { Workspace } from '@/lib/types';
+import { Priority } from '@/lib/priority';
 
 export const templateSchema = z.object({
   id: z.string(),
   name: z.string(),
   description: z.string().optional(),
   title: z.string(),
-  priority: z.enum(['low', 'medium', 'high']),
+  priority: z.enum(Priority),
   tags: z.array(z.string()),
   pomodoros: z.number(),
   workspace: z.enum(['personal', 'work', 'side-project']),

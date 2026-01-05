@@ -46,14 +46,16 @@ import { cn } from '@/lib/utils';
 import { format } from 'date-fns';
 import { enUS, fr } from 'date-fns/locale';
 import type { Task, Workspace } from '@/lib/types';
+import { Priority } from '@/lib/priority';
 import { useI18n } from './i18n-provider';
 import { suggestTags, suggestDueDate, breakdownTask } from '@/ai/flows/features-flow';
-import { TemplateService } from '@/lib/services/template-service';
+import { getPriorityOptions } from '@/lib/priority';
 import { useAuth } from '@/components/providers/auth-provider';
 import { Project } from '@/lib/types';
 import { Template } from '@/lib/services/template-service';
 import { TaskWithSubTasks } from '@/lib/types';
 import { Label } from '@/components/ui/label';
+import { TemplateService } from '@/lib/services/template-service';
 
 // Simple subtask for form (before saving to DB)
 import { motion } from 'framer-motion';
@@ -121,7 +123,7 @@ const taskSchema = (t: (key: string) => string) => z.object({
   id: z.string().optional(),
   title: z.string().min(1, t('taskForm.titleRequired')),
   description: z.string().optional(),
-  priority: z.enum(['low', 'medium', 'high']),
+  priority: z.nativeEnum(Priority).default(Priority.MEDIUM),
   type: z.enum(['task', 'milestone', 'subtask']),
   tags: z.string().optional(),
   dueDate: z.date().optional(),
@@ -169,7 +171,7 @@ export function TaskForm({ isOpen, onClose, onSave, task, allTasks, activeWorksp
     defaultValues: {
       title: '',
       description: '',
-      priority: 'medium' as const,
+      priority: Priority.MEDIUM,
       type: 'task',
       tags: '',
       dueDate: undefined,
@@ -229,7 +231,7 @@ export function TaskForm({ isOpen, onClose, onSave, task, allTasks, activeWorksp
             form.reset({
               title: '',
               description: '',
-              priority: 'medium',
+              priority: Priority.MEDIUM,
               type: 'task',
               tags: '',
               dueDate: undefined,
@@ -247,7 +249,7 @@ export function TaskForm({ isOpen, onClose, onSave, task, allTasks, activeWorksp
           form.reset({
             title: '',
             description: '',
-            priority: 'medium',
+            priority: Priority.MEDIUM,
             type: 'task',
             tags: '',
             dueDate: undefined,
@@ -290,7 +292,7 @@ export function TaskForm({ isOpen, onClose, onSave, task, allTasks, activeWorksp
     form.reset({
       title: '',
       description: '',
-      priority: 'medium',
+      priority: Priority.MEDIUM,
       type: 'task',
       tags: '',
       dueDate: undefined,
@@ -550,31 +552,21 @@ export function TaskForm({ isOpen, onClose, onSave, task, allTasks, activeWorksp
                           <FormLabel className="text-xs font-semibold text-muted-foreground">
                             {t('taskForm.priority')}
                           </FormLabel>
-                          <Select onValueChange={field.onChange} defaultValue={field.value} value={field.value}>
+                          <Select onValueChange={(value) => field.onChange(Number(value))} defaultValue={field.value.toString()} value={field.value.toString()}>
                             <FormControl>
                               <SelectTrigger className="bg-background/50 h-9">
                                 <SelectValue placeholder={t('taskForm.selectPriority')} />
                               </SelectTrigger>
                             </FormControl>
                             <SelectContent>
-                              <SelectItem value="low">
-                                <span className="flex items-center gap-2">
-                                  <span className="w-2 h-2 rounded-full bg-green-500" />
-                                  {t('taskForm.low')}
-                                </span>
-                              </SelectItem>
-                              <SelectItem value="medium">
-                                <span className="flex items-center gap-2">
-                                  <span className="w-2 h-2 rounded-full bg-yellow-500" />
-                                  {t('taskForm.medium')}
-                                </span>
-                              </SelectItem>
-                              <SelectItem value="high">
-                                <span className="flex items-center gap-2">
-                                  <span className="w-2 h-2 rounded-full bg-red-500" />
-                                  {t('taskForm.high')}
-                                </span>
-                              </SelectItem>
+                              {getPriorityOptions(locale).map((option) => (
+                                <SelectItem key={option.value} value={option.value.toString()}>
+                                  <span className="flex items-center gap-2">
+                                    <span className="w-2 h-2 rounded-full bg-green-500" />
+                                    {option.label}
+                                  </span>
+                                </SelectItem>
+                              ))}
                             </SelectContent>
                           </Select>
                           <FormMessage />
